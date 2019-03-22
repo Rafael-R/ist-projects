@@ -14,9 +14,9 @@
 #define MAX_CHAR 63
 #define MAX_EVENT 1000
 #define MAX_ATTEN 3
-#define TRUE 1
+#define UNDEFINED -1
 #define FALSE 0
-
+#define TRUE 1
 
 typedef struct {
     char description[MAX_CHAR];
@@ -251,7 +251,7 @@ void printEvent(Event event) {
 
 
 int getEventIndex(char description[]) {
-    int i, index = -1;
+    int i, index = UNDEFINED;
 
     for (i = 0; i < num_events; i++) {
         if (strcmp(events[i].description, description) == 0) {
@@ -312,7 +312,7 @@ void __r__(char description[]) {
 
     event_index = getEventIndex(description);
 
-    if (event_index == -1) {
+    if (event_index == UNDEFINED) {
         printf("Evento %s inexistente.\n", description);
     } else {
         for (i = event_index; i < num_events-1; i++) {
@@ -329,7 +329,7 @@ void __i__(char description[], int start) {
 
     event_index = getEventIndex(description);
 
-    if (event_index == -1) {
+    if (event_index == UNDEFINED) {
         printf("Evento %s inexistente.\n", description);
     } else {
         teste = events[event_index];
@@ -347,7 +347,7 @@ void __t__(char description[], int duration) {
 
     event_index = getEventIndex(description);
 
-    if (event_index == -1) {
+    if (event_index == UNDEFINED) {
         printf("Evento %s inexistente.\n", description);
     } else {
         teste = events[event_index];
@@ -365,7 +365,7 @@ void __m__(char description[], int room) {
 
     event_index = getEventIndex(description);
 
-    if (event_index == -1) {
+    if (event_index == UNDEFINED) {
         printf("Evento %s inexistente.\n", description);
     } else {
         teste = events[event_index];
@@ -382,7 +382,7 @@ void __A__(char description[], char attendant[]) {
 
     event_index = getEventIndex(description);
 
-    if (event_index == -1) {
+    if (event_index == UNDEFINED) {
         printf("Evento %s inexistente.\n", description);
     } else if (events[event_index].num_attendants == MAX_ATTEN) {
         printf("Impossivel adicionar participante. Evento %s ja tem 3 "
@@ -399,11 +399,11 @@ void __A__(char description[], char attendant[]) {
 
 
 void __R__(char description[], char attendant[]) {
-    int event_index, i, attendant_index = -1;
+    int event_index, i, attendant_index = UNDEFINED;
 
     event_index = getEventIndex(description);
 
-    if (event_index == -1) {
+    if (event_index == UNDEFINED) {
         printf("Evento %s inexistente.\n", description);
     } else if (events[event_index].num_attendants == 1) {
         printf("Impossivel remover participante. Participante %s e o unico "
@@ -415,7 +415,7 @@ void __R__(char description[], char attendant[]) {
                 attendant_index = i;
             }
         }
-        if (attendant_index == -1) {
+        if (attendant_index == UNDEFINED) {
             return;
         } else {
             for (i = attendant_index; i < MAX_ATTEN-1; i++) {
