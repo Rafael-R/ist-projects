@@ -40,7 +40,8 @@ int num_events;
 
 
 void readInfo(char info[]) {
-    int c, i = 0;
+    char c;
+    int i = 0;
 
     getchar();
     while ((c = getchar()) != '\n' && c != EOF) {
@@ -178,7 +179,9 @@ int verifyRoom(Event test) {
             end = calcEnd(start, events[i].duration);
             t_start = test.start;
             t_end = calcEnd(t_start, test.duration);
-            if (t_end >= start && t_start <= end) {
+            if ((t_start < start && t_end > start && t_end < end) ||
+                (t_start > start && t_start < end && t_end > end) ||
+                (t_start >= start && t_end <= end)) {
                 return FALSE;
             }
         }
@@ -197,7 +200,9 @@ int verifyAttendant(Event test, char attendant[]) {
             end = calcEnd(start, events[i].duration);
             t_start = test.start;
             t_end = calcEnd(t_start, test.duration);
-            if (t_end >= start && t_start <= end) {
+            if ((t_start < start && t_end > start && t_end < end) ||
+                (t_start > start && t_start < end && t_end > end) ||
+                (t_start >= start && t_end <= end)) {
                 if (strcmp(events[i].responsible, attendant) == 0) {
                     return FALSE;
                 }
@@ -292,9 +297,9 @@ void printEvent(Event event) {
     printf("%s %.2d/%.2d/%.4d %.2d:%.2d %.2d Sala%d %s\n* ", event.description, dia,
            mes, ano, horas, minutos, event.duration, event.room,
            event.responsible);
-    for (i = 0; i < event.num_attendants; i++) {
+    for (i = 0; i < event.num_attendants-1; i++) {
         printf("%s:", event.attendants[i]);
-    } printf("\b \n");
+    } printf("%s\n", event.attendants[i]);
 
     return;
 }
@@ -462,10 +467,6 @@ void __R__(char description[], char attendant[]) {
 
     if (event_index == UNDEFINED) {
         printf("Evento %s inexistente.\n", description);
-    } else if (events[event_index].num_attendants == 1) {
-        printf("Impossivel remover participante. Participante %s e o unico "
-               "participante no evento %s.\n",
-               events[event_index].attendants[1], description);
     } else {
         for (i = 0; i < MAX_ATTEN; i++) {
             if (strcmp(events[event_index].attendants[i], attendant) == 0) {
@@ -474,6 +475,10 @@ void __R__(char description[], char attendant[]) {
         }
         if (attendant_index == UNDEFINED) {
             return;
+        } else if (events[event_index].num_attendants == 1) {
+            printf("Impossivel remover participante. Participante %s e o unico "
+                   "participante no evento %s.\n",
+                   events[event_index].attendants[0], description);
         } else {
             for (i = attendant_index; i < MAX_ATTEN-1; i++) {
                 strcpy(events[event_index].attendants[i],
@@ -482,4 +487,5 @@ void __R__(char description[], char attendant[]) {
             events[event_index].num_attendants--;
         }
     }
+
 }
