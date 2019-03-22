@@ -13,6 +13,9 @@
 #define MAX_PARAM 9
 #define MAX_CHAR 63
 #define MAX_EVENT 1000
+#define MAX_ATTEN 3
+#define TRUE 1
+#define FALSE 0
 
 
 typedef struct {
@@ -23,7 +26,7 @@ typedef struct {
     int room;
     char responsible[MAX_CHAR];
     int num_attendants;
-    char attendants[3][MAX_CHAR];
+    char attendants[MAX_ATTEN][MAX_CHAR];
 } Event;
 
 Event events[MAX_EVENT];
@@ -149,6 +152,37 @@ Event processInfo(char command, char info[]) {
 }
 
 
+int verifyRoomAvailability(Event teste) {
+
+    return TRUE;
+}
+
+
+int verifyAttendantAvailability(char test[]) {
+
+    return TRUE;
+}
+
+
+int verifyAttendantsAvailability(Event test, char unavailable[]) {
+    if (verifyAttendantAvailability(test.responsible) == FALSE) {
+        strcpy(unavailable, test.responsible);
+        return FALSE;
+    } else if (verifyAttendantAvailability(test.attendants[1]) == FALSE) {
+        strcpy(unavailable, test.attendants[1]);
+        return FALSE;
+    } else if (verifyAttendantAvailability(test.attendants[1]) == FALSE) {
+        strcpy(unavailable, test.attendants[2]);
+        return FALSE;
+    } else if (verifyAttendantAvailability(test.attendants[1]) == FALSE) {
+        strcpy(unavailable, test.attendants[3]);
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+
 void swap(int rooms[], int room_1, int room_2) {
     int temp;
 
@@ -216,19 +250,19 @@ int getEventIndex(char description[]) {
 
 
 void __a__(Event input) {
-    int i;
+    int i, available;
+    char unavailable[MAX_CHAR];
 
-    for (i = 0; i < num_events; i++) {
-        if (events[i].room == input.room && events[i].date == input.date &&
-            events[i].start == input.start) {
-            printf("Impossivel agendar evento %s. Sala%d ocupada.\n",
-                   input.description, input.room);
-            return;
-        }
+    if (verifyRoomAvailability(input) == FALSE) {
+        printf("Impossivel agendar evento %s. Sala%d ocupada.\n",
+               input.description, input.room);
+    } else if (verifyAttendantsAvailability(input, unavailable) == FALSE) {
+        printf("Impossivel agendar evento %s. Participante %s tem um "
+               "evento sobreposto.\n", input.description, unavailable);
+    } else {
+        events[num_events] = input;
+        num_events++;
     }
-
-    events[num_events] = input;
-    num_events++;
 }
 
 
@@ -321,23 +355,28 @@ void __m__(char description[], int room) {
 
 
 void __A__(char description[], char attendant[]) {
-    int event_index;
+    int event_index, num_attendants;
 
     event_index = getEventIndex(description);
 
     if (event_index == -1) {
         printf("Evento %s inexistente.\n", description);
-    } else if (events[event_index].num_attendants == 3) {
+    } else if (events[event_index].num_attendants == MAX_ATTEN) {
         printf("Impossivel adicionar participante. Evento %s ja tem 3 "
                "participantes.\n", description);
+    } else if (verifyAttendantAvailability(attendant) == FALSE) {
+        printf("Impossivel adicionar participante. Participante %s tem um "
+               "evento sobreposto.\n", attendant);
     } else {
-        printf("TODO\n");
+        num_attendants = events[event_index].num_attendants;
+        strcpy(events[event_index].attendants[num_attendants], attendant);
+        events[event_index].num_attendants++;
     }
 }
 
 
 void __R__(char description[], char attendant[]) {
-    int event_index;
+    int event_index, i, attendant_index;
 
     event_index = getEventIndex(description);
 
@@ -348,6 +387,15 @@ void __R__(char description[], char attendant[]) {
                "participante no evento %s.\n",
                events[event_index].attendants[1], description);
     } else {
-        printf("TODO\n");
+        for (i = 0; i < MAX_ATTEN; i++) {
+            if (strcmp(events[event_index].attendants[i], attendant) == 0) {
+                attendant_index = i;
+            }
+        }
+        for (i = attendant_index; i < MAX_ATTEN-1; i++) {
+            strcpy(events[event_index].attendants[i],
+                   events[event_index].attendants[i+1]);
+        }
+        events[event_index].num_attendants--;
     }
 }
