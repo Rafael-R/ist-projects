@@ -169,16 +169,16 @@ int calcEnd(int start, int duration) {
 }
 
 
-int verifyRoomAvailability(Event test) {
-    int i, start, end, test_start, test_end;
+int verifyRoom(Event test) {
+    int i, start, end, t_start, t_end;
 
     for (i = 0; i < num_events; i++) {
         if (events[i].date == test.date && events[i].room == test.room) {
             start = events[i].start;
-            end = calcEnd(events[i].start, events[i].duration);
-            test_start = test.start;
-            test_end = calcEnd(test.start, test.duration);
-            if (test_start < end || test_end > start) {
+            end = calcEnd(start, events[i].duration);
+            t_start = test.start;
+            t_end = calcEnd(t_start, test.duration);
+            if (t_end >= start && t_start <= end) {
                 return FALSE;
             }
         }
@@ -188,23 +188,43 @@ int verifyRoomAvailability(Event test) {
 }
 
 
-int verifyAttendantAvailability(char test[]) {
+int verifyAttendant(Event test, char attendant[]) {
+    int i, start, end, t_start, t_end, j;
+
+    for (i = 0; i < num_events; i++) {
+        if (events[i].date == test.date) {
+            start = events[i].start;
+            end = calcEnd(start, events[i].duration);
+            t_start = test.start;
+            t_end = calcEnd(t_start, test.duration);
+            if (t_end >= start && t_start <= end) {
+                if (strcmp(events[i].responsible, attendant) == 0) {
+                    return FALSE;
+                }
+                for (j = 0; j < MAX_ATTEN; j++) {
+                    if (strcmp(events[i].attendants[j], attendant) == 0) {
+                        return FALSE;
+                    }
+                }
+            }
+        }
+    }
 
     return TRUE;
 }
 
 
 int verifyAttendantsAvailability(Event test, char unavailable[]) {
-    if (verifyAttendantAvailability(test.responsible) == FALSE) {
+    if (verifyAttendant(test, test.responsible) == FALSE) {
         strcpy(unavailable, test.responsible);
         return FALSE;
-    } else if (verifyAttendantAvailability(test.attendants[1]) == FALSE) {
+    } else if (verifyAttendant(test, test.attendants[1]) == FALSE) {
         strcpy(unavailable, test.attendants[1]);
         return FALSE;
-    } else if (verifyAttendantAvailability(test.attendants[1]) == FALSE) {
+    } else if (verifyAttendant(test, test.attendants[1]) == FALSE) {
         strcpy(unavailable, test.attendants[2]);
         return FALSE;
-    } else if (verifyAttendantAvailability(test.attendants[1]) == FALSE) {
+    } else if (verifyAttendant(test, test.attendants[1]) == FALSE) {
         strcpy(unavailable, test.attendants[3]);
         return FALSE;
     }
@@ -216,7 +236,7 @@ int verifyAttendantsAvailability(Event test, char unavailable[]) {
 int verifications(Event input) {
     char unavailable[MAX_CHAR];
 
-    if (verifyRoomAvailability(input) == FALSE) {
+    if (verifyRoom(input) == FALSE) {
         printf("Impossivel agendar evento %s. Sala%d ocupada.\n",
                input.description, input.room);
         return FALSE;
@@ -355,16 +375,16 @@ void __r__(char description[]) {
 
 void __i__(char description[], int start) {
     int event_index;
-    Event teste;
+    Event test;
 
     event_index = getEventIndex(description);
 
     if (event_index == UNDEFINED) {
         printf("Evento %s inexistente.\n", description);
     } else {
-        teste = events[event_index];
-        teste.start = start;
-        if (verifications(teste) == TRUE) {
+        test = events[event_index];
+        test.start = start;
+        if (verifications(test) == TRUE) {
             events[event_index].start = start;
         }
     }
@@ -373,16 +393,16 @@ void __i__(char description[], int start) {
 
 void __t__(char description[], int duration) {
     int event_index;
-    Event teste;
+    Event test;
 
     event_index = getEventIndex(description);
 
     if (event_index == UNDEFINED) {
         printf("Evento %s inexistente.\n", description);
     } else {
-        teste = events[event_index];
-        teste.duration = duration;
-        if (verifications(teste) == TRUE) {
+        test = events[event_index];
+        test.duration = duration;
+        if (verifications(test) == TRUE) {
             events[event_index].duration = duration;
         }
     }
@@ -391,16 +411,16 @@ void __t__(char description[], int duration) {
 
 void __m__(char description[], int room) {
     int event_index;
-    Event teste;
+    Event test;
 
     event_index = getEventIndex(description);
 
     if (event_index == UNDEFINED) {
         printf("Evento %s inexistente.\n", description);
     } else {
-        teste = events[event_index];
-        teste.room = room;
-        if (verifications(teste) == TRUE) {
+        test = events[event_index];
+        test.room = room;
+        if (verifications(test) == TRUE) {
             events[event_index].room = room;
         }
     }
@@ -408,22 +428,29 @@ void __m__(char description[], int room) {
 
 
 void __A__(char description[], char attendant[]) {
-    int event_index, num_attendants;
+    int event_index, num_attendants, i;
 
     event_index = getEventIndex(description);
 
     if (event_index == UNDEFINED) {
         printf("Evento %s inexistente.\n", description);
-    } else if (events[event_index].num_attendants == MAX_ATTEN) {
-        printf("Impossivel adicionar participante. Evento %s ja tem 3 "
-               "participantes.\n", description);
-    } else if (verifyAttendantAvailability(attendant) == FALSE) {
-        printf("Impossivel adicionar participante. Participante %s tem um "
-               "evento sobreposto.\n", attendant);
     } else {
-        num_attendants = events[event_index].num_attendants;
-        strcpy(events[event_index].attendants[num_attendants], attendant);
-        events[event_index].num_attendants++;
+        for (i = 0; i < MAX_ATTEN; i++) {
+            if (strcmp(events[event_index].attendants[i], attendant) == 0) {
+                return;
+            }
+        }
+        if (verifyAttendant(events[event_index], attendant) == FALSE) {
+            printf("Impossivel adicionar participante. Participante %s tem um "
+                   "evento sobreposto.\n", attendant);
+        } else if (events[event_index].num_attendants == MAX_ATTEN) {
+            printf("Impossivel adicionar participante. Evento %s ja tem 3 "
+                   "participantes.\n", description);
+        } else {
+            num_attendants = events[event_index].num_attendants;
+            strcpy(events[event_index].attendants[num_attendants], attendant);
+            events[event_index].num_attendants++;
+        }
     }
 }
 
