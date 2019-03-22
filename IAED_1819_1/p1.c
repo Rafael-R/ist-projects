@@ -25,31 +25,31 @@ int main() {
                     break;
 
                 case 's':
-                    __s__(parameters);
+                    __s__(parameters.room);
                     break;
 
                 case 'r':
-                    __r__(parameters);
+                    __r__(parameters.description);
                     break;
 
                 case 'i':
-                    __i__(parameters);
+                    __i__(parameters.description, parameters.start);
                     break;
 
                 case 't':
-                    __t__(parameters);
+                    __t__(parameters.description, parameters.duration);
                     break;
 
                 case 'm':
-                    __m__(parameters);
+                    __m__(parameters.description, parameters.room);
                     break;
 
                 case 'A':
-                    __A__(parameters);
+                    __A__(parameters.description, parameters.attendants[0]);
                     break;
 
                 case 'R':
-                    __R__(parameters);
+                    __R__(parameters.description, parameters.attendants[0]);
                     break;
             }
         }
