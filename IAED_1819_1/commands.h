@@ -18,6 +18,7 @@
 #define FALSE 0
 #define TRUE 1
 
+
 typedef struct {
     char description[MAX_CHAR];
     int date;
@@ -28,6 +29,7 @@ typedef struct {
     int num_attendants;
     char attendants[MAX_ATTEN][MAX_CHAR];
 } Event;
+
 
 Event events[MAX_EVENT];
 
@@ -152,7 +154,35 @@ Event processInfo(char command, char info[]) {
 }
 
 
-int verifyRoomAvailability(Event teste) {
+int calcEnd(int start, int duration) {
+    int end, hours, minutes;
+
+    if (duration > 59) {
+        hours = duration / 60;
+        minutes = duration % 60;
+        end = start + (hours * 100) + minutes;
+    } else {
+        end = start + duration;
+    }
+
+    return end;
+}
+
+
+int verifyRoomAvailability(Event test) {
+    int i, start, end, test_start, test_end;
+
+    for (i = 0; i < num_events; i++) {
+        if (events[i].date == test.date && events[i].room == test.room) {
+            start = events[i].start;
+            end = calcEnd(events[i].start, events[i].duration);
+            test_start = test.start;
+            test_end = calcEnd(test.start, test.duration);
+            if (test_start < end || test_end > start) {
+                return FALSE;
+            }
+        }
+    }
 
     return TRUE;
 }
