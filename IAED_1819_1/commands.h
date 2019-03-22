@@ -149,26 +149,30 @@ Event processInfo(char command, char info[]) {
 }
 
 
+void swap(int rooms[], int room_1, int room_2) {
+    int temp;
+
+    temp = rooms[room_1];
+    rooms[room_1] = rooms[room_2];
+    rooms[room_2] = temp;
+}
+
+
 void sortEvents(int rooms[], int index) {
-    int i, j, temp;
+    int i, j;
 
     for (i = 0; i < index-1; i++) {
         for (j = 0; j < index-i-1; j++) {
             if (events[rooms[j]].date > events[rooms[j+1]].date) {
-                temp = rooms[j];
-                rooms[j] = rooms[j+1];
-                rooms[j+1] = temp;
-            } else if (events[rooms[j]].date == events[rooms[j+1]].date &&
-                       events[rooms[j]].start > events[rooms[j+1]].start) {
-                temp = rooms[j];
-                rooms[j] = rooms[j+1];
-                rooms[j+1] = temp;
-            } else if (events[rooms[j]].date == events[rooms[j+1]].date &&
-                       events[rooms[j]].start == events[rooms[j+1]].start &&
-                       events[rooms[j]].room > events[rooms[j+1]].room) {
-                temp = rooms[j];
-                rooms[j] = rooms[j+1];
-                rooms[j+1] = temp;
+                swap(rooms, j, j+1);
+            } else if (events[rooms[j]].date == events[rooms[j+1]].date) {
+                if (events[rooms[j]].start > events[rooms[j+1]].start) {
+                    swap(rooms, j, j+1);
+                } else if (events[rooms[j]].start == events[rooms[j+1]].start) {
+                    if (events[rooms[j]].room > events[rooms[j+1]].room) {
+                        swap(rooms, j, j+1);
+                    }
+                }
             }
         }
     }
@@ -278,17 +282,41 @@ void __r__(char description[]) {
 
 
 void __i__(char description[], int start) {
-    printf("command i %s:%d\n", description, start);
+    int i, event_index;
+
+    event_index = getEventIndex(description);
+
+    if (event_index == -1) {
+        printf("Evento %s inexistente.\n", description);
+    } else {
+        printf("TODO\n");
+    }
 }
 
 
 void __t__(char description[], int duration) {
-    printf("command t %s:%d\n", description, duration);
+    int i, event_index;
+
+    event_index = getEventIndex(description);
+
+    if (event_index == -1) {
+        printf("Evento %s inexistente.\n", description);
+    } else {
+        printf("TODO\n");
+    }
 }
 
 
 void __m__(char description[], int room) {
-    printf("command m %s:%d\n", description, room);
+    int i, event_index;
+
+    event_index = getEventIndex(description);
+
+    if (event_index == -1) {
+        printf("Evento %s inexistente.\n", description);
+    } else {
+        printf("TODO\n");
+    }
 }
 
 

@@ -56,6 +56,5 @@ int main() {
     }
 
     printf("exit\n");
-
     return 0;
 }
