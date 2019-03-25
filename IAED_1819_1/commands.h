@@ -39,47 +39,22 @@ int num_events;
 /* ------------------------- DEFINIÇÃO DAS FUNÇÕES -------------------------- */
 
 
-void readInfo(char info[]) {
-    char c;
-    int i = 0;
 
-    getchar();
-    while ((c = getchar()) != '\n' && c != EOF) {
-        info[i++] = c;
-    } info[i] = '\0';
-}
+int splitInfo(char info[], char parameters[][MAX_CHAR]) {
+    char parameter[63];
+    int i, j = 0, counter = 0;
 
-
-int countParameters(char info[]) {
-    int i, counter = 1, length;
-
-    length = strlen(info);
-    for (i = 0; i < length; i++) {
-        if (info[i] == ':') {
-            counter++;
+    for (i = 2; info[i] != '\0'; i++) {
+        if (info[i] == ':' || info[i] == '\n') {
+            parameter[j] = '\0';
+            strcpy(parameters[counter++], parameter);
+            j = 0;
+        } else {
+            parameter[j++] = info[i];
         }
     }
 
     return counter;
-}
-
-
-void convertInfo(char info[], char parameters[][MAX_CHAR]) {
-    char parameter[63];
-    int i, j = 0, count = 0;
-
-    for (i = 0; info[i] != '\0'; i++) {
-        if (info[i] != ':') {
-            parameter[j++] = info[i];
-        } else {
-            parameter[j] = '\0';
-            strcpy(parameters[count], parameter);
-            count++;
-            j = 0;
-        }
-    }
-    parameter[j] = '\0';
-    strcpy(parameters[count], parameter);
 }
 
 
@@ -95,63 +70,67 @@ int stringToInt(char string[]) {
 }
 
 
-Event processInfo(char command, char info[]) {
-    char converted_info[MAX_PARAM][MAX_CHAR];
+Event processInfo(char info[], char command) {
+    char splited_info[MAX_PARAM][MAX_CHAR];
     int num_parameters;
     Event parameters;
 
-    num_parameters = countParameters(info);
-    convertInfo(info, converted_info);
+    if (command == 'l' || command == 'x') {
+        parameters.num_attendants = 0;
+        return parameters;
+    } else {
+        num_parameters = splitInfo(info, splited_info);
 
-    switch (command) {
-        case 'a':
-            strcpy(parameters.description, converted_info[0]);
-            parameters.date = stringToInt(converted_info[1]);
-            parameters.start = stringToInt(converted_info[2]);
-            parameters.duration = stringToInt(converted_info[3]);
-            parameters.room = stringToInt(converted_info[4]);
-            strcpy(parameters.responsible, converted_info[5]);
-            parameters.num_attendants = num_parameters - 6;
-            strcpy(parameters.attendants[0], converted_info[6]);
-            strcpy(parameters.attendants[1], converted_info[7]);
-            strcpy(parameters.attendants[2], converted_info[8]);
-            break;
+        switch (command) {
+            case 'a':
+                strcpy(parameters.description, splited_info[0]);
+                parameters.date = stringToInt(splited_info[1]);
+                parameters.start = stringToInt(splited_info[2]);
+                parameters.duration = stringToInt(splited_info[3]);
+                parameters.room = stringToInt(splited_info[4]);
+                strcpy(parameters.responsible, splited_info[5]);
+                parameters.num_attendants = num_parameters - 6;
+                strcpy(parameters.attendants[0], splited_info[6]);
+                strcpy(parameters.attendants[1], splited_info[7]);
+                strcpy(parameters.attendants[2], splited_info[8]);
+                break;
 
-        case 's':
-            parameters.room = stringToInt(info);
-            break;
+            case 's':
+                parameters.room = stringToInt(splited_info[0]);
+                break;
 
-        case 'r':
-            strcpy(parameters.description, info);
-            break;
+            case 'r':
+                strcpy(parameters.description, splited_info[0]);
+                break;
 
-        case 'i':
-            strcpy(parameters.description, converted_info[0]);
-            parameters.start = stringToInt(converted_info[1]);
-            break;
+            case 'i':
+                strcpy(parameters.description, splited_info[0]);
+                parameters.start = stringToInt(splited_info[1]);
+                break;
 
-        case 't':
-            strcpy(parameters.description, converted_info[0]);
-            parameters.duration = stringToInt(converted_info[1]);
-            break;
+            case 't':
+                strcpy(parameters.description, splited_info[0]);
+                parameters.duration = stringToInt(splited_info[1]);
+                break;
 
-        case 'm':
-            strcpy(parameters.description, converted_info[0]);
-            parameters.room = stringToInt(converted_info[1]);
-            break;
+            case 'm':
+                strcpy(parameters.description, splited_info[0]);
+                parameters.room = stringToInt(splited_info[1]);
+                break;
 
-        case 'A':
-            strcpy(parameters.description, converted_info[0]);
-            strcpy(parameters.attendants[0], converted_info[1]);
-            break;
+            case 'A':
+                strcpy(parameters.description, splited_info[0]);
+                strcpy(parameters.attendants[0], splited_info[1]);
+                break;
 
-        case 'R':
-            strcpy(parameters.description, converted_info[0]);
-            strcpy(parameters.attendants[0], converted_info[1]);
-            break;
+            case 'R':
+                strcpy(parameters.description, splited_info[0]);
+                strcpy(parameters.attendants[0], splited_info[1]);
+                break;
+        }
+
+        return parameters;
     }
-
-    return parameters;
 }
 
 

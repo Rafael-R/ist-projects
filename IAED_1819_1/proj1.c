@@ -8,50 +8,51 @@
 
 
 int main() {
-    char command, info[MAX_INFO];
+    char info[MAX_INFO], command;
     Event parameters;
 
-    while ((command = getchar()) != EOF && command != '\n') {
+    while (command != 'x') {
 
-        if (command == 'l') {
-            __l__();
-            getchar();
-        } else {
-            readInfo(info);
-            parameters = processInfo(command, info);
-            switch (command) {
-                case 'a':
-                    __a__(parameters);
-                    break;
+        fgets(info, MAX_INFO, stdin);
+        command = info[0];
+        parameters = processInfo(info, command);
 
-                case 's':
-                    __s__(parameters.room);
-                    break;
+        switch (command) {
+            case 'a':
+                __a__(parameters);
+                break;
 
-                case 'r':
-                    __r__(parameters.description);
-                    break;
+            case 'l':
+                __l__();
+                break;
 
-                case 'i':
-                    __i__(parameters.description, parameters.start);
-                    break;
+            case 's':
+                __s__(parameters.room);
+                break;
 
-                case 't':
-                    __t__(parameters.description, parameters.duration);
-                    break;
+            case 'r':
+                __r__(parameters.description);
+                break;
 
-                case 'm':
-                    __m__(parameters.description, parameters.room);
-                    break;
+            case 'i':
+                __i__(parameters.description, parameters.start);
+                break;
 
-                case 'A':
-                    __A__(parameters.description, parameters.attendants[0]);
-                    break;
+            case 't':
+                __t__(parameters.description, parameters.duration);
+                break;
 
-                case 'R':
-                    __R__(parameters.description, parameters.attendants[0]);
-                    break;
-            }
+            case 'm':
+                __m__(parameters.description, parameters.room);
+                break;
+
+            case 'A':
+                __A__(parameters.description, parameters.attendants[0]);
+                break;
+
+            case 'R':
+                __R__(parameters.description, parameters.attendants[0]);
+                break;
         }
     }
 
