@@ -26,8 +26,8 @@ typedef struct {
     int duration;
     int room;
     char responsible[MAX_CHAR];
-    int num_attendants;
     char attendants[MAX_ATTEN][MAX_CHAR];
+    int num_attendants;
 } Event;
 
 
@@ -39,98 +39,35 @@ int num_events;
 /* ------------------------- DEFINIÇÃO DAS FUNÇÕES -------------------------- */
 
 
-
-int splitInfo(char info[], char parameters[][MAX_CHAR]) {
-    char parameter[63];
-    int i, j = 0, counter = 0;
-
-    for (i = 2; info[i] != '\0'; i++) {
-        if (info[i] == ':' || info[i] == '\n') {
-            parameter[j] = '\0';
-            strcpy(parameters[counter++], parameter);
-            j = 0;
-        } else {
-            parameter[j++] = info[i];
-        }
-    }
-
-    return counter;
-}
-
-
 int stringToInt(char string[]) {
     int i, integer = 0, length;
 
     length = strlen(string);
     for (i = 0; i < length; i++) {
-        integer = (integer * 10) + (string[i] - 48);
+        integer = (integer * 10) + (string[i] - '0');
     }
 
     return integer;
 }
 
 
-Event processInfo(char info[], char command) {
-    char splited_info[MAX_PARAM][MAX_CHAR];
-    int num_parameters;
-    Event parameters;
+int splitInfo(char info[], char splited_info[MAX_PARAM][MAX_CHAR]) {
+    char parameter[MAX_CHAR];
+    int i, j = 0, counter = 0;
 
-    if (command == 'l' || command == 'x') {
-        parameters.num_attendants = 0;
-        return parameters;
-    } else {
-        num_parameters = splitInfo(info, splited_info);
-
-        switch (command) {
-            case 'a':
-                strcpy(parameters.description, splited_info[0]);
-                parameters.date = stringToInt(splited_info[1]);
-                parameters.start = stringToInt(splited_info[2]);
-                parameters.duration = stringToInt(splited_info[3]);
-                parameters.room = stringToInt(splited_info[4]);
-                strcpy(parameters.responsible, splited_info[5]);
-                parameters.num_attendants = num_parameters - 6;
-                strcpy(parameters.attendants[0], splited_info[6]);
-                strcpy(parameters.attendants[1], splited_info[7]);
-                strcpy(parameters.attendants[2], splited_info[8]);
-                break;
-
-            case 's':
-                parameters.room = stringToInt(splited_info[0]);
-                break;
-
-            case 'r':
-                strcpy(parameters.description, splited_info[0]);
-                break;
-
-            case 'i':
-                strcpy(parameters.description, splited_info[0]);
-                parameters.start = stringToInt(splited_info[1]);
-                break;
-
-            case 't':
-                strcpy(parameters.description, splited_info[0]);
-                parameters.duration = stringToInt(splited_info[1]);
-                break;
-
-            case 'm':
-                strcpy(parameters.description, splited_info[0]);
-                parameters.room = stringToInt(splited_info[1]);
-                break;
-
-            case 'A':
-                strcpy(parameters.description, splited_info[0]);
-                strcpy(parameters.attendants[0], splited_info[1]);
-                break;
-
-            case 'R':
-                strcpy(parameters.description, splited_info[0]);
-                strcpy(parameters.attendants[0], splited_info[1]);
-                break;
+    if (strlen(info) > 2) {
+        for (i = 2; info[i] != '\0'; i++) {
+            if (info[i] == ':' || info[i] == '\n') {
+                parameter[j] = '\0';
+                strcpy(splited_info[counter++], parameter);
+                j = 0;
+            } else {
+                parameter[j++] = info[i];
+            }
         }
-
-        return parameters;
     }
+
+    return counter;
 }
 
 
@@ -150,7 +87,7 @@ int calcEnd(int start, int duration) {
 
 
 int verifyRoom(Event test) {
-    int i, start, end, t_start, t_end;
+    int i, start, end, t_start, t_end, nop;
 
     for (i = 0; i < num_events; i++) {
         if (events[i].date == test.date && events[i].room == test.room) {
@@ -158,20 +95,21 @@ int verifyRoom(Event test) {
             end = calcEnd(start, events[i].duration);
             t_start = test.start;
             t_end = calcEnd(t_start, test.duration);
-            if ((t_start < start && t_end > start && t_end < end) ||
-                (t_start > start && t_start < end && t_end > end) ||
-                (t_start >= start && t_end <= end)) {
+            if (t_start >= end || t_end <= start) {
+                nop++;
+            } else {
+                printf("Impossivel agendar evento %s. Sala%d ocupada.\n",
+                       test.description, test.room);
                 return FALSE;
             }
         }
     }
-
     return TRUE;
 }
 
 
 int verifyAttendant(Event test, char attendant[]) {
-    int i, start, end, t_start, t_end, j;
+    int i, start, end, t_start, t_end, j, nop;
 
     for (i = 0; i < num_events; i++) {
         if (events[i].date == test.date) {
@@ -179,9 +117,9 @@ int verifyAttendant(Event test, char attendant[]) {
             end = calcEnd(start, events[i].duration);
             t_start = test.start;
             t_end = calcEnd(t_start, test.duration);
-            if ((t_start < start && t_end > start && t_end < end) ||
-                (t_start > start && t_start < end && t_end > end) ||
-                (t_start >= start && t_end <= end)) {
+            if (t_start >= end || t_end <= start) {
+                nop++;
+            } else {
                 if (strcmp(events[i].responsible, attendant) == 0) {
                     return FALSE;
                 }
@@ -193,40 +131,32 @@ int verifyAttendant(Event test, char attendant[]) {
             }
         }
     }
-
     return TRUE;
 }
 
 
-int verifyAttendantsAvailability(Event test, char unavailable[]) {
-    if (verifyAttendant(test, test.responsible) == FALSE) {
-        strcpy(unavailable, test.responsible);
-        return FALSE;
-    } else if (verifyAttendant(test, test.attendants[1]) == FALSE) {
-        strcpy(unavailable, test.attendants[1]);
-        return FALSE;
-    } else if (verifyAttendant(test, test.attendants[1]) == FALSE) {
-        strcpy(unavailable, test.attendants[2]);
-        return FALSE;
-    } else if (verifyAttendant(test, test.attendants[1]) == FALSE) {
-        strcpy(unavailable, test.attendants[3]);
+int verifications(Event test) {
+    int fails = 0, i;
+
+    if (verifyRoom(test) == FALSE) {
         return FALSE;
     }
 
-    return TRUE;
-}
-
-
-int verifications(Event input) {
-    char unavailable[MAX_CHAR];
-
-    if (verifyRoom(input) == FALSE) {
-        printf("Impossivel agendar evento %s. Sala%d ocupada.\n",
-               input.description, input.room);
-        return FALSE;
-    } else if (verifyAttendantsAvailability(input, unavailable) == FALSE) {
+    if (verifyAttendant(test, test.responsible) == FALSE) {
         printf("Impossivel agendar evento %s. Participante %s tem um "
-               "evento sobreposto.\n", input.description, unavailable);
+               "evento sobreposto.\n", test.description, test.responsible);
+        fails++;
+    }
+
+    for (i = 0; i < test.num_attendants; i++) {
+        if (verifyAttendant(test, test.attendants[i]) == FALSE) {
+            printf("Impossivel agendar evento %s. Participante %s tem um "
+                   "evento sobreposto.\n", test.description, test.attendants[i]);
+            fails++;
+        }
+    }
+
+    if (fails > 0) {
         return FALSE;
     } else {
         return TRUE;
@@ -265,7 +195,7 @@ void sortEvents(int rooms[], int index) {
 
 
 void printEvent(Event event) {
-    int i, dia, mes, ano, horas, minutos;
+    int i;/*, dia, mes, ano, horas, minutos;
 
     dia = (event.date) / 1000000;
     mes = ((event.date) / 10000) % 100;
@@ -275,9 +205,13 @@ void printEvent(Event event) {
 
     printf("%s %.2d/%.2d/%.4d %.2d:%.2d %.2d Sala%d %s\n* ", event.description, dia,
            mes, ano, horas, minutos, event.duration, event.room,
-           event.responsible);
+           event.responsible);*/
+
+    printf("%s %.8d %.4d %d Sala%d %s\n* ", event.description, event.date,
+           event.start, event.duration, event.room, event.responsible);
+
     for (i = 0; i < event.num_attendants-1; i++) {
-        printf("%s:", event.attendants[i]);
+        printf("%s ", event.attendants[i]);
     } printf("%s\n", event.attendants[i]);
 
     return;
@@ -301,6 +235,7 @@ int getEventIndex(char description[]) {
 
 
 void __a__(Event input) {
+    puts("Funcao __a__.");
     if (verifications(input) == TRUE) {
         events[num_events] = input;
         num_events++;
@@ -310,6 +245,8 @@ void __a__(Event input) {
 
 void __l__() {
     int i, l[MAX_EVENT], index = 0;
+
+    puts("Funcao __l__.");
 
     for (i = 0; i < num_events; i++) {
         l[index++] = i;
@@ -325,6 +262,8 @@ void __l__() {
 
 void __s__(int room) {
     int i, s[MAX_EVENT], index = 0;
+
+    puts("Funcao __s__.");
 
     for (i = 0; i < num_events; i++) {
         if (events[i].room == room) {
@@ -344,6 +283,8 @@ void __s__(int room) {
 void __r__(char description[]) {
     int i, event_index;
 
+    puts("Funcao __r__.");
+
     event_index = getEventIndex(description);
 
     if (event_index == UNDEFINED) {
@@ -360,6 +301,8 @@ void __r__(char description[]) {
 void __i__(char description[], int start) {
     int event_index;
     Event test;
+
+    puts("Funcao __i__.");
 
     event_index = getEventIndex(description);
 
@@ -379,6 +322,8 @@ void __t__(char description[], int duration) {
     int event_index;
     Event test;
 
+    puts("Funcao __t__.");
+
     event_index = getEventIndex(description);
 
     if (event_index == UNDEFINED) {
@@ -397,6 +342,8 @@ void __m__(char description[], int room) {
     int event_index;
     Event test;
 
+    puts("Funcao __m__.");
+
     event_index = getEventIndex(description);
 
     if (event_index == UNDEFINED) {
@@ -404,7 +351,7 @@ void __m__(char description[], int room) {
     } else {
         test = events[event_index];
         test.room = room;
-        if (verifications(test) == TRUE) {
+        if (verifyRoom(test) == TRUE) {
             events[event_index].room = room;
         }
     }
@@ -413,6 +360,8 @@ void __m__(char description[], int room) {
 
 void __A__(char description[], char attendant[]) {
     int event_index, num_attendants, i;
+
+    puts("Funcao __l__.");
 
     event_index = getEventIndex(description);
 
@@ -441,6 +390,8 @@ void __A__(char description[], char attendant[]) {
 
 void __R__(char description[], char attendant[]) {
     int event_index, i, attendant_index = UNDEFINED;
+
+    puts("Funcao __l__.");
 
     event_index = getEventIndex(description);
 
