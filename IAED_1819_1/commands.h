@@ -43,6 +43,7 @@ int stringToInt(char string[]) {
     int i, integer = 0, length;
 
     length = strlen(string);
+
     for (i = 0; i < length; i++) {
         integer = (integer * 10) + (string[i] - '0');
     }
@@ -86,51 +87,64 @@ int calcEnd(int start, int duration) {
 }
 
 
+int verifyTime(Event event, Event test) {
+    int end, test_end;
+
+    end = calcEnd(event.start, event.duration);
+    test_end = calcEnd(test.start, test.duration);
+
+    if (test.start >= end || test_end <= event.start) {
+        return TRUE;
+    } else {
+        return FALSE;
+    }
+}
+
+
 int verifyRoom(Event test) {
-    int i, start, end, t_start, t_end, nop;
+    int i;
 
     for (i = 0; i < num_events; i++) {
         if (events[i].date == test.date && events[i].room == test.room) {
-            start = events[i].start;
-            end = calcEnd(start, events[i].duration);
-            t_start = test.start;
-            t_end = calcEnd(t_start, test.duration);
-            if (t_start >= end || t_end <= start) {
-                nop++;
-            } else {
+            if (verifyTime(events[i], test) == FALSE) {
                 printf("Impossivel agendar evento %s. Sala%d ocupada.\n",
                        test.description, test.room);
                 return FALSE;
             }
         }
     }
+
     return TRUE;
 }
 
 
+int getAttendantIndex(Event event, char attendant[]) {
+    int i, index = UNDEFINED;
+
+    for (i = 0; i < event.num_attendants; i++) {
+        if (strcmp(event.attendants[i], attendant) == 0) {
+            index = i;
+        }
+    }
+
+    return index;
+}
+
+
 int verifyAttendant(Event test, char attendant[]) {
-    int i, start, end, t_start, t_end, j, nop;
+    int i;
 
     for (i = 0; i < num_events; i++) {
         if (events[i].date == test.date) {
-            start = events[i].start;
-            end = calcEnd(start, events[i].duration);
-            t_start = test.start;
-            t_end = calcEnd(t_start, test.duration);
-            if (t_start >= end || t_end <= start) {
-                nop++;
-            } else {
-                if (strcmp(events[i].responsible, attendant) == 0) {
+            if (verifyTime(events[i], test) == FALSE) {
+                if (strcmp(events[i].responsible, attendant) == 0 ||
+                    getAttendantIndex(events[i], attendant) != UNDEFINED) {
                     return FALSE;
-                }
-                for (j = 0; j < MAX_ATTEN; j++) {
-                    if (strcmp(events[i].attendants[j], attendant) == 0) {
-                        return FALSE;
-                    }
                 }
             }
         }
     }
+
     return TRUE;
 }
 
@@ -195,17 +209,7 @@ void sortEvents(int rooms[], int index) {
 
 
 void printEvent(Event event) {
-    int i;/*, dia, mes, ano, horas, minutos;
-
-    dia = (event.date) / 1000000;
-    mes = ((event.date) / 10000) % 100;
-    ano = (event.date) % 10000;
-    horas = (event.start) / 100;
-    minutos = (event.start) % 100;
-
-    printf("%s %.2d/%.2d/%.4d %.2d:%.2d %.2d Sala%d %s\n* ", event.description, dia,
-           mes, ano, horas, minutos, event.duration, event.room,
-           event.responsible);*/
+    int i;
 
     printf("%s %.8d %.4d %d Sala%d %s\n* ", event.description, event.date,
            event.start, event.duration, event.room, event.responsible);
@@ -235,7 +239,7 @@ int getEventIndex(char description[]) {
 
 
 void __a__(Event input) {
-    puts("Funcao __a__.");
+
     if (verifications(input) == TRUE) {
         events[num_events] = input;
         num_events++;
@@ -245,8 +249,6 @@ void __a__(Event input) {
 
 void __l__() {
     int i, l[MAX_EVENT], index = 0;
-
-    puts("Funcao __l__.");
 
     for (i = 0; i < num_events; i++) {
         l[index++] = i;
@@ -262,8 +264,6 @@ void __l__() {
 
 void __s__(int room) {
     int i, s[MAX_EVENT], index = 0;
-
-    puts("Funcao __s__.");
 
     for (i = 0; i < num_events; i++) {
         if (events[i].room == room) {
@@ -281,16 +281,14 @@ void __s__(int room) {
 
 
 void __r__(char description[]) {
-    int i, event_index;
+    int i, index;
 
-    puts("Funcao __r__.");
+    index = getEventIndex(description);
 
-    event_index = getEventIndex(description);
-
-    if (event_index == UNDEFINED) {
+    if (index == UNDEFINED) {
         printf("Evento %s inexistente.\n", description);
     } else {
-        for (i = event_index; i < num_events-1; i++) {
+        for (i = index; i < num_events-1; i++) {
             events[i] = events[i+1];
         }
         num_events--;
@@ -299,123 +297,108 @@ void __r__(char description[]) {
 
 
 void __i__(char description[], int start) {
-    int event_index;
+    int index;
     Event test;
 
-    puts("Funcao __i__.");
+    index = getEventIndex(description);
 
-    event_index = getEventIndex(description);
-
-    if (event_index == UNDEFINED) {
+    if (index == UNDEFINED) {
         printf("Evento %s inexistente.\n", description);
     } else {
-        test = events[event_index];
+        test = events[index];
         test.start = start;
         if (verifications(test) == TRUE) {
-            events[event_index].start = start;
+            events[index].start = start;
         }
     }
 }
 
 
 void __t__(char description[], int duration) {
-    int event_index;
+    int index;
     Event test;
 
-    puts("Funcao __t__.");
+    index = getEventIndex(description);
 
-    event_index = getEventIndex(description);
-
-    if (event_index == UNDEFINED) {
+    if (index == UNDEFINED) {
         printf("Evento %s inexistente.\n", description);
     } else {
-        test = events[event_index];
+        test = events[index];
         test.duration = duration;
         if (verifications(test) == TRUE) {
-            events[event_index].duration = duration;
+            events[index].duration = duration;
         }
     }
 }
 
 
 void __m__(char description[], int room) {
-    int event_index;
+    int index;
     Event test;
 
-    puts("Funcao __m__.");
+    index = getEventIndex(description);
 
-    event_index = getEventIndex(description);
-
-    if (event_index == UNDEFINED) {
+    if (index == UNDEFINED) {
         printf("Evento %s inexistente.\n", description);
     } else {
-        test = events[event_index];
+        test = events[index];
         test.room = room;
         if (verifyRoom(test) == TRUE) {
-            events[event_index].room = room;
+            events[index].room = room;
         }
     }
 }
 
 
 void __A__(char description[], char attendant[]) {
-    int event_index, num_attendants, i;
+    int index, num_attendants, i;
 
-    puts("Funcao __l__.");
+    index = getEventIndex(description);
 
-    event_index = getEventIndex(description);
-
-    if (event_index == UNDEFINED) {
+    if (index == UNDEFINED) {
         printf("Evento %s inexistente.\n", description);
     } else {
-        for (i = 0; i < MAX_ATTEN; i++) {
-            if (strcmp(events[event_index].attendants[i], attendant) == 0) {
+        for (i = 0; i < events[index].num_attendants; i++) {
+            if (strcmp(events[index].attendants[i], attendant) == 0) {
                 return;
             }
         }
-        if (verifyAttendant(events[event_index], attendant) == FALSE) {
+        if (verifyAttendant(events[index], attendant) == FALSE) {
             printf("Impossivel adicionar participante. Participante %s tem um "
                    "evento sobreposto.\n", attendant);
-        } else if (events[event_index].num_attendants == MAX_ATTEN) {
+        } else if (events[index].num_attendants == MAX_ATTEN) {
             printf("Impossivel adicionar participante. Evento %s ja tem 3 "
                    "participantes.\n", description);
         } else {
-            num_attendants = events[event_index].num_attendants;
-            strcpy(events[event_index].attendants[num_attendants], attendant);
-            events[event_index].num_attendants++;
+            num_attendants = events[index].num_attendants;
+            strcpy(events[index].attendants[num_attendants], attendant);
+            events[index].num_attendants++;
         }
     }
 }
 
 
 void __R__(char description[], char attendant[]) {
-    int event_index, i, attendant_index = UNDEFINED;
+    int e_index, i, a_index = UNDEFINED;
 
-    puts("Funcao __l__.");
+    e_index = getEventIndex(description);
 
-    event_index = getEventIndex(description);
-
-    if (event_index == UNDEFINED) {
+    if (e_index == UNDEFINED) {
         printf("Evento %s inexistente.\n", description);
     } else {
-        for (i = 0; i < MAX_ATTEN; i++) {
-            if (strcmp(events[event_index].attendants[i], attendant) == 0) {
-                attendant_index = i;
-            }
-        }
-        if (attendant_index == UNDEFINED) {
+        a_index = getAttendantIndex(events[e_index], attendant);
+
+        if (a_index == UNDEFINED) {
             return;
-        } else if (events[event_index].num_attendants == 1) {
+        } else if (events[e_index].num_attendants == 1) {
             printf("Impossivel remover participante. Participante %s e o unico "
                    "participante no evento %s.\n",
-                   events[event_index].attendants[0], description);
+                events[e_index].attendants[0], description);
         } else {
-            for (i = attendant_index; i < MAX_ATTEN-1; i++) {
-                strcpy(events[event_index].attendants[i],
-                       events[event_index].attendants[i+1]);
-            }
-            events[event_index].num_attendants--;
+            for (i = a_index; i < events[e_index].num_attendants-1; i++) {
+                strcpy(events[e_index].attendants[i],
+                       events[e_index].attendants[i+1]);
+            } events[e_index].num_attendants--;
         }
     }
-
 }
