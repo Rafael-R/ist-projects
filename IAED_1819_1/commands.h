@@ -111,14 +111,12 @@ int verifyTime(Event event, Event test) {
     end = calcEnd(event.start, event.duration);
     test_end = calcEnd(test.start, test.duration);
 
-    if (event.date == test.date) {
-        if (test.start >= end || test_end <= event.start) {
-            return TRUE;
-        } else {
-            return FALSE;
-        }
+    if (event.date == test.date &&
+        !(test.start >= end || test_end <= event.start)) {
+        return FALSE;
+    } else {
+        return TRUE;
     }
-    return TRUE;
 }
 
 
@@ -166,8 +164,7 @@ int verifications(Event test, int index) {
                 return FALSE;
             }
 
-            if (events[i].date == test.date &&
-                verifyTime(events[i], test) == FALSE) {
+            if (verifyTime(events[i], test) == FALSE) {
 
                 if (verifyAttendant(events[i], test.responsible) == FALSE) {
                     printf("Impossivel agendar evento %s. Participante %s tem um "
