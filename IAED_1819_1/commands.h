@@ -72,6 +72,24 @@ int splitInfo(char info[], char splited_info[MAX_PARAM][MAX_CHAR]) {
 }
 
 
+long sortData(Event event) {
+    long sorted_data;
+    int year, month, day;
+
+    year = event.date % 10000;
+    month = (event.date % 1000000) / 10000;
+    day = event.date / 1000000;
+
+    sorted_data = year * 10000000000 +
+                  month * 100000000 +
+                  day * 1000000 +
+                  event.start * 100 +
+                  event.room;
+
+    return sorted_data;
+}
+
+
 int calcEnd(int start, int duration) {
     int end, hours, minutes;
 
@@ -101,16 +119,13 @@ int verifyTime(Event event, Event test) {
 }
 
 
-int verifyRoom(Event test) {
-    int i;
+int verifyRoom(Event event, Event test) {
 
-    for (i = 0; i < num_events; i++) {
-        if (events[i].date == test.date && events[i].room == test.room) {
-            if (verifyTime(events[i], test) == FALSE) {
-                printf("Impossivel agendar evento %s. Sala%d ocupada.\n",
-                       test.description, test.room);
-                return FALSE;
-            }
+    if (event.date == test.date && event.room == test.room) {
+        if (verifyTime(event, test) == FALSE) {
+            printf("Impossivel agendar evento %s. Sala%d ocupada.\n",
+                   test.description, test.room);
+            return FALSE;
         }
     }
 
@@ -131,50 +146,51 @@ int getAttendantIndex(Event event, char attendant[]) {
 }
 
 
-int verifyAttendant(Event test, char attendant[]) {
-    int i;
+int verifyAttendant(Event event, char attendant[]) {
 
-    for (i = 0; i < num_events; i++) {
-        if (events[i].date == test.date) {
-            if (verifyTime(events[i], test) == FALSE) {
-                if (strcmp(events[i].responsible, attendant) == 0 ||
-                    getAttendantIndex(events[i], attendant) != UNDEFINED) {
-                    return FALSE;
-                }
-            }
-        }
+    if (strcmp(event.responsible, attendant) == 0 ||
+        getAttendantIndex(event, attendant) != UNDEFINED) {
+        return FALSE;
     }
 
     return TRUE;
 }
 
 
-int verifications(Event test) {
+int verifications(Event test, int index) {
     int fails = 0, i;
 
-    if (verifyRoom(test) == FALSE) {
-        return FALSE;
-    }
+    for (i = 0; i < num_events; i++) {
+        if (i != index && events[i].date == test.date) {
+            if (verifyRoom(events[i], test) == FALSE) {
+                return FALSE;
+            }
 
-    if (verifyAttendant(test, test.responsible) == FALSE) {
-        printf("Impossivel agendar evento %s. Participante %s tem um "
-               "evento sobreposto.\n", test.description, test.responsible);
-        fails++;
-    }
+            if (verifyTime(events[i], test) == FALSE) {
 
-    for (i = 0; i < test.num_attendants; i++) {
-        if (verifyAttendant(test, test.attendants[i]) == FALSE) {
-            printf("Impossivel agendar evento %s. Participante %s tem um "
-                   "evento sobreposto.\n", test.description, test.attendants[i]);
-            fails++;
+                if (verifyAttendant(events[i], test.responsible) == FALSE) {
+                    printf("Impossivel agendar evento %s. Participante %s tem um "
+                           "evento sobreposto.\n", test.description, test.responsible);
+                    fails++;
+                }
+
+                for (i = 0; i < test.num_attendants; i++) {
+                    if (verifyAttendant(test, test.attendants[i]) == FALSE) {
+                        printf("Impossivel agendar evento %s. Participante %s tem um "
+                               "evento sobreposto.\n", test.description, test.attendants[i]);
+                        fails++;
+                    }
+                }
+
+                if (fails > 0) {
+                    return FALSE;
+                } else {
+                    return TRUE;
+                }
+            }
         }
     }
-
-    if (fails > 0) {
-        return FALSE;
-    } else {
-        return TRUE;
-    }
+    return TRUE;
 }
 
 
@@ -192,16 +208,8 @@ void sortEvents(int rooms[], int index) {
 
     for (i = 0; i < index-1; i++) {
         for (j = 0; j < index-i-1; j++) {
-            if (events[rooms[j]].date > events[rooms[j+1]].date) {
+            if (sortData(events[rooms[j]]) > sortData(events[rooms[j+1]])) {
                 swap(rooms, j, j+1);
-            } else if (events[rooms[j]].date == events[rooms[j+1]].date) {
-                if (events[rooms[j]].start > events[rooms[j+1]].start) {
-                    swap(rooms, j, j+1);
-                } else if (events[rooms[j]].start == events[rooms[j+1]].start) {
-                    if (events[rooms[j]].room > events[rooms[j+1]].room) {
-                        swap(rooms, j, j+1);
-                    }
-                }
             }
         }
     }
@@ -240,7 +248,7 @@ int getEventIndex(char description[]) {
 
 void __a__(Event input) {
 
-    if (verifications(input) == TRUE) {
+    if (verifications(input, 1001) == TRUE) {
         events[num_events] = input;
         num_events++;
     }
@@ -307,7 +315,7 @@ void __i__(char description[], int start) {
     } else {
         test = events[index];
         test.start = start;
-        if (verifications(test) == TRUE) {
+        if (verifications(test, index) == TRUE) {
             events[index].start = start;
         }
     }
@@ -325,7 +333,7 @@ void __t__(char description[], int duration) {
     } else {
         test = events[index];
         test.duration = duration;
-        if (verifications(test) == TRUE) {
+        if (verifications(test, index) == TRUE) {
             events[index].duration = duration;
         }
     }
@@ -333,7 +341,7 @@ void __t__(char description[], int duration) {
 
 
 void __m__(char description[], int room) {
-    int index;
+    int index, i;
     Event test;
 
     index = getEventIndex(description);
@@ -343,9 +351,14 @@ void __m__(char description[], int room) {
     } else {
         test = events[index];
         test.room = room;
-        if (verifyRoom(test) == TRUE) {
-            events[index].room = room;
+
+        for (i = 0; i < num_events; i++) {
+            if (i != index && verifyRoom(events[i], test) == FALSE) {
+                return;
+            }
         }
+
+        events[index].room = room;
     }
 }
 

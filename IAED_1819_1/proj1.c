@@ -64,6 +64,9 @@ int main() {
             case 'R':
                 __R__(splited_info[0], splited_info[1]);
                 break;
+                
+            default:
+                break;
         }
     }
 
