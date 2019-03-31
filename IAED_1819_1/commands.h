@@ -111,24 +111,24 @@ int verifyTime(Event event, Event test) {
     end = calcEnd(event.start, event.duration);
     test_end = calcEnd(test.start, test.duration);
 
-    if (test.start >= end || test_end <= event.start) {
-        return TRUE;
-    } else {
-        return FALSE;
+    if (event.date == test.date) {
+        if (test.start >= end || test_end <= event.start) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
     }
+    return TRUE;
 }
 
 
 int verifyRoom(Event event, Event test) {
 
-    if (event.date == test.date && event.room == test.room) {
-        if (verifyTime(event, test) == FALSE) {
-            printf("Impossivel agendar evento %s. Sala%d ocupada.\n",
-                   test.description, test.room);
-            return FALSE;
-        }
+    if (event.room == test.room && verifyTime(event, test) == FALSE) {
+        printf("Impossivel agendar evento %s. Sala%d ocupada.\n",
+               test.description, test.room);
+        return FALSE;
     }
-
     return TRUE;
 }
 
@@ -158,15 +158,16 @@ int verifyAttendant(Event event, char attendant[]) {
 
 
 int verifications(Event test, int index) {
-    int fails = 0, i;
+    int fails = 0, i, j;
 
     for (i = 0; i < num_events; i++) {
-        if (i != index && events[i].date == test.date) {
+        if (i != index) {
             if (verifyRoom(events[i], test) == FALSE) {
                 return FALSE;
             }
 
-            if (verifyTime(events[i], test) == FALSE) {
+            if (events[i].date == test.date &&
+                verifyTime(events[i], test) == FALSE) {
 
                 if (verifyAttendant(events[i], test.responsible) == FALSE) {
                     printf("Impossivel agendar evento %s. Participante %s tem um "
@@ -174,10 +175,10 @@ int verifications(Event test, int index) {
                     fails++;
                 }
 
-                for (i = 0; i < test.num_attendants; i++) {
-                    if (verifyAttendant(test, test.attendants[i]) == FALSE) {
+                for (j = 0; j < test.num_attendants; j++) {
+                    if (verifyAttendant(test, test.attendants[j]) == FALSE) {
                         printf("Impossivel agendar evento %s. Participante %s tem um "
-                               "evento sobreposto.\n", test.description, test.attendants[i]);
+                               "evento sobreposto.\n", test.description, test.attendants[j]);
                         fails++;
                     }
                 }
