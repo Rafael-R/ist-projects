@@ -6,12 +6,13 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 
-#define MAX_INFO 340
+#define MAX_INFO 350
 #define MAX_PARAM 9
-#define MAX_CHAR 63
+#define MAX_CHAR 64
 #define MAX_EVENT 1000
 #define MAX_ATTEN 3
 #define UNDEFINED -1
@@ -37,19 +38,6 @@ int num_events;
 
 
 /* ------------------------- DEFINIÇÃO DAS FUNÇÕES -------------------------- */
-
-
-int stringToInt(char string[]) {
-    int i, integer = 0, length;
-
-    length = strlen(string);
-
-    for (i = 0; i < length; i++) {
-        integer = (integer * 10) + (string[i] - '0');
-    }
-
-    return integer;
-}
 
 
 int splitInfo(char info[], char splited_info[MAX_PARAM][MAX_CHAR]) {
@@ -91,17 +79,18 @@ long sortData(Event event) {
 
 
 int calcEnd(int start, int duration) {
-    int end, hours, minutes;
+    int start_hour, start_min, add_hour, add_min, end_hour, end_min;
 
-    if (duration > 59) {
-        hours = duration / 60;
-        minutes = duration % 60;
-        end = start + (hours * 100) + minutes;
-    } else {
-        end = start + duration;
-    }
+    start_hour = start / 100;
+    start_min = start % 100;
 
-    return end;
+    add_min = start_min + duration;
+    add_hour = add_min / 60;
+
+    end_min = add_min % 60;
+    end_hour = start_hour + add_hour;
+
+    return (end_hour * 100) + end_min;
 }
 
 
@@ -111,11 +100,14 @@ int verifyTime(Event event, Event test) {
     end = calcEnd(event.start, event.duration);
     test_end = calcEnd(test.start, test.duration);
 
-    if (event.date == test.date &&
-        !(test.start >= end || test_end <= event.start)) {
-        return FALSE;
-    } else {
+    if (event.date != test.date) {
         return TRUE;
+    } else {
+        if (test_end <= event.start || test.start >= end) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
     }
 }
 
@@ -155,7 +147,7 @@ int verifyAttendant(Event event, char attendant[]) {
 }
 
 
-int verifications(Event test, int index) {
+int verifications(int index, Event test) {
     int fails = 0, i, j;
 
     for (i = 0; i < num_events; i++) {
@@ -167,24 +159,24 @@ int verifications(Event test, int index) {
             if (verifyTime(events[i], test) == FALSE) {
 
                 if (verifyAttendant(events[i], test.responsible) == FALSE) {
-                    printf("Impossivel agendar evento %s. Participante %s tem um "
-                           "evento sobreposto.\n", test.description, test.responsible);
+                    printf("Impossivel agendar evento %s. Participante %s "
+                           "tem um evento sobreposto.\n",
+                           test.description, test.responsible);
                     fails++;
                 }
 
                 for (j = 0; j < test.num_attendants; j++) {
-                    if (verifyAttendant(test, test.attendants[j]) == FALSE) {
-                        printf("Impossivel agendar evento %s. Participante %s tem um "
-                               "evento sobreposto.\n", test.description, test.attendants[j]);
+                    if (verifyAttendant(events[i], test.attendants[j]) == FALSE) {
+                        printf("Impossivel agendar evento %s. Participante %s "
+                               "tem um evento sobreposto.\n",
+                               test.description, test.attendants[j]);
                         fails++;
                     }
                 }
+            }
 
-                if (fails > 0) {
-                    return FALSE;
-                } else {
-                    return TRUE;
-                }
+            if (fails > 0) {
+                return FALSE;
             }
         }
     }
@@ -238,178 +230,4 @@ int getEventIndex(char description[]) {
     }
 
     return index;
-}
-
-
-/* -------------------- DEFINIÇÃO DAS FUNÇÕES PRINCIPAIS -------------------- */
-
-
-void __a__(Event input) {
-
-    if (verifications(input, 1001) == TRUE) {
-        events[num_events] = input;
-        num_events++;
-    }
-}
-
-
-void __l__() {
-    int i, l[MAX_EVENT], index = 0;
-
-    for (i = 0; i < num_events; i++) {
-        l[index++] = i;
-    }
-
-    sortEvents(l, index);
-
-    for (i = 0; i < index; i++) {
-        printEvent(events[l[i]]);
-    }
-}
-
-
-void __s__(int room) {
-    int i, s[MAX_EVENT], index = 0;
-
-    for (i = 0; i < num_events; i++) {
-        if (events[i].room == room) {
-            s[index++] = i;
-        }
-    }
-
-    sortEvents(s, index);
-
-    for (i = 0; i < index; i++) {
-        printEvent(events[s[i]]);
-    }
-
-}
-
-
-void __r__(char description[]) {
-    int i, index;
-
-    index = getEventIndex(description);
-
-    if (index == UNDEFINED) {
-        printf("Evento %s inexistente.\n", description);
-    } else {
-        for (i = index; i < num_events-1; i++) {
-            events[i] = events[i+1];
-        }
-        num_events--;
-    }
-}
-
-
-void __i__(char description[], int start) {
-    int index;
-    Event test;
-
-    index = getEventIndex(description);
-
-    if (index == UNDEFINED) {
-        printf("Evento %s inexistente.\n", description);
-    } else {
-        test = events[index];
-        test.start = start;
-        if (verifications(test, index) == TRUE) {
-            events[index].start = start;
-        }
-    }
-}
-
-
-void __t__(char description[], int duration) {
-    int index;
-    Event test;
-
-    index = getEventIndex(description);
-
-    if (index == UNDEFINED) {
-        printf("Evento %s inexistente.\n", description);
-    } else {
-        test = events[index];
-        test.duration = duration;
-        if (verifications(test, index) == TRUE) {
-            events[index].duration = duration;
-        }
-    }
-}
-
-
-void __m__(char description[], int room) {
-    int index, i;
-    Event test;
-
-    index = getEventIndex(description);
-
-    if (index == UNDEFINED) {
-        printf("Evento %s inexistente.\n", description);
-    } else {
-        test = events[index];
-        test.room = room;
-
-        for (i = 0; i < num_events; i++) {
-            if (i != index && verifyRoom(events[i], test) == FALSE) {
-                return;
-            }
-        }
-
-        events[index].room = room;
-    }
-}
-
-
-void __A__(char description[], char attendant[]) {
-    int index, num_attendants, i;
-
-    index = getEventIndex(description);
-
-    if (index == UNDEFINED) {
-        printf("Evento %s inexistente.\n", description);
-    } else {
-        for (i = 0; i < events[index].num_attendants; i++) {
-            if (strcmp(events[index].attendants[i], attendant) == 0) {
-                return;
-            }
-        }
-        if (verifyAttendant(events[index], attendant) == FALSE) {
-            printf("Impossivel adicionar participante. Participante %s tem um "
-                   "evento sobreposto.\n", attendant);
-        } else if (events[index].num_attendants == MAX_ATTEN) {
-            printf("Impossivel adicionar participante. Evento %s ja tem 3 "
-                   "participantes.\n", description);
-        } else {
-            num_attendants = events[index].num_attendants;
-            strcpy(events[index].attendants[num_attendants], attendant);
-            events[index].num_attendants++;
-        }
-    }
-}
-
-
-void __R__(char description[], char attendant[]) {
-    int e_index, i, a_index = UNDEFINED;
-
-    e_index = getEventIndex(description);
-
-    if (e_index == UNDEFINED) {
-        printf("Evento %s inexistente.\n", description);
-    } else {
-        a_index = getAttendantIndex(events[e_index], attendant);
-
-        if (a_index == UNDEFINED) {
-            return;
-        } else if (events[e_index].num_attendants == 1) {
-            printf("Impossivel remover participante. Participante %s e o unico "
-                   "participante no evento %s.\n",
-                events[e_index].attendants[0], description);
-        } else {
-            for (i = a_index; i < events[e_index].num_attendants-1; i++) {
-                strcpy(events[e_index].attendants[i],
-                       events[e_index].attendants[i+1]);
-            } events[e_index].num_attendants--;
-        }
-    }
 }
