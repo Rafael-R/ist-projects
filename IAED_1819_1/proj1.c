@@ -111,14 +111,9 @@ int main() {
 
 void __a__(Event input) {
 
-    if (num_events == 0) {
+    if (verifications(UNDEFINED, input) == TRUE) {
         events[num_events] = input;
         num_events++;
-    } else {
-        if (verifications(UNDEFINED, input) == TRUE) {
-            events[num_events] = input;
-            num_events++;
-        }
     }
 }
 

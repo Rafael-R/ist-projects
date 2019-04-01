@@ -10,12 +10,12 @@
 #include <string.h>
 
 
-#define MAX_INFO 350
+#define MAX_INFO 344
 #define MAX_PARAM 9
 #define MAX_CHAR 64
 #define MAX_EVENT 1000
 #define MAX_ATTEN 3
-#define UNDEFINED -1
+#define UNDEFINED 1001
 #define FALSE 0
 #define TRUE 1
 
