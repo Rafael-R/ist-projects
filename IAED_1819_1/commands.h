@@ -40,26 +40,6 @@ int num_events;
 /* ------------------------- DEFINIÇÃO DAS FUNÇÕES -------------------------- */
 
 
-int splitInfo(char info[], char splited_info[MAX_PARAM][MAX_CHAR]) {
-    char parameter[MAX_CHAR];
-    int i, j = 0, counter = 0;
-
-    if (strlen(info) > 2) {
-        for (i = 2; info[i] != '\0'; i++) {
-            if (info[i] == ':' || info[i] == '\n') {
-                parameter[j] = '\0';
-                strcpy(splited_info[counter++], parameter);
-                j = 0;
-            } else {
-                parameter[j++] = info[i];
-            }
-        }
-    }
-
-    return counter;
-}
-
-
 long sortData(Event event) {
     long sorted_data;
     int year, month, day;

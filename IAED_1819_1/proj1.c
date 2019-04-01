@@ -33,29 +33,40 @@ void __R__(char description[], char attendant[]);
 
 
 int main() {
-    char command = ' ', info[MAX_INFO], splited_info[MAX_PARAM][MAX_CHAR];
+    char raw_input[MAX_INFO], splited_input[MAX_PARAM][MAX_CHAR];
+    char command, *parameter;
     int num_parameters;
-    Event parameters;
+    Event input;
 
     while (command != 'x') {
 
-        fgets(info, MAX_INFO, stdin);
-        command = info[0];
-        num_parameters = splitInfo(info, splited_info);
+        fgets(raw_input, MAX_INFO, stdin);
+
+        parameter = strtok(raw_input, " ");
+        command = *parameter;
+
+        num_parameters = 0;
+        while(parameter != NULL) {
+            if (num_parameters != 0) {
+                strcpy(splited_input[num_parameters-1], parameter);
+            }
+            parameter = strtok(NULL, ":\n");
+            num_parameters++;
+        } num_parameters--;
 
         switch (command) {
             case 'a':
-                strcpy(parameters.description, splited_info[0]);
-                parameters.date = atoi(splited_info[1]);
-                parameters.start = atoi(splited_info[2]);
-                parameters.duration = atoi(splited_info[3]);
-                parameters.room = atoi(splited_info[4]);
-                strcpy(parameters.responsible, splited_info[5]);
-                strcpy(parameters.attendants[0], splited_info[6]);
-                strcpy(parameters.attendants[1], splited_info[7]);
-                strcpy(parameters.attendants[2], splited_info[8]);
-                parameters.num_attendants = num_parameters - 6;
-                __a__(parameters);
+                strcpy(input.description, splited_input[0]);
+                input.date = atoi(splited_input[1]);
+                input.start = atoi(splited_input[2]);
+                input.duration = atoi(splited_input[3]);
+                input.room = atoi(splited_input[4]);
+                strcpy(input.responsible, splited_input[5]);
+                strcpy(input.attendants[0], splited_input[6]);
+                strcpy(input.attendants[1], splited_input[7]);
+                strcpy(input.attendants[2], splited_input[8]);
+                input.num_attendants = num_parameters - 6;
+                __a__(input);
                 break;
 
             case 'l':
@@ -63,31 +74,31 @@ int main() {
                 break;
 
             case 's':
-                __s__(atoi(splited_info[0]));
+                __s__(atoi(splited_input[0]));
                 break;
 
             case 'r':
-                __r__(splited_info[0]);
+                __r__(splited_input[0]);
                 break;
 
             case 'i':
-                __i__(splited_info[0], atoi(splited_info[1]));
+                __i__(splited_input[0], atoi(splited_input[1]));
                 break;
 
             case 't':
-                __t__(splited_info[0], atoi(splited_info[1]));
+                __t__(splited_input[0], atoi(splited_input[1]));
                 break;
 
             case 'm':
-                __m__(splited_info[0], atoi(splited_info[1]));
+                __m__(splited_input[0], atoi(splited_input[1]));
                 break;
 
             case 'A':
-                __A__(splited_info[0], splited_info[1]);
+                __A__(splited_input[0], splited_input[1]);
                 break;
 
             case 'R':
-                __R__(splited_info[0], splited_info[1]);
+                __R__(splited_input[0], splited_input[1]);
                 break;
         }
     }
