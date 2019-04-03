@@ -1,61 +1,11 @@
 /*
- * File:  commands.h
+ * File:  auxiliar.h
  * Author:  Rafael Rodrigues
  * Description: A file that contains all the commands needed for
                 the execution of the project.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-
-#define MAX_INFO 344
-#define MAX_PARAM 9
-#define MAX_CHAR 64
-#define MAX_EVENT 1000
-#define MAX_ATTEN 3
-#define UNDEFINED 1001
-#define FALSE 0
-#define TRUE 1
-
-
-typedef struct {
-    char description[MAX_CHAR];
-    int date;
-    int start;
-    int duration;
-    int room;
-    char responsible[MAX_CHAR];
-    char attendants[MAX_ATTEN][MAX_CHAR];
-    int num_attendants;
-} Event;
-
-
-Event events[MAX_EVENT];
-
-int num_events;
-
-
-/* ------------------------- DEFINIÇÃO DAS FUNÇÕES -------------------------- */
-
-
-long sortData(Event event) {
-    long sorted_data;
-    int year, month, day;
-
-    year = event.date % 10000;
-    month = (event.date % 1000000) / 10000;
-    day = event.date / 1000000;
-
-    sorted_data = year * 10000000000 +
-                  month * 100000000 +
-                  day * 1000000 +
-                  event.start * 100 +
-                  event.room;
-
-    return sorted_data;
-}
+#include "auxiliar.h"
 
 
 int calcEnd(int start, int duration) {
@@ -164,42 +114,6 @@ int verifications(int index, Event test) {
 }
 
 
-void swap(int rooms[], int room_1, int room_2) {
-    int temp;
-
-    temp = rooms[room_1];
-    rooms[room_1] = rooms[room_2];
-    rooms[room_2] = temp;
-}
-
-
-void sortEvents(int rooms[], int index) {
-    int i, j;
-
-    for (i = 0; i < index-1; i++) {
-        for (j = 0; j < index-i-1; j++) {
-            if (sortData(events[rooms[j]]) > sortData(events[rooms[j+1]])) {
-                swap(rooms, j, j+1);
-            }
-        }
-    }
-}
-
-
-void printEvent(Event event) {
-    int i;
-
-    printf("%s %.8d %.4d %d Sala%d %s\n* ", event.description, event.date,
-           event.start, event.duration, event.room, event.responsible);
-
-    for (i = 0; i < event.num_attendants-1; i++) {
-        printf("%s ", event.attendants[i]);
-    } printf("%s\n", event.attendants[i]);
-
-    return;
-}
-
-
 int getEventIndex(char description[]) {
     int i, index = UNDEFINED;
 
@@ -210,4 +124,50 @@ int getEventIndex(char description[]) {
     }
 
     return index;
+}
+
+
+long sortData(Event event) {
+    long sorted_data;
+    int year, month, day;
+
+    year = event.date % 10000;
+    month = (event.date % 1000000) / 10000;
+    day = event.date / 1000000;
+
+    sorted_data = year * 10000000000 +
+                  month * 100000000 +
+                  day * 1000000 +
+                  event.start * 100 +
+                  event.room;
+
+    return sorted_data;
+}
+
+
+void sortEvents() {
+    int i, j;
+    Event aux;
+
+    for (i = 1; i < num_events; i++) {
+        aux = events[i];
+        j = i-1;
+        while (j >= 0 && sortData(aux) < sortData(events[j])) {
+            events[j+1] = events[j];
+            j--;
+        }
+        events[j+1] = aux;
+    }
+}
+
+
+void printEvent(Event event) {
+    int i;
+
+    printf("%s %.8d %.4d %d Sala%d %s\n*", event.description, event.date,
+           event.start, event.duration, event.room, event.responsible);
+
+    for (i = 0; i < event.num_attendants; i++) {
+        printf(" %s", event.attendants[i]);
+    } printf("\n");
 }

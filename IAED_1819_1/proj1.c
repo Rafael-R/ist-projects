@@ -4,7 +4,7 @@
  * Description: Primeiro Projeto da cadeira de IAED
 */
 
-#include "commands.h"
+#include "auxiliar.h"
 
 
 /* -------------------------------------------------------------------------- */
@@ -33,14 +33,14 @@ void __R__(char description[], char attendant[]);
 
 
 int main() {
-    char raw_input[MAX_INFO], splited_input[MAX_PARAM][MAX_CHAR];
+    char raw_input[MAX_INPUT], splited_input[MAX_PARAMETERS][MAX_CHAR];
     char command, *parameter;
     int num_parameters;
     Event input;
 
     while (command != 'x') {
 
-        fgets(raw_input, MAX_INFO, stdin);
+        fgets(raw_input, MAX_INPUT, stdin);
 
         parameter = strtok(raw_input, " ");
         command = *parameter;
@@ -119,35 +119,26 @@ void __a__(Event input) {
 
 
 void __l__() {
-    int i, l[MAX_EVENT], index = 0;
+    int i;
+
+    sortEvents();
 
     for (i = 0; i < num_events; i++) {
-        l[index++] = i;
-    }
-
-    sortEvents(l, index);
-
-    for (i = 0; i < index; i++) {
-        printEvent(events[l[i]]);
+        printEvent(events[i]);
     }
 }
 
 
 void __s__(int room) {
-    int i, s[MAX_EVENT], index = 0;
+    int i;
+
+    sortEvents();
 
     for (i = 0; i < num_events; i++) {
         if (events[i].room == room) {
-            s[index++] = i;
+            printEvent(events[i]);
         }
     }
-
-    sortEvents(s, index);
-
-    for (i = 0; i < index; i++) {
-        printEvent(events[s[i]]);
-    }
-
 }
 
 
@@ -236,7 +227,7 @@ void __A__(char description[], char attendant[]) {
     } else {
         if (getAttendantIndex(events[index], attendant) != UNDEFINED) {
             return;
-        } else if (events[index].num_attendants == MAX_ATTEN) {
+        } else if (events[index].num_attendants == MAX_ATTENDANTS) {
             printf("Impossivel adicionar participante. Evento %s ja tem 3 "
                    "participantes.\n", description);
         }
@@ -272,7 +263,7 @@ void __R__(char description[], char attendant[]) {
         } else if (events[e_index].num_attendants == 1) {
             printf("Impossivel remover participante. Participante %s e o unico "
                    "participante no evento %s.\n",
-                events[e_index].attendants[0], description);
+                   events[e_index].attendants[0], description);
         } else {
             for (i = a_index; i < events[e_index].num_attendants-1; i++) {
                 strcpy(events[e_index].attendants[i],
