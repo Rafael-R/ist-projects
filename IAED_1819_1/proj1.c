@@ -173,11 +173,7 @@ void __s__(int room) {
 void __r__(char description[]) {
     int index, i;
 
-    index = getEventIndex(description);
-
-    if (index == UNDEFINED) {
-        printf("Evento %s inexistente.\n", description);
-    } else {
+    if ((index = getEventIndex(description)) != UNDEFINED) {
         for (i = index; i < num_events-1; i++) {
             events[i] = events[i+1];
         }
@@ -190,11 +186,7 @@ void __i__(char description[], int start) {
     int index;
     Event test;
 
-    index = getEventIndex(description);
-
-    if (index == UNDEFINED) {
-        printf("Evento %s inexistente.\n", description);
-    } else {
+    if ((index = getEventIndex(description)) != UNDEFINED) {
         test = events[index];
         test.start = start;
         if (verifications(index, test) == TRUE) {
@@ -208,11 +200,7 @@ void __t__(char description[], int duration) {
     int index;
     Event test;
 
-    index = getEventIndex(description);
-
-    if (index == UNDEFINED) {
-        printf("Evento %s inexistente.\n", description);
-    } else {
+    if ((index = getEventIndex(description)) != UNDEFINED) {
         test = events[index];
         test.duration = duration;
         if (verifications(index, test) == TRUE) {
@@ -226,11 +214,7 @@ void __m__(char description[], int room) {
     int index, i;
     Event test;
 
-    index = getEventIndex(description);
-
-    if (index == UNDEFINED) {
-        printf("Evento %s inexistente.\n", description);
-    } else {
+    if ((index = getEventIndex(description)) != UNDEFINED) {
         test = events[index];
         test.room = room;
 
@@ -248,11 +232,7 @@ void __m__(char description[], int room) {
 void __A__(char description[], char attendant[]) {
     int index, i, num_attendants;
 
-    index = getEventIndex(description);
-
-    if (index == UNDEFINED) {
-        printf("Evento %s inexistente.\n", description);
-    } else {
+    if ((index = getEventIndex(description)) != UNDEFINED) {
         if (getAttendantIndex(events[index], attendant) != UNDEFINED) {
             return;
         } else if (events[index].num_attendants == MAX_ATTENDANTS) {
@@ -280,11 +260,7 @@ void __A__(char description[], char attendant[]) {
 void __R__(char description[], char attendant[]) {
     int e_index, a_index, i;
 
-    e_index = getEventIndex(description);
-
-    if (e_index == UNDEFINED) {
-        printf("Evento %s inexistente.\n", description);
-    } else {
+    if ((e_index = getEventIndex(description)) != UNDEFINED) {
         a_index = getAttendantIndex(events[e_index], attendant);
 
         if (a_index == UNDEFINED) {
@@ -417,6 +393,9 @@ int getEventIndex(char description[]) {
         if (strcmp(events[i].description, description) == 0) {
             index = i;
         }
+    }
+    if (index == UNDEFINED) {
+        printf("Evento %s inexistente.\n", description);
     }
     return index;
 }
