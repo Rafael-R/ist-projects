@@ -377,7 +377,7 @@ int verifications(int index, Event test) {
     int fails = 0, i, j;
 
     for (i = 0; i < num_events; i++) {
-        if (i != index) {
+        if (i != index) {       /* Ignora o indice do evento original */
             if (verifyRoom(events[i], test) == FALSE) {
                 return FALSE;
             }
