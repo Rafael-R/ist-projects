@@ -1,8 +1,8 @@
 /*
  * File:  auxiliar.h
  * Author:  Rafael Rodrigues 89532
- * Description: A file that contains all the commands needed for
-                the execution of the project.
+ * Description: Ficheiro que contem as bibliotecas, as constantes e as
+                estruturas necessarias para o projeto.
 */
 
 #include <stdio.h>
@@ -18,7 +18,7 @@
 #define MAX_INFO 9
 /* Numero maximo de caracteres da descricao e dos nomes */
 #define MAX_CHAR 64
-/* Numero maximo de participantes */
+/* Numero maximo de participantes num evento */
 #define MAX_ATTENDANTS 3
 
 #define UNDEFINED 1001
@@ -33,7 +33,7 @@ typedef struct {
     int duration;
     int room;
     char responsible[MAX_CHAR];
-    int num_attendants;
+    int num_attendants;     /* Numero de participantes do evento */
     char attendants[MAX_ATTENDANTS][MAX_CHAR];
 } Event;
 
