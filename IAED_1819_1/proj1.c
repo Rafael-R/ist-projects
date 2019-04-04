@@ -9,7 +9,7 @@
 /* -------------------------------------------------------------------------- */
 
 
-void __a__(Event input);
+void __a__(char input[MAX_INFO][MAX_CHAR], int num_info);
 
 void __l__();
 
@@ -62,40 +62,26 @@ int num_events; /* Numero de eventos agendados. */
 
 /* Le os comandos a partir do terminal e executa-os */
 int main() {
-    char raw_input[MAX_INPUT], splited_input[MAX_INFO][MAX_CHAR];
-    char command = ' ', *info;
-    int num_info, i;
-    Event input;
+    char input[MAX_INPUT], command, *info, splited_input[MAX_INFO][MAX_CHAR];
+    int num_info;
 
     while (command != 'x') {
 
-        fgets(raw_input, MAX_INPUT, stdin);
+        fgets(input, MAX_INPUT, stdin);
 
-        info = strtok(raw_input, " ");
+        info = strtok(input, " ");
         command = *info;
 
-        num_info = 0;
-        while(info != NULL) {
-            if (num_info != 0) {
-                strcpy(splited_input[num_info-1], info);
+        for (num_info = -1; info != NULL; num_info++) {
+            if (num_info > -1) {
+                strcpy(splited_input[num_info], info);
             }
             info = strtok(NULL, ":\n");
-            num_info++;
-        } num_info--;
+        }
 
         switch (command) {
             case 'a':
-                strcpy(input.description, splited_input[0]);
-                input.date = atoi(splited_input[1]);
-                input.start = atoi(splited_input[2]);
-                input.duration = atoi(splited_input[3]);
-                input.room = atoi(splited_input[4]);
-                strcpy(input.responsible, splited_input[5]);
-                input.num_attendants = num_info - 6;
-                for (i = 0; i < input.num_attendants; i++) {
-                    strcpy(input.attendants[i], splited_input[6+i]);
-                }
-                __a__(input);
+                __a__(splited_input, num_info);
                 break;
 
             case 'l':
@@ -138,10 +124,23 @@ int main() {
 /* -------------------------------------------------------------------------- */
 
 /* Adiciona um novo evento */
-void __a__(Event input) {
+void __a__(char input[MAX_INFO][MAX_CHAR], int num_info) {
+    Event test;
+    int i;
 
-    if (verifications(UNDEFINED, input) == TRUE) {
-        events[num_events] = input;
+    strcpy(test.description, input[0]);
+    test.date = atoi(input[1]);
+    test.start = atoi(input[2]);
+    test.duration = atoi(input[3]);
+    test.room = atoi(input[4]);
+    strcpy(test.responsible, input[5]);
+    test.num_attendants = num_info - 6;
+    for (i = 0; i < test.num_attendants; i++) {
+        strcpy(test.attendants[i], input[6+i]);
+    }
+
+    if (verifications(UNDEFINED, test) == TRUE) {
+        events[num_events] = test;
         num_events++;
     }
 }
@@ -172,7 +171,7 @@ void __s__(int room) {
 
 /* Apaga um evento */
 void __r__(char description[]) {
-    int i, index;
+    int index, i;
 
     index = getEventIndex(description);
 
@@ -247,7 +246,7 @@ void __m__(char description[], int room) {
 
 /* Adiciona um participante a um evento ja existente */
 void __A__(char description[], char attendant[]) {
-    int index, num_attendants, i;
+    int index, i, num_attendants;
 
     index = getEventIndex(description);
 
@@ -324,15 +323,15 @@ int calcEnd(int start, int duration) {
 
 /* Verifica se dois eventos se sobrepoem */
 int verifyTime(Event event1, Event event2) {
-    int end1, end2;
+    int event1_end, event2_end;
 
-    end1 = calcEnd(event1.start, event1.duration);
-    end2 = calcEnd(event2.start, event2.duration);
+    event1_end = calcEnd(event1.start, event1.duration);
+    event2_end = calcEnd(event2.start, event2.duration);
 
     if (event1.date != event2.date) {
         return TRUE;
     } else {
-        if (end2 <= event1.start || event2.start >= end1) {
+        if (event2_end <= event1.start || event2.start >= event1_end) {
             return TRUE;
         } else {
             return FALSE;
@@ -360,7 +359,6 @@ int getAttendantIndex(Event event, char attendant[]) {
             index = i;
         }
     }
-
     return index;
 }
 
@@ -371,7 +369,6 @@ int verifyAttendant(Event event, char attendant[]) {
         getAttendantIndex(event, attendant) != UNDEFINED) {
         return FALSE;
     }
-
     return TRUE;
 }
 
@@ -421,7 +418,6 @@ int getEventIndex(char description[]) {
             index = i;
         }
     }
-
     return index;
 }
 
