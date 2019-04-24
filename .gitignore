@@ -19,4 +19,6 @@ test-vg.sh
 
 testes_publicos
 codigo_comum.pl
+puzzles_publicos.pl
+teste.py
 
