@@ -1,14 +1,13 @@
 % Numero: 89532  -  Nome: Rafael Rodrigues
 
-%-------------------------------------------------------------------------------
+%###############################################################################
 %                                   Projeto
 %                           Logica para Programacao
-%-------------------------------------------------------------------------------
+%###############################################################################
 
 :- [codigo_comum].
-:- [puzzles_publicos].
 
-%-------------------------------------------------------------------------------
+%###############################################################################
 
 % Predicados auxiliares
 
@@ -16,25 +15,47 @@ zero(Num) :- not(var(Num)), Num == 0.
 
 um(Num) :- not(var(Num)), Num == 1.
 
-conta_elementos(L, Elem, Cont) :-
+conta_elementos(L, Elem, N_Elems) :-
+    /* Predicado: conta_elementos/3
+       ------------
+       Input: Recebe uma lista (L) e um tipo de elemento (Elem).
+       Output: Devolve o numero de vezes que o elemento ocorre
+               na lista recebida (N_Elems).
+    */
     include(Elem, L, L_Elems),
-    length(L_Elems, Cont).
+    length(L_Elems, N_Elems).
 
 
 soma_lista([], 0).
+    /* Predicado: soma_lista/2
+       ------------
+       Input: Recebe uma lista.
+       Output: Devolve o valor da soma dos elementos da lista fornecida.
+    */
 soma_lista([H|T], Soma) :-
    soma_lista(T, Resto),
    Soma is H + Resto.
 
 
 soma_triplo([X, Y, Z], Soma) :-
+    /* Predicado: soma_triplo/2
+       ------------
+       Input: Recebe uma lista de tres elemntos.
+       Output: Devolve o valor da soma dos elementos da lista fornecida.
+    */
     exclude(var, [X, Y, Z], L),
     soma_lista(L, Soma).
 
 
 preenche([], _, []).
-preenche([H|T], Num, [Num|T2]) :- var(H), preenche(T, Num, T2).
-preenche([H|T], Num, [H|T2]) :- preenche(T, Num, T2).
+    /* Predicado: preenche/3
+       ------------
+       Input: Recebe uma lista e um elemnto (Elem).
+       Output: Devolve a lista que resulta de substituir as
+               variaveis pelo elemnto fornecido.
+    */
+preenche([H|T], Elem, [Elem|T2]) :- var(H), preenche(T, Elem, T2).
+preenche([H|T], Elem, [H|T2]) :- preenche(T, Elem, T2).
 
 
 combinacao(0, _, []).
@@ -46,110 +67,205 @@ combinacao(N, L, [E|C_L_E]) :-
     combinacao(N_1, L_apos_E, C_L_E).
 
 
+%###############################################################################
 
 % Predicados para inicializacao de puzzles
 
 aplica_R1_triplo([X, Y, Z], N_Triplo) :-
+    /* Predicado: aplica_R1_triplo/2
+       ------------
+       Input: Recebe uma lista de tres elementos.
+       Output: Devolve a lista (N_Triplo) resultante de aplicar a regra 1 a
+               lista dada. Isto significa que se a lista tiver dois zeros/uns e
+               uma variavel, esta deve ser preenchida com um/zero. Se a lista
+               tiver tres zeros/uns, o predicado deve devolver false.
+    */
     conta_elementos([X, Y, Z], var, Num_Vars),
     soma_triplo([X, Y, Z], Soma),
-    (Num_Vars == 0, Soma > 0, Soma < 3, N_Triplo = [X, Y, Z]
-        ;
-     Num_Vars == 1, Soma == 2, preenche([X, Y, Z], 0, N_Triplo)
-        ;
-     Num_Vars == 1, Soma == 0, preenche([X, Y, Z], 1, N_Triplo)
-        ;
-     Num_Vars == 1, Soma == 1, N_Triplo = [X, Y, Z]
-        ;
-     member(Num_Vars, [2 ,3]), N_Triplo = [X, Y, Z]).
+    (Num_Vars == 0, Soma > 0, Soma < 3,
+        N_Triplo = [X, Y, Z], !;
+     Num_Vars == 1, Soma == 2,
+        preenche([X, Y, Z], 0, N_Triplo), !;
+     Num_Vars == 1, Soma == 0,
+        preenche([X, Y, Z], 1, N_Triplo), !;
+     Num_Vars == 1, Soma == 1,
+        N_Triplo = [X, Y, Z], !;
+     member(Num_Vars, [2 ,3]),
+        N_Triplo = [X, Y, Z]), !.
 
+%-------------------------------------------------------------------------------
 
 aplica_R1_fila_aux([X, Y, Z], N_Fila) :- aplica_R1_triplo([X, Y, Z], N_Fila).
-
+    /* Predicado: aplica_R1_fila_aux/2
+       ------------
+       Input: Recebe uma lista, que representa uma linha/coluna.
+       Output: Devolve a lista (N_Fila) resultante de aplicar a regra 1 a lista,
+               uma so vez. Isto significa que a lista deve ser percorrida uma
+               vez, do inicio para o fim, aplicando o predicado aplica_R1_triplo
+               a cada sub-fila de 3 elementos. Se a lista tiver tres zeros/uns
+               seguidos, o predicado deve devolver false.
+    */
 aplica_R1_fila_aux([X, Y, Z | R], N_Fila) :-
     aplica_R1_triplo([X, Y, Z], [NX, NY, NZ]),
-    aplica_R1_fila_aux([NY, NZ | R], N_Fila_Temp),
+    aplica_R1_fila_aux([NY, NZ | R], N_Fila_Temp), !,
     N_Fila = [NX | N_Fila_Temp].
 
+%-------------------------------------------------------------------------------
 
 aplica_R1_fila(Fila, N_Fila) :-
+    /* Predicado: aplica_R1_fila/2
+       ------------
+       Input: Recebe uma lista (Fila), que representa uma linha/coluna.
+       Output: Devolve a lista (N_Fila) resultante de aplicar a regra 1 a lista.
+               Isto significa que todas as posicoes vazias da lista que possam
+               ser preenchidas para respeitar a regra 1 se encontram preenchidas
+               em N_Fila. Para tal, o predicado aplica_R1_fila_aux deve ser
+               repetidamente aplicado a lista, ate que nao sejam preenchidas
+               novas posicoes. Se a lista tiver tres zeros/uns seguidos, o
+               predicado deve devolver false.
+    */
     aplica_R1_fila_aux(Fila, N_Fila_Temp),
-    (Fila == N_Fila_Temp, N_Fila = N_Fila_Temp
-        ;
+    (Fila == N_Fila_Temp,
+        N_Fila = N_Fila_Temp, !;
      aplica_R1_fila(N_Fila_Temp, N_Fila)).
 
+%-------------------------------------------------------------------------------
 
 aplica_R2_fila(Fila, N_Fila) :-
+    /* Predicado: aplica_R2_fila/2
+       ------------
+       Input: Recebe uma lista (Fila), que representa uma linha/coluna.
+       Output: Devolve a lista (N_Fila) resultante de aplicar a regra 2 a lista.
+               Seja N metade do numero de elementos da lista. Aplicar a regra 2
+               significa que se a lista ja contiver N zeros/uns, todas as
+               posicoes vazias da lista devem ser preenchidas com uns/zeros.
+               Se o numero de zeros/uns ultrapassar N, o predicado deve
+               devolver false.
+    */
     length(Fila, Dim),
     N is Dim / 2,
     conta_elementos(Fila, zero, Num_Zeros),
     conta_elementos(Fila, um, Num_Uns),
     N >= Num_Zeros,
     N >= Num_Uns,
-    (Num_Zeros == N, preenche(Fila, 1, N_Fila)
-        ;
-     Num_Uns == N, preenche(Fila, 0, N_Fila)
-        ;
+    (Num_Zeros == N,
+        preenche(Fila, 1, N_Fila), !;
+     Num_Uns == N,
+        preenche(Fila, 0, N_Fila), !;
      N_Fila = Fila).
 
+%-------------------------------------------------------------------------------
 
 aplica_R1_R2_fila(Fila, N_Fila) :-
+    /* Predicado: aplica_R2_fila/2
+       ------------
+       Input: Recebe uma lista (Fila), que representa uma linha/coluna.
+       Output: Devolve a lista (N_Fila) resultante de aplicar as regras 1 e 2 a
+               lista, por esta ordem.
+    */
     aplica_R1_fila(Fila, N_Fila1), !,
     aplica_R2_fila(N_Fila1, N_Fila).
 
+%-------------------------------------------------------------------------------
 
 aplica_R1_R2_puzzle_aux([], []).
-
+    /* Predicado: aplica_R1_R2_puzzle_aux/2
+    ------------
+    Input: Recebe uma lista, que representa uma linha/coluna.
+    Output: Devolve uma lista resultante de aplicar as regras 1 e 2 a lista.
+    */
 aplica_R1_R2_puzzle_aux([H|T], [NH|T2]) :-
     aplica_R1_R2_fila(H, NH),
     aplica_R1_R2_puzzle_aux(T, T2).
 
 
 aplica_R1_R2_puzzle(Puz, N_Puz) :-
+    /* Predicado: aplica_R1_R2_puzzle/2
+       ------------
+       Input: Recebe um puzzle (Puz).
+       Output: Devolve o puzzle (N_Puz) resultante de aplicar as regras 1 e 2,
+               as linhas e as colunas de Puz, por esta ordem.
+    */
     aplica_R1_R2_puzzle_aux(Puz, N_Puz1),
     mat_transposta(N_Puz1, N_Puz1T),
     aplica_R1_R2_puzzle_aux(N_Puz1T, N_Puz2T),
     mat_transposta(N_Puz2T, N_Puz).
 
+%-------------------------------------------------------------------------------
 
 inicializa(Puz, N_Puz) :-
+    /* Predicado: inicializa/2
+       ------------
+       Input: Recebe um puzzle (Puz).
+       Output: Devolve o puzzle (N_Puz) resultante de inicializar o puzzle Puz.
+               Inicializar um puzzle consiste em aplicar as regras 1 e 2, a
+               cada linha e coluna, ate nao serem preenchidas novas posicoes.
+    */
     aplica_R1_R2_puzzle(Puz, N_Puz),
-    (Puz == N_Puz
-        ;
-     dif(Puz, N_Puz), inicializa(N_Puz, N_Puz)).
+    (dif(Puz, N_Puz),
+        inicializa(N_Puz, N_Puz), !;
+     Puz == N_Puz).
 
 
+%###############################################################################
 
 % Predicado para a verificacao da regra 3
 
-verifica_R3_aux([H|T2]) :-
-    /*conta_elementos(Comb1, var, Num_Vars1),
-    conta_elementos(Comb2, var, Num_Vars2),*/
-    write(H),
-    write('-'),
-    /*write(Comb2),
-    write('     '),*/
-    verifica_R3_aux(T2).
+verifica_R3_aux([[Comb1, Comb2]|T]) :-
+    /* Predicado: verifica_R3_aux/1
+       ------------
+       Input: Recebe uma lista com todas as combinacoes possiveis de
+              linhas/colunas, duas a duas, de um puzzle.
+       Output: Devolve false caso alguma das combinacoes tenha duas
+               linhas/colunas iguais, ou true em caso contrario.
+    */
+    conta_elementos(Comb1, var, Num_Vars1),
+    conta_elementos(Comb2, var, Num_Vars2),
+    (Num_Vars1 == 0, Num_Vars2 == 0, not(Comb1 = Comb2),
+        verifica_R3_aux(T);
+    Num_Vars1 > 0 ; Num_Vars2 > 0,
+        verifica_R3_aux(T)).
 
 
 verifica_R3(Puz) :-
+    /* Predicado: verifica_R3/1
+       ------------
+       Input: Recebe um puzzle (Puz).
+       Output: Devolve true caso o puzzle respeite a regra 3 ou
+               false em caso contrario.
+    */
     findall(Comb, combinacao(2, Puz, Comb), L_Combs),
-    verifica_R3_aux(L_Combs),
+    verifica_R3_aux(L_Combs), !,
     mat_transposta(Puz, Puz1),
     findall(Comb, combinacao(2, Puz1, Comb), C_Combs),
-    verifica_R3_aux(C_Combs).
+    verifica_R3_aux(C_Combs), !,
+    mat_transposta(Puz1, Puz).
 
-
+%###############################################################################
 
 % Predicado para a propagacao de mudancas
 
-propaga_posicoes().
+/*propaga_posicoes(Posicoes, Puz, N_Puz) :-*/
+    /* Predicado: propaga_posicoes/3
+       ------------
+       Input: Recebe uma lista de posicoes (Posicoes) e um puzzle (Puz).
+       Output: Devolve um puzzle (N_Puz) resultande de recursivamente,
+               (as mudancas de) as posicoes de Posicoes.
+    */
+    /*N_Puz is Puz.*/
 
-
+%###############################################################################
 
 % Predicado resolve
 
-resolve().
+resolve(Puz, Sol) :-
+    /* Predicado: resolve/2
+       ------------
+       Input: Recebe um puzzle (Puz).
+       Output: Devolve um puzzle (Sol) que e uma solucao para o puzzle Puz.
+    */
+    inicializa(Puz, Puz_Ini),
+    verifica_R3(Puz_Ini), !,
+    Sol is Puz_Ini.
 
-
-
-%-------------------------------------------------------------------------------
+%###############################################################################
