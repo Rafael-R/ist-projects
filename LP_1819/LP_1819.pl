@@ -6,6 +6,7 @@
 %###############################################################################
 
 :- [codigo_comum].
+:- [puzzles_publicos].
 
 %###############################################################################
 
@@ -13,7 +14,9 @@
 
 zero(Num) :- not(var(Num)), Num == 0.
 
+
 um(Num) :- not(var(Num)), Num == 1.
+
 
 conta_elementos(L, Elem, N_Elems) :-
     /* Predicado: conta_elementos/3
@@ -67,6 +70,20 @@ combinacao(N, L, [E|C_L_E]) :-
     combinacao(N_1, L_apos_E, C_L_E).
 
 
+diferente(Puz1, Puz2, (L, C)) :-
+    mat_ref(Puz1, (L, C), Cont1),
+    mat_ref(Puz2, (L, C), Cont2),
+    (zero(Cont2), var(Cont1)
+        ;
+     um(Cont2), var(Cont1)).
+
+
+e_var(Puz1, (L, C)) :-
+    mat_ref(Puz1, (L, C), Cont1),
+    var(Cont1).
+
+head([H|_], [H]).
+
 %###############################################################################
 
 % Predicados para inicializacao de puzzles
@@ -103,7 +120,7 @@ aplica_R1_fila_aux([X, Y, Z], N_Fila) :- aplica_R1_triplo([X, Y, Z], N_Fila).
                uma so vez. Isto significa que a lista deve ser percorrida uma
                vez, do inicio para o fim, aplicando o predicado aplica_R1_triplo
                a cada sub-fila de 3 elementos. Se a lista tiver tres zeros/uns
-               seguidos, o predicado deve devolver false.
+               seguidos, o predicado devolve false.
     */
 aplica_R1_fila_aux([X, Y, Z | R], N_Fila) :-
     aplica_R1_triplo([X, Y, Z], [NX, NY, NZ]),
@@ -119,10 +136,8 @@ aplica_R1_fila(Fila, N_Fila) :-
        Output: Devolve a lista (N_Fila) resultante de aplicar a regra 1 a lista.
                Isto significa que todas as posicoes vazias da lista que possam
                ser preenchidas para respeitar a regra 1 se encontram preenchidas
-               em N_Fila. Para tal, o predicado aplica_R1_fila_aux deve ser
-               repetidamente aplicado a lista, ate que nao sejam preenchidas
-               novas posicoes. Se a lista tiver tres zeros/uns seguidos, o
-               predicado deve devolver false.
+               em N_Fila. Se a lista tiver tres zeros/uns seguidos, o
+               predicado devolve false.
     */
     aplica_R1_fila_aux(Fila, N_Fila_Temp),
     (Fila == N_Fila_Temp,
@@ -139,8 +154,7 @@ aplica_R2_fila(Fila, N_Fila) :-
                Seja N metade do numero de elementos da lista. Aplicar a regra 2
                significa que se a lista ja contiver N zeros/uns, todas as
                posicoes vazias da lista devem ser preenchidas com uns/zeros.
-               Se o numero de zeros/uns ultrapassar N, o predicado deve
-               devolver false.
+               Se o numero de zeros/uns ultrapassar N, o predicado devolve false.
     */
     length(Fila, Dim),
     N is Dim / 2,
@@ -171,8 +185,8 @@ aplica_R1_R2_fila(Fila, N_Fila) :-
 aplica_R1_R2_puzzle_aux([], []).
     /* Predicado: aplica_R1_R2_puzzle_aux/2
     ------------
-    Input: Recebe uma lista, que representa uma linha/coluna.
-    Output: Devolve uma lista resultante de aplicar as regras 1 e 2 a lista.
+       Input: Recebe uma lista, que representa uma linha/coluna.
+       Output: Devolve uma lista resultante de aplicar as regras 1 e 2 a lista.
     */
 aplica_R1_R2_puzzle_aux([H|T], [NH|T2]) :-
     aplica_R1_R2_fila(H, NH),
@@ -204,7 +218,8 @@ inicializa(Puz, N_Puz) :-
     aplica_R1_R2_puzzle(Puz, N_Puz),
     (dif(Puz, N_Puz),
         inicializa(N_Puz, N_Puz), !;
-     Puz == N_Puz).
+    not(dif(Puz, N_Puz))).
+
 
 
 %###############################################################################
@@ -245,18 +260,45 @@ verifica_R3(Puz) :-
 
 % Predicado para a propagacao de mudancas
 
-/*propaga_posicoes(Posicoes, Puz, N_Puz) :-*/
+propaga_posicoes_aux(Puz, (L, C), Pos, N_Puz, N_Pos) :-
+    nth1(L, Puz, Linha),
+    aplica_R1_R2_fila(Linha, N_Linha),
+    mat_elementos_coluna(Puz, C, Coluna),
+    aplica_R1_R2_fila(Coluna, N_Coluna),
+    mat_muda_linha(Puz, L, N_Linha, N_PuzL),
+    mat_muda_coluna(N_PuzL, C, N_Coluna, N_Puz),
+    findall((X, Y), (diferente(Puz, N_Puz, (X, Y))), N_PosT),
+    append(N_PosT, Pos, N_Pos).
+
+
+propaga_posicoes([], N_Puz, N_Puz).
     /* Predicado: propaga_posicoes/3
-       ------------
+    ------------
        Input: Recebe uma lista de posicoes (Posicoes) e um puzzle (Puz).
        Output: Devolve um puzzle (N_Puz) resultande de recursivamente,
                (as mudancas de) as posicoes de Posicoes.
     */
-    /*N_Puz is Puz.*/
+propaga_posicoes([H|T], Puz, N_Puz) :-
+    (mat_muda_posicao(Puz, H, 0, N_Puz0),
+        propaga_posicoes_aux(N_Puz0, H, T, N_Puz00, N_Pos),
+        propaga_posicoes(N_Pos, N_Puz00, N_Puz);
+     mat_muda_posicao(Puz, H, 1, N_Puz1),
+        propaga_posicoes_aux(N_Puz1, H, T, N_Puz11, N_Pos),
+        propaga_posicoes(N_Pos, N_Puz11, N_Puz)).
 
 %###############################################################################
 
 % Predicado resolve
+
+resolve_aux(Puz, Sol) :-
+    findall((X, Y), (e_var(Puz, (X, Y))), Pos),
+    length(Pos, Num_Pos),
+    (Num_Pos > 0,
+        head(Pos, Pos1),
+        propaga_posicoes(Pos1, Puz, N_Puz), !,
+        resolve_aux(N_Puz, Sol);
+     Sol = Puz).
+
 
 resolve(Puz, Sol) :-
     /* Predicado: resolve/2
@@ -264,8 +306,8 @@ resolve(Puz, Sol) :-
        Input: Recebe um puzzle (Puz).
        Output: Devolve um puzzle (Sol) que e uma solucao para o puzzle Puz.
     */
-    inicializa(Puz, Puz_Ini),
-    verifica_R3(Puz_Ini), !,
-    Sol is Puz_Ini.
+    inicializa(Puz, N_PuzI),
+    verifica_R3(N_PuzI), !,
+    resolve_aux(N_PuzI, Sol).
 
 %###############################################################################
