@@ -82,7 +82,7 @@ e_var(Puz1, (L, C)) :-
     mat_ref(Puz1, (L, C), Cont1),
     var(Cont1).
 
-head([H|_], [H]).
+head([H|_], H).
 
 %###############################################################################
 
@@ -215,11 +215,20 @@ inicializa(Puz, N_Puz) :-
                Inicializar um puzzle consiste em aplicar as regras 1 e 2, a
                cada linha e coluna, ate nao serem preenchidas novas posicoes.
     */
-    aplica_R1_R2_puzzle(Puz, N_Puz),
-    (dif(Puz, N_Puz),
-        inicializa(N_Puz, N_Puz), !;
-    not(dif(Puz, N_Puz))).
+    aplica_R1_R2_puzzle(Puz, N_PuzR12),
+    (dif(Puz, N_PuzR12),
+        inicializa(N_PuzR12, N_Puz), !;
+     not(dif(Puz, N_PuzR12)),
+        N_Puz = N_PuzR12).
 
+/*    aplica_R1_R2_puzzle(Puz, N_PuzR12),
+    findall((X, Y), (diferente(Puz, N_PuzR12, (X, Y))), Dif_Pos),
+    length(Dif_Pos, Num_Dif_Pos),
+    (Num_Dif_Pos > 0,
+        inicializa(N_PuzR12, N_Puz), !;
+     Num_Dif_Pos == 0,
+        N_Puz = N_PuzR12).
+*/
 
 
 %###############################################################################
@@ -260,17 +269,6 @@ verifica_R3(Puz) :-
 
 % Predicado para a propagacao de mudancas
 
-propaga_posicoes_aux(Puz, (L, C), Pos, N_Puz, N_Pos) :-
-    nth1(L, Puz, Linha),
-    aplica_R1_R2_fila(Linha, N_Linha),
-    mat_elementos_coluna(Puz, C, Coluna),
-    aplica_R1_R2_fila(Coluna, N_Coluna),
-    mat_muda_linha(Puz, L, N_Linha, N_PuzL),
-    mat_muda_coluna(N_PuzL, C, N_Coluna, N_Puz),
-    findall((X, Y), (diferente(Puz, N_Puz, (X, Y))), N_PosT),
-    append(N_PosT, Pos, N_Pos).
-
-
 propaga_posicoes([], N_Puz, N_Puz).
     /* Predicado: propaga_posicoes/3
     ------------
@@ -278,13 +276,16 @@ propaga_posicoes([], N_Puz, N_Puz).
        Output: Devolve um puzzle (N_Puz) resultande de recursivamente,
                (as mudancas de) as posicoes de Posicoes.
     */
-propaga_posicoes([H|T], Puz, N_Puz) :-
-    (mat_muda_posicao(Puz, H, 0, N_Puz0),
-        propaga_posicoes_aux(N_Puz0, H, T, N_Puz00, N_Pos),
-        propaga_posicoes(N_Pos, N_Puz00, N_Puz);
-     mat_muda_posicao(Puz, H, 1, N_Puz1),
-        propaga_posicoes_aux(N_Puz1, H, T, N_Puz11, N_Pos),
-        propaga_posicoes(N_Pos, N_Puz11, N_Puz)).
+propaga_posicoes([(L, C)|T], Puz, N_Puz) :-
+    nth1(L, Puz, Linha),
+    aplica_R1_R2_fila(Linha, N_Linha),
+    mat_elementos_coluna(Puz, C, Coluna),
+    aplica_R1_R2_fila(Coluna, N_Coluna),
+    mat_muda_linha(Puz, L, N_Linha, N_PuzL),
+    mat_muda_coluna(N_PuzL, C, N_Coluna, N_PuzLC),
+    findall((X, Y), (diferente(Puz, N_PuzLC, (X, Y))), N_PosT),
+    append(N_PosT, T, N_Pos),
+    propaga_posicoes(N_Pos, N_PuzLC, N_Puz).
 
 %###############################################################################
 
@@ -295,9 +296,15 @@ resolve_aux(Puz, Sol) :-
     length(Pos, Num_Pos),
     (Num_Pos > 0,
         head(Pos, Pos1),
-        propaga_posicoes(Pos1, Puz, N_Puz), !,
-        resolve_aux(N_Puz, Sol);
-     Sol = Puz).
+        (mat_muda_posicao(Puz, Pos1, 0, N_Puz0),
+         propaga_posicoes([Pos1], N_Puz0, Puz0),
+         verifica_R3(Puz0),
+            resolve_aux(Puz0, Sol), !;
+         mat_muda_posicao(Puz, Pos1, 1, N_Puz1),
+         propaga_posicoes([Pos1], N_Puz1, Puz1),
+         verifica_R3(Puz1),
+            resolve_aux(Puz1, Sol), !);
+      Sol = Puz).
 
 
 resolve(Puz, Sol) :-
