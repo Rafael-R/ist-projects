@@ -221,16 +221,6 @@ inicializa(Puz, N_Puz) :-
      not(dif(Puz, N_PuzR12)),
         N_Puz = N_PuzR12).
 
-/*    aplica_R1_R2_puzzle(Puz, N_PuzR12),
-    findall((X, Y), (diferente(Puz, N_PuzR12, (X, Y))), Dif_Pos),
-    length(Dif_Pos, Num_Dif_Pos),
-    (Num_Dif_Pos > 0,
-        inicializa(N_PuzR12, N_Puz), !;
-     Num_Dif_Pos == 0,
-        N_Puz = N_PuzR12).
-*/
-
-
 %###############################################################################
 
 % Predicado para a verificacao da regra 3
