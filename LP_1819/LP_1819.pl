@@ -6,16 +6,26 @@
 %###############################################################################
 
 :- [codigo_comum].
-:- [puzzles_publicos].
+%:- [puzzles_publicos].
 
 %###############################################################################
 
 % Predicados auxiliares
 
-zero(Num) :- not(var(Num)), Num == 0.
+zero(Elem) :- not(var(Elem)), Elem == 0.
+    /* Predicado: zero/1
+       ------------
+       Input: Recebe um numero (Elem).
+       Output: Devolve falso caso Elem nao seja zero.
+    */
 
 
-um(Num) :- not(var(Num)), Num == 1.
+um(Elem) :- not(var(Elem)), Elem == 1.
+    /* Predicado: um/1
+       ------------
+       Input: Recebe um numero (Elem).
+       Output: Devolve falso caso Elem nao seja um.
+    */
 
 
 conta_elementos(L, Elem, N_Elems) :-
@@ -62,7 +72,6 @@ preenche([H|T], Elem, [H|T2]) :- preenche(T, Elem, T2).
 
 
 combinacao(0, _, []).
-
 combinacao(N, L, [E|C_L_E]) :-
     N > 0,
     append(_, [E|L_apos_E], L),
@@ -73,16 +82,15 @@ combinacao(N, L, [E|C_L_E]) :-
 diferente(Puz1, Puz2, (L, C)) :-
     mat_ref(Puz1, (L, C), Cont1),
     mat_ref(Puz2, (L, C), Cont2),
-    (zero(Cont2), var(Cont1)
+    (var(Cont1), zero(Cont2)
         ;
-     um(Cont2), var(Cont1)).
+     var(Cont1), um(Cont2)).
 
 
-e_var(Puz1, (L, C)) :-
+pos_var(Puz1, (L, C)) :-
     mat_ref(Puz1, (L, C), Cont1),
     var(Cont1).
 
-head([H|_], H).
 
 %###############################################################################
 
@@ -225,7 +233,7 @@ inicializa(Puz, N_Puz) :-
 
 % Predicado para a verificacao da regra 3
 
-verifica_R3_aux([[Comb1, Comb2]|T]) :-
+verifica_R3_aux([]).
     /* Predicado: verifica_R3_aux/1
        ------------
        Input: Recebe uma lista com todas as combinacoes possiveis de
@@ -233,6 +241,7 @@ verifica_R3_aux([[Comb1, Comb2]|T]) :-
        Output: Devolve false caso alguma das combinacoes tenha duas
                linhas/colunas iguais, ou true em caso contrario.
     */
+verifica_R3_aux([[Comb1, Comb2]|T]) :-
     conta_elementos(Comb1, var, Num_Vars1),
     conta_elementos(Comb2, var, Num_Vars2),
     (Num_Vars1 == 0, Num_Vars2 == 0, not(Comb1 = Comb2),
@@ -282,19 +291,21 @@ propaga_posicoes([(L, C)|T], Puz, N_Puz) :-
 % Predicado resolve
 
 resolve_aux(Puz, Sol) :-
-    findall((X, Y), (e_var(Puz, (X, Y))), Pos),
-    length(Pos, Num_Pos),
-    (Num_Pos > 0,
-        head(Pos, Pos1),
-        (mat_muda_posicao(Puz, Pos1, 0, N_Puz0),
-         propaga_posicoes([Pos1], N_Puz0, Puz0),
-         verifica_R3(Puz0),
-            resolve_aux(Puz0, Sol), !;
-         mat_muda_posicao(Puz, Pos1, 1, N_Puz1),
-         propaga_posicoes([Pos1], N_Puz1, Puz1),
-         verifica_R3(Puz1),
-            resolve_aux(Puz1, Sol), !);
-      Sol = Puz).
+    findall((X, Y), (pos_var(Puz, (X, Y))), Pos_Vars),
+    length(Pos_Vars, Num_Vars),
+    (Num_Vars == 0,
+       Sol = Puz, !;
+    Num_Vars > 0,
+        random_between(1, Num_Vars, Index),
+        nth1(Index, Pos_Vars, Var),
+        (mat_muda_posicao(Puz, Var, 0, N_Puz0),
+         propaga_posicoes([Var], N_Puz0, N_Puz00),
+         verifica_R3(N_Puz00),
+            resolve_aux(N_Puz00, Sol), !;
+         mat_muda_posicao(Puz, Var, 1, N_Puz1),
+         propaga_posicoes([Var], N_Puz1, N_Puz11),
+         verifica_R3(N_Puz11),
+            resolve_aux(N_Puz11, Sol), !)).
 
 
 resolve(Puz, Sol) :-
