@@ -1,12 +1,11 @@
 % Numero: 89532  -  Nome: Rafael Rodrigues
 
-%###############################################################################
-%                                   Projeto
-%                           Logica para Programacao
-%###############################################################################
+/*##############################################################################
+                                    Projeto
+                            Logica para Programacao
+##############################################################################*/
 
 :- [codigo_comum].
-%:- [puzzles_publicos].
 
 %###############################################################################
 
@@ -15,16 +14,16 @@
 zero(Elem) :- not(var(Elem)), Elem == 0.
     /* Predicado: zero/1
        ------------
-       Input: Recebe um numero (Elem).
-       Output: Devolve falso caso Elem nao seja zero.
+       Input: Recebe um elemento (Elem).
+       Output: Devolve true caso Elem seja igual a zero e false caso contrario.
     */
 
 
 um(Elem) :- not(var(Elem)), Elem == 1.
     /* Predicado: um/1
        ------------
-       Input: Recebe um numero (Elem).
-       Output: Devolve falso caso Elem nao seja um.
+       Input: Recebe um elemento (Elem).
+       Output: Devolve true caso Elem seja igual a um e false caso contrario.
     */
 
 
@@ -53,7 +52,7 @@ soma_lista([H|T], Soma) :-
 soma_triplo([X, Y, Z], Soma) :-
     /* Predicado: soma_triplo/2
        ------------
-       Input: Recebe uma lista de tres elemntos.
+       Input: Recebe uma lista de tres elementos.
        Output: Devolve o valor da soma dos elementos da lista fornecida.
     */
     exclude(var, [X, Y, Z], L),
@@ -63,15 +62,20 @@ soma_triplo([X, Y, Z], Soma) :-
 preenche([], _, []).
     /* Predicado: preenche/3
        ------------
-       Input: Recebe uma lista e um elemnto (Elem).
+       Input: Recebe uma lista e um elemento (Elem).
        Output: Devolve a lista que resulta de substituir as
-               variaveis pelo elemnto fornecido.
+               variaveis pelo elemento fornecido.
     */
 preenche([H|T], Elem, [Elem|T2]) :- var(H), preenche(T, Elem, T2).
 preenche([H|T], Elem, [H|T2]) :- preenche(T, Elem, T2).
 
 
 combinacao(0, _, []).
+    /* Predicado: combinacao/3
+       ------------
+       Input: Recebe um numero (N) e uma lista (L).
+       Output: Devolve as combinacoes, N a N, dos elementos de L.
+    */
 combinacao(N, L, [E|C_L_E]) :-
     N > 0,
     append(_, [E|L_apos_E], L),
@@ -80,6 +84,12 @@ combinacao(N, L, [E|C_L_E]) :-
 
 
 diferente(Puz1, Puz2, (L, C)) :-
+    /* Predicado: diferente/3
+       ------------
+       Input: Recebe dois puzzles (Puz1 e Puz2) e uma posicao ((L, C)).
+       Output: Devolve true caso os elementos na mesma posicao dada, dos dois
+               puzzles, seja diferente e falso caso contrario.
+    */
     mat_ref(Puz1, (L, C), Cont1),
     mat_ref(Puz2, (L, C), Cont2),
     (var(Cont1), zero(Cont2)
@@ -87,10 +97,15 @@ diferente(Puz1, Puz2, (L, C)) :-
      var(Cont1), um(Cont2)).
 
 
-pos_var(Puz1, (L, C)) :-
-    mat_ref(Puz1, (L, C), Cont1),
-    var(Cont1).
-
+pos_var(Puz, (L, C)) :-
+    /* Predicado: pos_var/2
+       ------------
+       Input: Recebe um puzzle (Puz) e uma posicao ((L, C)).
+       Output: Devolve true caso o elemento na posicao dada seja uma
+               variavel e falso caso contrario.
+    */
+    mat_ref(Puz, (L, C), Cont),
+    var(Cont).
 
 %###############################################################################
 
@@ -162,14 +177,13 @@ aplica_R2_fila(Fila, N_Fila) :-
                Seja N metade do numero de elementos da lista. Aplicar a regra 2
                significa que se a lista ja contiver N zeros/uns, todas as
                posicoes vazias da lista devem ser preenchidas com uns/zeros.
-               Se o numero de zeros/uns ultrapassar N, o predicado devolve false.
+               Se o numero de zeros/uns ultrapassa N, o predicado devolve false.
     */
     length(Fila, Dim),
     N is Dim / 2,
     conta_elementos(Fila, zero, Num_Zeros),
     conta_elementos(Fila, um, Num_Uns),
-    N >= Num_Zeros,
-    N >= Num_Uns,
+    N >= Num_Zeros, N >= Num_Uns,
     (Num_Zeros == N,
         preenche(Fila, 1, N_Fila), !;
      Num_Uns == N,
@@ -272,8 +286,8 @@ propaga_posicoes([], N_Puz, N_Puz).
     /* Predicado: propaga_posicoes/3
     ------------
        Input: Recebe uma lista de posicoes (Posicoes) e um puzzle (Puz).
-       Output: Devolve um puzzle (N_Puz) resultande de recursivamente,
-               (as mudancas de) as posicoes de Posicoes.
+       Output: Devolve um puzzle (N_Puz) resultande de propagar,
+               recursivamente, as mudancas das posicoes.
     */
 propaga_posicoes([(L, C)|T], Puz, N_Puz) :-
     nth1(L, Puz, Linha),
@@ -312,7 +326,7 @@ resolve(Puz, Sol) :-
     /* Predicado: resolve/2
        ------------
        Input: Recebe um puzzle (Puz).
-       Output: Devolve um puzzle (Sol) que e uma solucao para o puzzle Puz.
+       Output: Devolve um puzzle (Sol) que e uma solucao para o puzzle.
     */
     inicializa(Puz, N_PuzI),
     verifica_R3(N_PuzI), !,
