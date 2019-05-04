@@ -10,11 +10,10 @@
 
 #include "contact.h"
 
-
 /* -------------------------------------------------------------------------- */
 
 
-link __a__(link head, char *name, char *local, char *domain, char *phone);
+link __a__(link head, char *name, char *email, char *phone);
 
 void __l__(link head);
 
@@ -22,7 +21,7 @@ void __p__(link head, char *name);
 
 link __r__(link head, char *name);
 
-void __e__(link head, char *name, char *new_local, char *new_domain);
+void __e__(link head, char *name, char *new_email);
 
 void __c__(link head, char *domain);
 
@@ -30,13 +29,10 @@ void __c__(link head, char *domain);
 /* -------------------------------------------------------------------------- */
 
 
-char* readString(int max_size);
+char* readString();
 
 
-int verifyEmail(char* local, char* domain);
-
-
-link verifyName(link head, char* name);
+link verifyName(link head, char *name);
 
 
 void printContact(link head);
@@ -48,54 +44,59 @@ char* strdup (const char *s);
 /* -------------------------------------------------------------------------- */
 
 
-int main() {
-    char command;
-    char *name, *local, *domain, *phone;
+int main(int argc, char const *argv[]) {
     link head = NULL;
+    char command, *input1, *input2, *input3;
 
-    while (scanf("%c", &command) && command != 'x') {
+    while (command != 'x') {
 
-        getchar();
-        switch (command) {
-
-            case 'a':
-                name = readString(MAX_NAME);
-                local = readString(MAX_LOCDOM);
-                domain = readString(MAX_LOCDOM);
-                phone = readString(MAX_PHONE);
-                if (verifyEmail(local, domain) == 0) {
-                    return 1;
+        if (argc > 1) {
+            command = argv[0][0];
+            if (command != 'l' && command != 'x') {
+                input1 = strdup(argv[1]);
+                printf("%s\n", input1);
+                if (command != 'p' && command != 'r' && command != 'c' ) {
+                    input2 = strdup(argv[2]);
+                    printf("%s\n", input2);
+                    if (command != 'e') {
+                        input3 = strdup(argv[3]);
+                        printf("%s\n", input3);
+                    }
                 }
-                head = __a__(head, name, local, domain, phone);
-                break;
+            }
+            argc = 0;
+        } else {
+            scanf("%c", &command);
+            getchar();
+            if (command != 'l' && command != 'x') {
+                input1 = readString();
+                if (command != 'p' && command != 'r' && command != 'c' ) {
+                    input2 = readString();
+                    if (command != 'e') {
+                        input3 = readString();
+                    }
+                }
+            }
+        }
 
+        switch (command) {
+            case 'a':
+                head = __a__(head, input1, input2, input3);
+                break;
             case 'l':
                 __l__(head);
                 break;
-
             case 'p':
-                name = readString(MAX_NAME);
-                __p__(head, name);
+                __p__(head, input1);
                 break;
-
             case 'r':
-                name = readString(MAX_NAME);
-                head = __r__(head, name);
+                head = __r__(head, input1);
                 break;
-
             case 'e':
-                name = readString(MAX_NAME);
-                local = readString(MAX_LOCDOM);
-                domain = readString(MAX_LOCDOM);
-                if (verifyEmail(local, domain) == 0) {
-                    return 1;
-                }
-                __e__(head, name, local, domain);
+                __e__(head, input1, input2);
                 break;
-
             case 'c':
-                domain = readString(MAX_LOCDOM);
-                __c__(head, domain);
+                __c__(head, input1);
                 break;
         }
     }
@@ -106,8 +107,12 @@ int main() {
 /* -------------------------------------------------------------------------- */
 
 
-link __a__(link head, char *name, char *local, char *domain, char *phone) {
+link __a__(link head, char *name, char *email, char *phone) {
     link aux, newnode = (link) malloc(sizeof(struct node));
+    char *local, *domain;
+
+    local = strtok(email, "@");
+    domain = strtok(NULL, "!");
 
     newnode->next = NULL;
     newnode->name = strdup(name);
@@ -171,8 +176,12 @@ link __r__(link head, char *name) {
 }
 
 
-void __e__(link head, char *name, char *new_local, char *new_domain) {
+void __e__(link head, char *name, char *new_email) {
     link contact;
+    char *new_local, *new_domain;
+
+    new_local = strtok(new_email, "@");
+    new_domain = strtok(NULL, "!");
 
     contact = verifyName(head, name);
     if (contact == NULL) {
@@ -200,31 +209,19 @@ void __c__(link head, char *domain) {
 /* -------------------------------------------------------------------------- */
 
 
-char* readString(int max_size) {
+char* readString() {
     int length = 1, count = 0;
     char * string = (char*) malloc(sizeof(char) * length), c;
 
-    while(count < max_size && (c = getchar()) != '\n' && c != ' ' && c != '@'){
-       string = realloc(string, sizeof(char) *  length++);
-       string[count++] = c;
-   } string[count] = '\0';
+    while((c = getchar()) != '\n' && c != ' ' && c != EOF){
+        string = realloc(string, sizeof(char) * length++);
+        string[count++] = c;
+    } string[count] = '\0';
     return string;
 }
 
 
-int verifyEmail(char *local, char *domain) {
-    int length;
-
-    length = strlen(local) + strlen(domain);
-    if (length > MAX_LOCDOM) {
-        return 0;
-    } else {
-        return 1;
-    }
-}
-
-
-link verifyName(link head, char *name) {
+link verifyName(link head, char* name) {
     link aux;
 
     for (aux = head; aux != NULL; aux = aux->next) {
@@ -241,7 +238,7 @@ void printContact(link head) {
 }
 
 
-char* strdup (const char *s) {
+char* strdup (const char* s) {
     size_t slen = strlen(s);
     char* result = malloc(slen + 1);
     if(result == NULL) {
