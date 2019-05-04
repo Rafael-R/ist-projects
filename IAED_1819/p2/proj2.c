@@ -10,6 +10,7 @@
 
 #include "contact.h"
 
+
 /* -------------------------------------------------------------------------- */
 
 
@@ -43,7 +44,9 @@ int listLength(link head);
 
 char* strdup (const char* s);
 
+
 /* -------------------------------------------------------------------------- */
+
 
 int main() {
     char command;
@@ -77,7 +80,7 @@ int main() {
 
             case 'r':
                 name = readString(MAX_NAME);
-                __r__(head, name);
+                head = __r__(head, name);
                 break;
 
             case 'e':
@@ -87,7 +90,7 @@ int main() {
                 if (verifyEmail(local, domain) == 0) {
                     return 1;
                 }
-                __e__(head, name, local, domain);
+                head = __e__(head, name, local, domain);
                 break;
 
             case 'c':
@@ -128,6 +131,7 @@ link __a__(link head, char *name, char *local, char *domain, char *phone) {
 
 
 void __l__(link head) {
+
     while (head != NULL) {
         printContact(head);
         head = head->next;
@@ -136,27 +140,31 @@ void __l__(link head) {
 
 
 void __p__(link head, char *name) {
-    link temp;
 
-    for(temp = head; temp != NULL; temp = temp->next) {
-        if (strcmp(temp->name, name) == 0) {
-            printContact(temp);
+    while (head != NULL) {
+        if (strcmp(head->name, name) == 0) {
+            printContact(head);
             return;
         }
+        head = head->next;
     }
     puts("Nome inexistente.");
 }
 
 
 link __r__(link head, char *name) {
-    link temp, aux;
+    link aux = head, prev = NULL , temp = NULL;
 
-    for(temp = head; temp != NULL; temp = temp->next) {
-        if (strcmp(temp->name, name) == 0) {
-            aux = temp;
-            free(aux);
+    while (aux != NULL) {
+        printf("%s\n", );
+        if (strcmp(aux->name, name) == 0) {
+            temp = prev->next;
+            prev->next = temp->next;
+            free(temp);
             return head;
         }
+        prev = aux;
+        aux = aux->next;
     }
     puts("Nome inexistente.");
     return head;
@@ -164,14 +172,15 @@ link __r__(link head, char *name) {
 
 
 link __e__(link head, char *name, char *new_local, char *new_domain) {
-    link temp;
+    link aux = head;
 
-    for(temp = head; temp != NULL; temp = temp->next) {
-        if (strcmp(temp->name, name) == 0) {
-            temp->local = strdup(new_local);
-            temp->domain = strdup(new_domain);
+    while (aux != NULL) {
+        if (strcmp(aux->name, name) == 0) {
+            aux->local = strdup(new_local);
+            aux->domain = strdup(new_domain);
             return head;
         }
+        aux = aux->next;
     }
     puts("Nome inexistente.");
     return head;
@@ -189,6 +198,7 @@ void __c__(link head, char *domain) {
     }
     printf("%s:%d\n", domain, count);
 }
+
 
 /* -------------------------------------------------------------------------- */
 
@@ -242,5 +252,6 @@ char* strdup (const char* s) {
     memcpy(result, s, slen+1);
     return result;
 }
+
 
 /* -------------------------------------------------------------------------- */
