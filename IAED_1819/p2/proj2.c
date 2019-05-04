@@ -22,7 +22,7 @@ void __p__(link head, char *name);
 
 link __r__(link head, char *name);
 
-link __e__(link head, char *name, char *new_local, char *new_domain);
+void __e__(link head, char *name, char *new_local, char *new_domain);
 
 void __c__(link head, char *domain);
 
@@ -33,16 +33,16 @@ void __c__(link head, char *domain);
 char* readString(int max_size);
 
 
-int verifyEmail(char *local, char *domain);
+int verifyEmail(char* local, char* domain);
+
+
+link verifyName(link head, char* name);
 
 
 void printContact(link head);
 
 
-int listLength(link head);
-
-
-char* strdup (const char* s);
+char* strdup (const char *s);
 
 
 /* -------------------------------------------------------------------------- */
@@ -90,7 +90,7 @@ int main() {
                 if (verifyEmail(local, domain) == 0) {
                     return 1;
                 }
-                head = __e__(head, name, local, domain);
+                __e__(head, name, local, domain);
                 break;
 
             case 'c':
@@ -107,7 +107,7 @@ int main() {
 
 
 link __a__(link head, char *name, char *local, char *domain, char *phone) {
-    link temp, newnode = (link) malloc(sizeof(struct node));
+    link aux, newnode = (link) malloc(sizeof(struct node));
 
     newnode->next = NULL;
     newnode->name = strdup(name);
@@ -118,13 +118,12 @@ link __a__(link head, char *name, char *local, char *domain, char *phone) {
     if (head == NULL) {
         return newnode;
     } else {
-        for(temp = head; temp->next != NULL; temp = temp->next) {
-            if (strcmp(temp->name, name) == 0) {
-                puts("Nome existente.");
-                return head;
-            }
+        if (verifyName(head, name) == NULL) {
+            for(aux = head; aux->next != NULL; aux = aux->next);
+            aux->next = newnode;
+        } else {
+            puts("Nome existente.");
         }
-        temp->next = newnode;
         return head;
     }
 }
@@ -140,59 +139,57 @@ void __l__(link head) {
 
 
 void __p__(link head, char *name) {
+    link contact;
 
-    while (head != NULL) {
-        if (strcmp(head->name, name) == 0) {
-            printContact(head);
-            return;
-        }
-        head = head->next;
+    contact = verifyName(head, name);
+    if (contact == NULL) {
+        puts("Nome inexistente.");
+    } else {
+        printContact(contact);
     }
-    puts("Nome inexistente.");
 }
 
 
 link __r__(link head, char *name) {
-    link aux = head, prev = NULL , temp = NULL;
+    link contact, aux;
 
-    while (aux != NULL) {
-        printf("%s\n", );
-        if (strcmp(aux->name, name) == 0) {
-            temp = prev->next;
-            prev->next = temp->next;
-            free(temp);
-            return head;
+    contact = verifyName(head, name);
+    if (contact == NULL) {
+        puts("Nome inexistente.");
+        return head;
+    } else {
+        if (contact == head) {
+            head = contact->next;
+        } else {
+            for(aux = head; aux->next != NULL &&
+                aux->next != contact; aux = aux->next);
+            aux->next = aux->next->next;
         }
-        prev = aux;
-        aux = aux->next;
+        free(contact);
+        return head;
     }
-    puts("Nome inexistente.");
-    return head;
 }
 
 
-link __e__(link head, char *name, char *new_local, char *new_domain) {
-    link aux = head;
+void __e__(link head, char *name, char *new_local, char *new_domain) {
+    link contact;
 
-    while (aux != NULL) {
-        if (strcmp(aux->name, name) == 0) {
-            aux->local = strdup(new_local);
-            aux->domain = strdup(new_domain);
-            return head;
-        }
-        aux = aux->next;
+    contact = verifyName(head, name);
+    if (contact == NULL) {
+        puts("Nome inexistente.");
+    } else {
+        contact->local = strdup(new_local);
+        contact->domain = strdup(new_domain);
     }
-    puts("Nome inexistente.");
-    return head;
 }
 
 
 void __c__(link head, char *domain) {
-    link temp;
+    link aux;
     int count = 0;
 
-    for(temp = head; temp != NULL; temp = temp->next) {
-        if (strcmp(temp->domain, domain) == 0) {
+    for(aux = head; aux != NULL; aux = aux->next) {
+        if (strcmp(aux->domain, domain) == 0) {
             count++;
         }
     }
@@ -227,22 +224,24 @@ int verifyEmail(char *local, char *domain) {
 }
 
 
+link verifyName(link head, char *name) {
+    link aux;
+
+    for (aux = head; aux != NULL; aux = aux->next) {
+        if (strcmp(aux->name, name) == 0) {
+            return aux;
+        }
+    }
+    return NULL;
+}
+
+
 void printContact(link head) {
     printf("%s %s@%s %s\n", head->name, head->local, head->domain, head->phone);
 }
 
 
-int listLength(link head) {
-    int count = 0;
-    link temp;
-    for (temp = head; temp != NULL; temp = temp->next) {
-        count++;
-    }
-    return count;
-}
-
-
-char* strdup (const char* s) {
+char* strdup (const char *s) {
     size_t slen = strlen(s);
     char* result = malloc(slen + 1);
     if(result == NULL) {
