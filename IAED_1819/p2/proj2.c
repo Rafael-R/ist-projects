@@ -8,7 +8,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "contact.h"
+typedef struct node {
+    struct node *next;
+    char *name;
+    char *local;
+    char *domain;
+    char *phone;
+} *link;
 
 /* -------------------------------------------------------------------------- */
 
