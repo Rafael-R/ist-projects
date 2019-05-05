@@ -5,11 +5,6 @@
                 estruturas necessarias para o projeto.
 */
 
-#define MAX_NAME 1024
-#define MAX_EMAIL 512
-#define MAX_LOCDOM 510
-#define MAX_PHONE 64
-
 
 typedef struct node {
     struct node *next;
