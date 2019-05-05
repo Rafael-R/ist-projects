@@ -16,10 +16,11 @@ typedef struct node {
     char *phone;
 } *link;
 
+
 /* -------------------------------------------------------------------------- */
 
 
-link __a__(link head, char *name, char *email, char *phone);
+link __a__(link head, char *name, char *local, char *domain, char *phone);
 
 void __l__(link head);
 
@@ -27,7 +28,7 @@ void __p__(link head, char *name);
 
 link __r__(link head, char *name);
 
-void __e__(link head, char *name, char *new_email);
+void __e__(link head, char *name, char *new_local, char *new_domain);
 
 void __c__(link head, char *domain);
 
@@ -47,26 +48,30 @@ void printContact(link head);
 char* strdup (const char *s);
 
 
+void freeNode(link head);
+
+
+link freeList(link head);
+
+
 /* -------------------------------------------------------------------------- */
 
 
-int main(int argc, char const *argv[]) {
+int main(int argc, char *argv[]) {
     link head = NULL;
-    char command, *input1, *input2, *input3;
+    char command, *input1, *input2, *input3, *input4;
 
     while (command != 'x') {
 
         if (argc > 1) {
-            command = argv[0][0];
+            command = argv[1][0];
             if (command != 'l' && command != 'x') {
-                input1 = strdup(argv[1]);
-                printf("%s\n", input1);
+                input1 = strdup(argv[2]);
                 if (command != 'p' && command != 'r' && command != 'c' ) {
-                    input2 = strdup(argv[2]);
-                    printf("%s\n", input2);
+                    input2 = strtok(argv[3], "@");
+                    input3 = strtok(NULL, "");
                     if (command != 'e') {
-                        input3 = strdup(argv[3]);
-                        printf("%s\n", input3);
+                        input4 = strdup(argv[4]);
                     }
                 }
             }
@@ -78,8 +83,9 @@ int main(int argc, char const *argv[]) {
                 input1 = readString();
                 if (command != 'p' && command != 'r' && command != 'c' ) {
                     input2 = readString();
+                    input3 = readString();
                     if (command != 'e') {
-                        input3 = readString();
+                        input4 = readString();
                     }
                 }
             }
@@ -87,7 +93,7 @@ int main(int argc, char const *argv[]) {
 
         switch (command) {
             case 'a':
-                head = __a__(head, input1, input2, input3);
+                head = __a__(head, input1, input2, input3, input4);
                 break;
             case 'l':
                 __l__(head);
@@ -99,13 +105,15 @@ int main(int argc, char const *argv[]) {
                 head = __r__(head, input1);
                 break;
             case 'e':
-                __e__(head, input1, input2);
+                __e__(head, input1, input2, input3);
                 break;
             case 'c':
                 __c__(head, input1);
                 break;
         }
     }
+
+    freeList(head);
     return 0;
 }
 
@@ -113,12 +121,8 @@ int main(int argc, char const *argv[]) {
 /* -------------------------------------------------------------------------- */
 
 
-link __a__(link head, char *name, char *email, char *phone) {
+link __a__(link head, char *name, char *local, char *domain, char *phone) {
     link aux, newnode = (link) malloc(sizeof(struct node));
-    char *local, *domain;
-
-    local = strtok(email, "@");
-    domain = strtok(NULL, "!");
 
     newnode->next = NULL;
     newnode->name = strdup(name);
@@ -133,6 +137,7 @@ link __a__(link head, char *name, char *email, char *phone) {
             for(aux = head; aux->next != NULL; aux = aux->next);
             aux->next = newnode;
         } else {
+            freeNode(newnode);
             puts("Nome existente.");
         }
         return head;
@@ -176,18 +181,14 @@ link __r__(link head, char *name) {
                 aux->next != contact; aux = aux->next);
             aux->next = aux->next->next;
         }
-        free(contact);
+        freeNode(contact);
         return head;
     }
 }
 
 
-void __e__(link head, char *name, char *new_email) {
+void __e__(link head, char *name, char *new_local, char *new_domain) {
     link contact;
-    char *new_local, *new_domain;
-
-    new_local = strtok(new_email, "@");
-    new_domain = strtok(NULL, "!");
 
     contact = verifyName(head, name);
     if (contact == NULL) {
@@ -219,7 +220,7 @@ char* readString() {
     int length = 1, count = 0;
     char * string = (char*) malloc(sizeof(char) * length), c;
 
-    while((c = getchar()) != '\n' && c != ' ' && c != EOF){
+    while((c = getchar()) != '\n' && c != EOF && c != ' ' && c != '@'){
         string = realloc(string, sizeof(char) * length++);
         string[count++] = c;
     } string[count] = '\0';
@@ -227,7 +228,7 @@ char* readString() {
 }
 
 
-link verifyName(link head, char* name) {
+link verifyName(link head, char *name) {
     link aux;
 
     for (aux = head; aux != NULL; aux = aux->next) {
@@ -244,15 +245,37 @@ void printContact(link head) {
 }
 
 
-char* strdup (const char* s) {
-    size_t slen = strlen(s);
-    char* result = malloc(slen + 1);
+char* strdup (const char *s) {
+    int slen = strlen(s);
+    char *result = malloc(slen + 1);
+
     if(result == NULL) {
         return NULL;
     }
-
     memcpy(result, s, slen+1);
     return result;
+}
+
+
+void freeNode(link head) {
+    free(head->name);
+    free(head->local);
+    free(head->domain);
+    free(head->phone);
+    free(head);
+}
+
+
+link freeList(link head) {
+    link temp;
+
+    while (head != NULL) {
+        temp = head;
+        head = head->next;
+        freeNode(temp);
+    }
+
+    return head;
 }
 
 
