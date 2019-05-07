@@ -8,14 +8,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 typedef struct node{
     char *name;
     char *local;
     char *domain;
     char *phone;
     struct node *next;
-} *link;
+} * link;
 
 typedef char* Key;
 
@@ -33,5 +32,7 @@ link insertEnd(link head, char *name, char *local, char *domain, char *phone);
 link removeItem(link head, char *name);
 
 link search(link head, char *name);
+
+void destroyList(link head);
 
 char* strdup (const char *s);
