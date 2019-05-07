@@ -4,9 +4,7 @@
  * Description: Segundo Projeto da cadeira de IAED
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "auxiliar.h"
 
 typedef struct node{
     char *name;
@@ -34,5 +32,3 @@ link removeItem(link head, char *name);
 link search(link head, char *name);
 
 void destroyList(link head);
-
-char* strdup (const char *s);
