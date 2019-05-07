@@ -17,7 +17,7 @@ int hash(Key name, int size) {
 }
 
 
-void STinit(link* heads) {
+void initST(link* heads) {
     int i;
 
     for (i = 0; i < ST_SIZE; i++) {
@@ -26,22 +26,32 @@ void STinit(link* heads) {
 }
 
 
-void STinsert(link *heads, Key name, char *local, char *domain, char *phone) {
+void insertST(link *heads, Key name, char *local, char *domain, char *phone) {
     int i = hash(name, ST_SIZE);
 
     heads[i] = insertEnd(heads[i], name, local, domain, phone);
 }
 
 
-void STdelete(link *heads, Key name) {
+void removeST(link *heads, Key name) {
     int i = hash(name, ST_SIZE);
 
     heads[i] = removeItem(heads[i], name);
 }
 
 
-link STsearch(link *heads, Key name) {
+link searchST(link *heads, Key name) {
     int i = hash(name, ST_SIZE);
 
     return search(heads[i], name);
+}
+
+
+void destroyST(link *heads) {
+    int i;
+
+    for (i = 0; i < ST_SIZE; i++) {
+        destroyList(heads[i]);
+    }
+    free(heads);
 }

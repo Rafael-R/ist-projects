@@ -75,6 +75,17 @@ link search(link head, char *name) {
 }
 
 
+void destroyList(link head) {
+    link aux;
+
+    while (head != NULL) {
+        aux = head;
+        head = head->next;
+        freeNode(aux);
+    }
+}
+
+
 char* strdup (const char *s) {
     int slen = strlen(s);
     char *result = malloc(slen + 1);

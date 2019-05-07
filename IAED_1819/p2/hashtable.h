@@ -11,10 +11,12 @@
 
 int hash(Key name, int size);
 
-void STinit(link* heads);
+void initST(link* heads);
 
-void STinsert(link *heads, Key name, char *local, char *domain, char *phone);
+void insertST(link *heads, Key name, char *local, char *domain, char *phone);
 
-void STdelete(link *heads, Key name);
+void removeST(link *heads, Key name);
 
-link STsearch(link *heads, Key name);
+link searchST(link *heads, Key name);
+
+void destroyST(link *heads);
