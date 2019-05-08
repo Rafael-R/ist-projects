@@ -1,15 +1,15 @@
 /*
- * File:  proj2.c
+ * File:  hashtable.h
  * Author:  Rafael Rodrigues 89532
  * Description: Segundo Projeto da cadeira de IAED
 */
 
 #include "linkedlist.h"
 
-#define ST_SIZE 10
+#define ST_SIZE 13
 
 
-int hash(Key name, int size);
+unsigned long hash(Key name, int size);
 
 void initST(link* heads);
 

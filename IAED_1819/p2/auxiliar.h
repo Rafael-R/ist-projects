@@ -1,5 +1,5 @@
 /*
- * File:  proj2.c
+ * File:  auxiliar.h
  * Author:  Rafael Rodrigues 89532
  * Description: Segundo Projeto da cadeira de IAED
 */
