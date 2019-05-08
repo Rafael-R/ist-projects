@@ -1,5 +1,5 @@
 /*
- * File:  proj2.c
+ * File:  linkedlist.h
  * Author:  Rafael Rodrigues 89532
  * Description: Segundo Projeto da cadeira de IAED
 */

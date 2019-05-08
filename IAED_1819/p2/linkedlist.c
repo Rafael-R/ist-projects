@@ -1,5 +1,5 @@
 /*
- * File:  proj2.c
+ * File:  linkedlist.c
  * Author:  Rafael Rodrigues 89532
  * Description: Segundo Projeto da cadeira de IAED
 */
@@ -20,11 +20,16 @@ link newNode(char *name, char *local, char *domain, char *phone) {
 
 
 void printNode(link head) {
-    printf("%s %s@%s %s\n", head->name, head->local, head->domain, head->phone);
+
+    if (head != NULL) {
+        	printf("%s %s@%s %s\n", head->name, head->local,
+                                    head->domain, head->phone);
+    }
 }
 
 
 void freeNode(link head) {
+
     free(head->name);
     free(head->local);
     free(head->domain);

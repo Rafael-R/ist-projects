@@ -1,5 +1,5 @@
 /*
- * File:  proj2.c
+ * File:  hashtable.c
  * Author:  Rafael Rodrigues 89532
  * Description: Segundo Projeto da cadeira de IAED
 */
@@ -7,13 +7,14 @@
 #include "hashtable.h"
 
 
-int hash(Key name, int size) {
-    int h = 0, a = 127;
+unsigned long hash(Key name, int size) {
+    unsigned long hash = 0;
+    int a = 127;
 
     for (; *name != '\0'; name++) {
-        h = (a*h + *name) % size;
+        hash = (a*hash + *name) % size;
     }
-    return h;
+    return hash;
 }
 
 

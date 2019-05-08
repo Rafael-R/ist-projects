@@ -1,5 +1,5 @@
 /*
- * File:  auxiliar.h
+ * File:  auxiliar.c
  * Author:  Rafael Rodrigues 89532
  * Description: Funcoes auxiliares
 */
@@ -8,14 +8,12 @@
 
 
 char* strdup (const char *s) {
-    int slen = strlen(s);
-    char *result = malloc(slen + 1);
-
-    if(result == NULL) {
-        return NULL;
+    int size = strlen(s) + 1;
+    char *p = malloc(size);
+    if (p != NULL) {
+        memcpy(p, s, size);
     }
-    memcpy(result, s, slen+1);
-    return result;
+    return p;
 }
 
 
