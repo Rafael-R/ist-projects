@@ -7,52 +7,52 @@
 #include "hashtable.h"
 
 
-unsigned long hash(Key name, int size) {
-    unsigned long hash = 0;
-    int a = 127;
+unsigned long hashkey(Key name) {
+    unsigned long hash = 5381;
+    int c;
 
-    for (; *name != '\0'; name++) {
-        hash = (a*hash + *name) % size;
-    }
-    return hash;
+    while ((c = *name++))
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+    return hash % HASH_SIZE;
 }
 
 
-void initST(link* heads) {
+void initHash(link* hash) {
     int i;
 
-    for (i = 0; i < ST_SIZE; i++) {
-        heads[i] = NULL;
+    for (i = 0; i < HASH_SIZE; i++) {
+        hash[i] = NULL;
     }
 }
 
 
-void insertST(link *heads, Key name, char *local, char *domain, char *phone) {
-    int i = hash(name, ST_SIZE);
+void insertHash(link *hash, link new) {
+    int i = hashkey(key(new));
 
-    heads[i] = insertEnd(heads[i], name, local, domain, phone);
+    hash[i] = insertLL(hash[i], new);
 }
 
 
-void removeST(link *heads, Key name) {
-    int i = hash(name, ST_SIZE);
+void removeHash(link *hash, Key name) {
+    int i = hashkey(name);
 
-    heads[i] = removeItem(heads[i], name);
+    hash[i] = removeLL(hash[i], name);
 }
 
 
-link searchST(link *heads, Key name) {
-    int i = hash(name, ST_SIZE);
+link searchHash(link *hash, Key name) {
+    int i = hashkey(name);
 
-    return search(heads[i], name);
+    return searchLL(hash[i], name);
 }
 
 
-void destroyST(link *heads) {
+void destroyHash(link *hash) {
     int i;
 
-    for (i = 0; i < ST_SIZE; i++) {
-        destroyList(heads[i]);
+    for (i = 0; i < HASH_SIZE; i++) {
+        destroyLL(hash[i]);
     }
-    free(heads);
+    free(hash);
 }

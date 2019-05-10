@@ -12,6 +12,8 @@ typedef struct node{
     char *domain;
     char *phone;
     struct node *next;
+    struct node *next_order;
+    struct node *prev_order;
 } * link;
 
 typedef char* Key;
@@ -25,10 +27,14 @@ void printNode(link head);
 
 void freeNode(link head);
 
-link insertEnd(link head, char *name, char *local, char *domain, char *phone);
+link insertLL(link head, link new);
 
-link removeItem(link head, char *name);
+link removeLL(link head, char *name);
 
-link search(link head, char *name);
+link searchLL(link head, char *name);
 
-void destroyList(link head);
+void destroyLL(link head);
+
+link insertDLL(link head, link new);
+
+link removeDLL(link head, link del);
