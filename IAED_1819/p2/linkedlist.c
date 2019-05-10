@@ -15,16 +15,15 @@ link newNode(char *name, char *local, char *domain, char *phone) {
     new->domain = strdup(domain);
     new->phone = strdup(phone);
     new->next = NULL;
+    new->next_order = NULL;
+    new->prev_order = NULL;
     return new;
 }
 
 
 void printNode(link head) {
 
-    if (head != NULL) {
-        	printf("%s %s@%s %s\n", head->name, head->local,
-                                    head->domain, head->phone);
-    }
+    printf("%s %s@%s %s\n", head->name, head->local, head->domain, head->phone);
 }
 
 
@@ -35,40 +34,39 @@ void freeNode(link head) {
     free(head->domain);
     free(head->phone);
     free(head);
+    head = NULL;
 }
 
 
-link insertEnd(link head, char *name, char *local, char *domain, char *phone) {
+link insertLL(link head, link new) {
     link aux;
 
     if(head == NULL) {
-        return newNode(name, local, domain, phone);
+        return new;
     }
     for(aux = head; aux->next != NULL; aux = aux->next);
-    aux->next = newNode(name, local, domain, phone);
+    aux->next = new;
     return head;
 }
 
 
-link removeItem(link head, char *name) {
+link removeLL(link head, char *name) {
     link aux, prev;
 
-    for(aux = head, prev = NULL; aux != NULL;
-        prev = aux, aux = aux->next) {
+    for(aux = head, prev = NULL; aux != NULL; prev = aux, aux = aux->next) {
         if(strcmp(aux->name, name) == 0) {
             if(aux == head) {
-                head = aux->next;
+                head = head->next;
             } else {
                 prev->next = aux->next;
             }
-            freeNode(aux);
         }
     }
     return head;
 }
 
 
-link search(link head, char *name) {
+link searchLL(link head, char *name) {
     link aux;
 
     for(aux = head; aux != NULL; aux = aux->next) {
@@ -80,7 +78,7 @@ link search(link head, char *name) {
 }
 
 
-void destroyList(link head) {
+void destroyLL(link head) {
     link aux;
 
     while (head != NULL) {
@@ -88,4 +86,32 @@ void destroyList(link head) {
         head = head->next;
         freeNode(aux);
     }
+}
+
+
+link insertDLL(link head, link new) {
+	link aux;
+
+	if(head == NULL) {
+		return new;
+	}
+    for(aux = head; aux->next_order != NULL; aux = aux->next_order);
+    aux->next_order = new;
+	new->prev_order = aux;
+    return head;
+}
+
+
+link removeDLL(link head, link del) {
+
+    if (head == del)
+        head = del->next_order;
+
+    if (del->next_order != NULL)
+        del->next_order->prev_order = del->prev_order;
+
+    if (del->prev_order != NULL)
+        del->prev_order->next_order = del->next_order;
+
+    return head;
 }
