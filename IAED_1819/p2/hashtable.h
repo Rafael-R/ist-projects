@@ -9,7 +9,7 @@
 #define HASH_SIZE 101
 
 
-unsigned long hashkey(Key name);
+int hashkey(Key string);
 
 void initHash(link* hash);
 

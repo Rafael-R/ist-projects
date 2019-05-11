@@ -7,12 +7,12 @@
 #include "hashtable.h"
 
 
-unsigned long hashkey(Key name) {
+int hashkey(Key string) {
     unsigned long hash = 5381;
     int c;
 
-    while ((c = *name++))
-        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+    while ((c = *string++))
+        hash = ((hash << 5) + hash) + c;
 
     return hash % HASH_SIZE;
 }
@@ -34,10 +34,10 @@ void insertHash(link *hash, link new) {
 }
 
 
-void removeHash(link *hash, Key name) {
-    int i = hashkey(name);
+void removeHash(link *hash, Key string) {
+    int i = hashkey(string);
 
-    hash[i] = removeLL(hash[i], name);
+    hash[i] = removeLL(hash[i], string);
 }
 
 
