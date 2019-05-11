@@ -89,29 +89,32 @@ void destroyLL(link head) {
 }
 
 
-link insertDLL(link head, link new) {
-	link aux;
+void insertDLL(link *first, link *last, link new) {
 
-	if(head == NULL) {
-		return new;
-	}
-    for(aux = head; aux->next_order != NULL; aux = aux->next_order);
-    aux->next_order = new;
-	new->prev_order = aux;
-    return head;
+    if (*first == NULL) {
+        *first = new;
+        *last = new;
+    } else {
+        (*last)->next_order = new;
+        new->prev_order = *last;
+        *last = new;
+    }
 }
 
 
-link removeDLL(link head, link del) {
+void removeDLL(link *first, link *last, link del) {
 
-    if (head == del)
-        head = del->next_order;
-
-    if (del->next_order != NULL)
+    if (*first == *last) {
+        *first = NULL;
+        *last = NULL;
+    } else if (*first == del) {
+        *first = (*first)->next_order;
+        (*first)->prev_order = NULL;
+    } else if (*last == del) {
+        *last = (*last)->prev_order;
+        (*last)->next_order = NULL;
+    } else {
         del->next_order->prev_order = del->prev_order;
-
-    if (del->prev_order != NULL)
         del->prev_order->next_order = del->next_order;
-
-    return head;
+    }
 }

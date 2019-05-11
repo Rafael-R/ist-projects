@@ -26,7 +26,7 @@ void __c__(link* hash, char *domain);
 
 
 int main(int argc, char *argv[]) {
-    link *hash, temp = NULL, sorted = NULL;
+    link *hash, temp = NULL, first = NULL, last = NULL;
     char command, *name, *local, *domain, *phone;
 
     hash = (link*) malloc(sizeof(link) * HASH_SIZE);
@@ -74,11 +74,11 @@ int main(int argc, char *argv[]) {
             case 'a':
                 temp = __a__(hash, name, local, domain, phone);
                 if (temp != NULL) {
-                    sorted = insertDLL(sorted, temp);
+                    insertDLL(&first, &last, temp);
                 }
                 break;
             case 'l':
-                __l__(sorted);
+                __l__(first);
                 break;
             case 'p':
                 __p__(hash, name);
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
             case 'r':
                 temp = __r__(hash, name);
                 if (temp != NULL) {
-                    sorted = removeDLL(sorted, temp);
+                    removeDLL(&first, &last, temp);
                     freeNode(temp);
                 }
                 break;
