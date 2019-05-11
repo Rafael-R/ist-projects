@@ -35,6 +35,6 @@ link searchLL(link head, char *name);
 
 void destroyLL(link head);
 
-link insertDLL(link head, link new);
+void insertDLL(link *first, link *last, link new);
 
-link removeDLL(link head, link del);
+void removeDLL(link *first, link *last, link del);
