@@ -15,8 +15,8 @@ void initHash(link* hash);
 
 void insertHash(link *hash, link new);
 
-void removeHash(link *hash, Key name);
+void removeHash(link *hash, Key key);
 
-link searchHash(link *hash, Key name);
+link searchHash(link *hash, Key key);
 
 void destroyHash(link *hash);

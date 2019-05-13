@@ -34,17 +34,17 @@ void insertHash(link *hash, link new) {
 }
 
 
-void removeHash(link *hash, Key string) {
-    int i = hashkey(string);
+void removeHash(link *hash, Key key) {
+    int i = hashkey(key);
 
-    hash[i] = removeLL(hash[i], string);
+    hash[i] = removeLL(hash[i], key);
 }
 
 
-link searchHash(link *hash, Key name) {
-    int i = hashkey(name);
+link searchHash(link *hash, Key key) {
+    int i = hashkey(key);
 
-    return searchLL(hash[i], name);
+    return searchLL(hash[i], key);
 }
 
 

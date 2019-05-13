@@ -39,15 +39,11 @@ void freeNode(link head) {
 
 
 link insertLL(link head, link new) {
-    link aux;
+    link aux = new;
 
-    if(head == NULL) {
-        return new;
+    aux->next = head;
+    return aux;
     }
-    for(aux = head; aux->next != NULL; aux = aux->next);
-    aux->next = new;
-    return head;
-}
 
 
 link removeLL(link head, char *name) {
