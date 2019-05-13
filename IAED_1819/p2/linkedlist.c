@@ -6,63 +6,62 @@
 
 #include "linkedlist.h"
 
-
+/* Cria um novo elemento */
 link newNode(char *name, char *local, char *domain, char *phone) {
-    link new = (link) malloc(sizeof(struct node));
+    link node = (link) malloc(sizeof(struct node));
 
-    new->name = strdup(name);
-    new->local = strdup(local);
-    new->domain = strdup(domain);
-    new->phone = strdup(phone);
-    new->next = NULL;
-    new->next_order = NULL;
-    new->prev_order = NULL;
-    return new;
+    node->name = strdup(name);
+    node->local = strdup(local);
+    node->domain = strdup(domain);
+    node->phone = strdup(phone);
+    node->next = NULL;
+    node->next_order = NULL;
+    node->prev_order = NULL;
+    return node;
 }
 
+/* Imprime um dado elemento */
+void printNode(link node) {
 
-void printNode(link head) {
-
-    printf("%s %s@%s %s\n", head->name, head->local, head->domain, head->phone);
+    printf("%s %s@%s %s\n", node->name, node->local, node->domain, node->phone);
 }
 
+/* Destroi um dado elemento */
+void destroyNode(link node) {
 
-void freeNode(link head) {
-
-    free(head->name);
-    free(head->local);
-    free(head->domain);
-    free(head->phone);
-    free(head);
-    head = NULL;
+    free(node->name);
+    free(node->local);
+    free(node->domain);
+    free(node->phone);
+    free(node);
+    node = NULL;
 }
 
-
-link insertLL(link head, link new) {
+/* Insere um dado elemento na lista */
+void insertLL(link *head, link new) {
     link aux = new;
 
-    aux->next = head;
-    return aux;
-    }
+    aux->next = *head;
+    *head = aux;
+}
 
-
-link removeLL(link head, char *name) {
+/* Remove um elemento com uma dada chave da lista */
+void removeLL(link *head, Key name) {
     link aux, prev;
 
-    for(aux = head, prev = NULL; aux != NULL; prev = aux, aux = aux->next) {
+    for(aux = *head, prev = NULL; aux != NULL; prev = aux, aux = aux->next) {
         if(strcmp(aux->name, name) == 0) {
-            if(aux == head) {
-                head = head->next;
+            if(aux == *head) {
+                *head = (*head)->next;
             } else {
                 prev->next = aux->next;
             }
         }
     }
-    return head;
 }
 
-
-link searchLL(link head, char *name) {
+/* Procura um elemento com uma dada chave da lista */
+link searchLL(link head, Key name) {
     link aux;
 
     for(aux = head; aux != NULL; aux = aux->next) {
@@ -73,18 +72,18 @@ link searchLL(link head, char *name) {
     return NULL;
 }
 
-
+/* Destroi uma dada lista */
 void destroyLL(link head) {
     link aux;
 
     while (head != NULL) {
         aux = head;
         head = head->next;
-        freeNode(aux);
+        destroyNode(aux);
     }
 }
 
-
+/* Insere um dado elemento no fim da lista */
 void insertDLL(link *first, link *last, link new) {
 
     if (*first == NULL) {
@@ -97,7 +96,7 @@ void insertDLL(link *first, link *last, link new) {
     }
 }
 
-
+/* Remove um dado elemento da lista */
 void removeDLL(link *first, link *last, link del) {
 
     if (*first == *last) {

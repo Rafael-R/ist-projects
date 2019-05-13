@@ -9,28 +9,26 @@
 /* -------------------------------------------------------------------------- */
 
 
-link __a__(link *hash, char *name, char *local, char *domain, char *phone);
+link __a__(hash hashtable, char *name, char *local, char *domain, char *phone);
 
 void __l__(link head);
 
-void __p__(link *hash, char *name);
+void __p__(hash hashtable, char *name);
 
-link __r__(link *hash, char *name);
+link __r__(hash hashtable, char *name);
 
-void __e__(link *hash, char *name, char *new_local, char *new_domain);
+void __e__(hash hashtable, char *name, char *new_local, char *new_domain);
 
 void __c__(link head, char *domain);
 
 
 /* -------------------------------------------------------------------------- */
 
-
+/* Le os comandos a partir do terminal e executa-os */
 int main(int argc, char *argv[]) {
-    link *hash, temp = NULL, first = NULL, last = NULL;
-    char command = ' ', *name, *local, *domain, *phone;
-
-    hash = (link*) malloc(sizeof(link) * HASH_SIZE);
-    initHash(hash);
+    link temp = NULL, first = NULL, last = NULL;
+    char command, *name, *local, *domain, *phone;
+    hash hashtable = initHash();
 
     while (command != 'x') {
 
@@ -72,7 +70,7 @@ int main(int argc, char *argv[]) {
 
         switch (command) {
             case 'a':
-                temp = __a__(hash, name, local, domain, phone);
+                temp = __a__(hashtable, name, local, domain, phone);
                 if (temp != NULL) {
                     insertDLL(&first, &last, temp);
                 }
@@ -81,17 +79,17 @@ int main(int argc, char *argv[]) {
                 __l__(first);
                 break;
             case 'p':
-                __p__(hash, name);
+                __p__(hashtable, name);
                 break;
             case 'r':
-                temp = __r__(hash, name);
+                temp = __r__(hashtable, name);
                 if (temp != NULL) {
                     removeDLL(&first, &last, temp);
-                    freeNode(temp);
+                    destroyNode(temp);
                 }
                 break;
             case 'e':
-                __e__(hash, name, local, domain);
+                __e__(hashtable, name, local, domain);
                 break;
             case 'c':
                 __c__(first, domain);
@@ -114,28 +112,28 @@ int main(int argc, char *argv[]) {
         }
 
     }
-    destroyHash(hash);
 
+    destroyHash(hashtable);
     return 0;
 }
 
 
 /* -------------------------------------------------------------------------- */
 
-
-link __a__(link *hash, char *name, char *local, char *domain, char *phone) {
+/* Adiciona um novo contacto */
+link __a__(hash hashtable, char *name, char *local, char *domain, char *phone) {
     link new = NULL;
 
-    if (searchHash(hash, name) != NULL) {
+    if (searchHash(hashtable, name) != NULL) {
         puts("Nome existente.");
     } else {
         new = newNode(name, local, domain, phone);
-        insertHash(hash, new);
+        insertHash(hashtable, new);
     }
     return new;
 }
 
-
+/* Lista os contactos introduzidos */
 void __l__(link head) {
 
     for (; head != NULL; head = head->next_order) {
@@ -143,11 +141,11 @@ void __l__(link head) {
     }
 }
 
-
-void __p__(link *hash, char *name) {
+/* Procura um contacto dado um nome */
+void __p__(hash hashtable, char *name) {
     link contact;
 
-    contact = searchHash(hash, name);
+    contact = searchHash(hashtable, name);
     if (contact == NULL) {
         puts("Nome inexistente.");
     } else {
@@ -155,24 +153,24 @@ void __p__(link *hash, char *name) {
     }
 }
 
-
-link __r__(link *hash, char *name) {
+/* Apaga um contacto dado um nome */
+link __r__(hash hashtable, char *name) {
     link contact;
 
-    contact = searchHash(hash, name);
+    contact = searchHash(hashtable, name);
     if (contact == NULL) {
         puts("Nome inexistente.");
     } else {
-        removeHash(hash, name);
+        removeHash(hashtable, name);
     }
     return contact;
 }
 
-
-void __e__(link *hash, char *name, char *new_local, char *new_domain) {
+/* Altera o endereco de email de um contacto dado o nome */
+void __e__(hash hashtable, char *name, char *new_local, char *new_domain) {
     link contact;
 
-    contact = searchHash(hash, name);
+    contact = searchHash(hashtable, name);
     if (contact == NULL) {
         puts("Nome inexistente.");
     } else {
@@ -181,15 +179,14 @@ void __e__(link *hash, char *name, char *new_local, char *new_domain) {
     }
 }
 
-
+/* Conta o numero de ocorrencias de um dominio de e-mail dado */
 void __c__(link head, char *domain) {
-    int count = 0;
+    int count;
 
-    while (head != NULL) {
+    for (count = 0; head != NULL; head = head->next_order) {
         if (strcmp(head->domain, domain) == 0) {
             count++;
         }
-        head = head->next_order;
     }
     printf("%s:%d\n", domain, count);
 }

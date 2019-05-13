@@ -6,17 +6,18 @@
 
 #include "linkedlist.h"
 
-#define HASH_SIZE 101
+#define HASHSIZE 101
 
+typedef link* hash;
 
-int hashkey(Key string);
+int hashkey(Key key);
 
-void initHash(link* hash);
+hash initHash();
 
-void insertHash(link *hash, link new);
+void insertHash(hash hashtable, link new);
 
-void removeHash(link *hash, Key key);
+void removeHash(hash hashtable, Key key);
 
-link searchHash(link *hash, Key key);
+link searchHash(hash hashtable, Key key);
 
-void destroyHash(link *hash);
+void destroyHash(hash hashtable);
