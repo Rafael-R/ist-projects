@@ -11,7 +11,7 @@
 
 link __a__(link *hash, char *name, char *local, char *domain, char *phone);
 
-void __l__(link sorted);
+void __l__(link head);
 
 void __p__(link *hash, char *name);
 
@@ -19,7 +19,7 @@ link __r__(link *hash, char *name);
 
 void __e__(link *hash, char *name, char *new_local, char *new_domain);
 
-void __c__(link* hash, char *domain);
+void __c__(link head, char *domain);
 
 
 /* -------------------------------------------------------------------------- */
@@ -27,7 +27,7 @@ void __c__(link* hash, char *domain);
 
 int main(int argc, char *argv[]) {
     link *hash, temp = NULL, first = NULL, last = NULL;
-    char command, *name, *local, *domain, *phone;
+    char command = ' ', *name, *local, *domain, *phone;
 
     hash = (link*) malloc(sizeof(link) * HASH_SIZE);
     initHash(hash);
@@ -94,12 +94,26 @@ int main(int argc, char *argv[]) {
                 __e__(hash, name, local, domain);
                 break;
             case 'c':
-                __c__(hash, domain);
-                free(domain);
+                __c__(first, domain);
                 break;
         }
-    }
 
+        if (command != 'l' && command != 'x') {
+            if (command == 'c') {
+                free(domain);
+            } else {
+                free(name);
+                if (command != 'p' && command != 'r') {
+                    free(local);
+                    free(domain);
+                    if (command == 'a') {
+                        free(phone);
+                    }
+                }
+            }
+        }
+
+    }
     destroyHash(hash);
 
     return 0;
@@ -122,11 +136,10 @@ link __a__(link *hash, char *name, char *local, char *domain, char *phone) {
 }
 
 
-void __l__(link sorted) {
+void __l__(link head) {
 
-    while (sorted != NULL) {
-        printNode(sorted);
-        sorted = sorted->next_order;
+    for (; head != NULL; head = head->next_order) {
+        printNode(head);
     }
 }
 
@@ -169,16 +182,14 @@ void __e__(link *hash, char *name, char *new_local, char *new_domain) {
 }
 
 
-void __c__(link *hash, char *domain) {
-    link aux;
-    int i, count = 0;
+void __c__(link head, char *domain) {
+    int count = 0;
 
-    for (i = 0; i < HASH_SIZE; i++) {
-        for(aux = hash[i]; aux != NULL; aux = aux->next) {
-            if (strcmp(aux->domain, domain) == 0) {
-                count++;
-            }
+    while (head != NULL) {
+        if (strcmp(head->domain, domain) == 0) {
+            count++;
         }
+        head = head->next_order;
     }
     printf("%s:%d\n", domain, count);
 }
