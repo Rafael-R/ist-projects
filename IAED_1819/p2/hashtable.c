@@ -6,53 +6,55 @@
 
 #include "hashtable.h"
 
-
-int hashkey(Key string) {
+/* Transforma a chave num indice da hashtable */
+int hashkey(Key key) {
     unsigned long hash = 5381;
     int c;
 
-    while ((c = *string++))
+    while ((c = *key++))
         hash = ((hash << 5) + hash) + c;
 
-    return hash % HASH_SIZE;
+    return hash % HASHSIZE;
 }
 
-
-void initHash(link* hash) {
+/* Inicializa uma dada hashtable */
+hash initHash() {
     int i;
+    hash hashtable = (hash) malloc(sizeof(link) * HASHSIZE);
 
-    for (i = 0; i < HASH_SIZE; i++) {
-        hash[i] = NULL;
+    for (i = 0; i < HASHSIZE; i++) {
+        hashtable[i] = NULL;
     }
+    return hashtable;
 }
 
-
-void insertHash(link *hash, link new) {
+/* Insere um novo elemento na hashtable */
+void insertHash(hash hashtable, link new) {
     int i = hashkey(key(new));
 
-    hash[i] = insertLL(hash[i], new);
+    insertLL(&hashtable[i], new);
 }
 
-
-void removeHash(link *hash, Key key) {
+/* Remove o elemento com uma dada chave da hashtable */
+void removeHash(hash hashtable, Key key) {
     int i = hashkey(key);
 
-    hash[i] = removeLL(hash[i], key);
+    removeLL(&hashtable[i], key);
 }
 
-
-link searchHash(link *hash, Key key) {
+/* Procura por um elemento com uma dada chave na hashtable */
+link searchHash(hash hashtable, Key key) {
     int i = hashkey(key);
 
-    return searchLL(hash[i], key);
+    return searchLL(hashtable[i], key);
 }
 
-
-void destroyHash(link *hash) {
+/* Destroi uma dada hashtable  */
+void destroyHash(hash hashtable) {
     int i;
 
-    for (i = 0; i < HASH_SIZE; i++) {
-        destroyLL(hash[i]);
+    for (i = 0; i < HASHSIZE; i++) {
+        destroyLL(hashtable[i]);
     }
-    free(hash);
+    free(hashtable);
 }

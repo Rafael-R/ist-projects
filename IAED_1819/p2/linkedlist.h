@@ -25,13 +25,13 @@ link newNode(char *name, char *local, char *domain, char *phone);
 
 void printNode(link head);
 
-void freeNode(link head);
+void destroyNode(link head);
 
-link insertLL(link head, link new);
+void insertLL(link *head, link new);
 
-link removeLL(link head, char *name);
+void removeLL(link *head, Key name);
 
-link searchLL(link head, char *name);
+link searchLL(link head, Key name);
 
 void destroyLL(link head);
 

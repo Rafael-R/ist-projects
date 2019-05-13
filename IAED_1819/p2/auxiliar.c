@@ -6,7 +6,7 @@
 
 #include "auxiliar.h"
 
-
+/* Copia uma string */
 char* strdup (const char *s) {
     int size = strlen(s) + 1;
     char *p = malloc(size);
@@ -16,7 +16,7 @@ char* strdup (const char *s) {
     return p;
 }
 
-
+/* Le o input do terminal */
 char* readString() {
     int length = 0;
     char c, *string = (char*) malloc(sizeof(char));
