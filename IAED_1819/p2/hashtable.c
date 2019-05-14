@@ -11,16 +11,16 @@ int hashkey(Key key) {
     unsigned long hash = 5381;
     int c;
 
-    while ((c = *key++))
+    while ((c = *key++)) {
         hash = ((hash << 5) + hash) + c;
-
+    }
     return hash % HASHSIZE;
 }
 
 /* Inicializa uma dada hashtable */
 hash initHash() {
     int i;
-    hash hashtable = (hash) malloc(sizeof(link) * HASHSIZE);
+    hash hashtable = (hash) malloc(sizeof(Link) * HASHSIZE);
 
     for (i = 0; i < HASHSIZE; i++) {
         hashtable[i] = NULL;
@@ -29,7 +29,7 @@ hash initHash() {
 }
 
 /* Insere um novo elemento na hashtable */
-void insertHash(hash hashtable, link new) {
+void insertHash(hash hashtable, Link new) {
     int i = hashkey(key(new));
 
     insertLL(&hashtable[i], new);
@@ -43,7 +43,7 @@ void removeHash(hash hashtable, Key key) {
 }
 
 /* Procura por um elemento com uma dada chave na hashtable */
-link searchHash(hash hashtable, Key key) {
+Link searchHash(hash hashtable, Key key) {
     int i = hashkey(key);
 
     return searchLL(hashtable[i], key);

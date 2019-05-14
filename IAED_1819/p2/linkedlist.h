@@ -1,40 +1,35 @@
 /*
- * File:  linkedlist.h
+ * File:  Linkedlist.h
  * Author:  Rafael Rodrigues 89532
  * Description: Segundo Projeto da cadeira de IAED
 */
 
-#include "auxiliar.h"
+#include "contact.h"
+
+typedef Contact Item;
 
 typedef struct node{
-    char *name;
-    char *local;
-    char *domain;
-    char *phone;
+    Item data;
     struct node *next;
     struct node *next_order;
     struct node *prev_order;
-} * link;
-
-typedef char* Key;
-
-#define key(contact) (contact->name)
+} * Link;
 
 
-link newNode(char *name, char *local, char *domain, char *phone);
+Link newNode(Item contact);
 
-void printNode(link head);
+void printNode(Link head);
 
-void destroyNode(link head);
+void destroyNode(Link head);
 
-void insertLL(link *head, link new);
+void insertLL(Link *head, Link new);
 
-void removeLL(link *head, Key name);
+void removeLL(Link *head, char *name);
 
-link searchLL(link head, Key name);
+Link searchLL(Link head, char *name);
 
-void destroyLL(link head);
+void destroyLL(Link head);
 
-void insertDLL(link *first, link *last, link new);
+void insertDLL(Link *first, Link *last, Link new);
 
-void removeDLL(link *first, link *last, link del);
+void removeDLL(Link *first, Link *last, Link del);
