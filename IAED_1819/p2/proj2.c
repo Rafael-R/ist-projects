@@ -6,33 +6,36 @@
 
 #include "hashtable.h"
 
+#define MAX_INPUT 2000
+
 /* -------------------------------------------------------------------------- */
 
 
-link __a__(hash hashtable, char *name, char *local, char *domain, char *phone);
+Link __a__(hash hashtable, char *name, char *local, char *domain, char *phone);
 
-void __l__(link head);
+void __l__(Link head);
 
 void __p__(hash hashtable, char *name);
 
-link __r__(hash hashtable, char *name);
+Link __r__(hash hashtable, char *name);
 
 void __e__(hash hashtable, char *name, char *new_local, char *new_domain);
 
-void __c__(link head, char *domain);
+void __c__(Link head, char *domain);
 
 
 /* -------------------------------------------------------------------------- */
 
 /* Le os comandos a partir do terminal e executa-os */
 int main(int argc, char *argv[]) {
-    link temp = NULL, first = NULL, last = NULL;
-    char command, *name, *local, *domain, *phone;
+    Link temp = NULL, first = NULL, last = NULL;
+    char input[MAX_INPUT], *splited, command, *name, *local, *domain, *phone;
     hash hashtable = initHash();
 
     while (command != 'x') {
 
         if (argc > 1) {
+
             command = argv[1][0];
             if (command != 'l' && command != 'x') {
                 if (command == 'c') {
@@ -49,19 +52,28 @@ int main(int argc, char *argv[]) {
                 }
             }
             argc = 0;
+
         } else {
-            scanf("%c", &command);
-            getchar();
+
+            fgets(input, MAX_INPUT, stdin);
+            splited = strtok(input, " ");
+            command = *splited;
+
             if (command != 'l' && command != 'x') {
                 if (command == 'c') {
-                    domain = readString();
+                    splited = strtok(NULL, " \n");
+                    domain = strdup(splited);
                 } else {
-                    name = readString();
+                    splited = strtok(NULL, " \n");
+                    name = strdup(splited);
                     if (command != 'p' && command != 'r') {
-                        local = readString();
-                        domain = readString();
+                        splited = strtok(NULL, "@");
+                        local = strdup(splited);
+                        splited = strtok(NULL, " \n");
+                        domain = strdup(splited);
                         if (command == 'a') {
-                            phone = readString();
+                            splited = strtok(NULL, " \n");
+                            phone = strdup(splited);
                         }
                     }
                 }
@@ -121,20 +133,22 @@ int main(int argc, char *argv[]) {
 /* -------------------------------------------------------------------------- */
 
 /* Adiciona um novo contacto */
-link __a__(hash hashtable, char *name, char *local, char *domain, char *phone) {
-    link new = NULL;
+Link __a__(hash hashtable, char *name, char *local, char *domain, char *phone) {
+    Item new_contact = NULL;
+    Link new_node = NULL;
 
     if (searchHash(hashtable, name) != NULL) {
         puts("Nome existente.");
     } else {
-        new = newNode(name, local, domain, phone);
-        insertHash(hashtable, new);
+        new_contact = newContact(name, local, domain, phone);
+        new_node = newNode(new_contact);
+        insertHash(hashtable, new_node);
     }
-    return new;
+    return new_node;
 }
 
 /* Lista os contactos introduzidos */
-void __l__(link head) {
+void __l__(Link head) {
 
     for (; head != NULL; head = head->next_order) {
         printNode(head);
@@ -143,7 +157,7 @@ void __l__(link head) {
 
 /* Procura um contacto dado um nome */
 void __p__(hash hashtable, char *name) {
-    link contact;
+    Link contact;
 
     contact = searchHash(hashtable, name);
     if (contact == NULL) {
@@ -154,8 +168,8 @@ void __p__(hash hashtable, char *name) {
 }
 
 /* Apaga um contacto dado um nome */
-link __r__(hash hashtable, char *name) {
-    link contact;
+Link __r__(hash hashtable, char *name) {
+    Link contact;
 
     contact = searchHash(hashtable, name);
     if (contact == NULL) {
@@ -168,23 +182,23 @@ link __r__(hash hashtable, char *name) {
 
 /* Altera o endereco de email de um contacto dado o nome */
 void __e__(hash hashtable, char *name, char *new_local, char *new_domain) {
-    link contact;
+    Link contact;
 
     contact = searchHash(hashtable, name);
     if (contact == NULL) {
         puts("Nome inexistente.");
     } else {
-        contact->local = strdup(new_local);
-        contact->domain = strdup(new_domain);
+        contact->data->local = strdup(new_local);
+        contact->data->domain = strdup(new_domain);
     }
 }
 
 /* Conta o numero de ocorrencias de um dominio de e-mail dado */
-void __c__(link head, char *domain) {
+void __c__(Link head, char *domain) {
     int count;
 
     for (count = 0; head != NULL; head = head->next_order) {
-        if (strcmp(head->domain, domain) == 0) {
+        if (strcmp(head->data->domain, domain) == 0) {
             count++;
         }
     }
