@@ -39,14 +39,14 @@ int main(int argc, char *argv[]) {
             command = argv[1][0];
             if (command != 'l' && command != 'x') {
                 if (command == 'c') {
-                    domain = strdup(argv[2]);
+                    domain = copyString(argv[2]);
                 } else {
-                    name = strdup(argv[2]);
+                    name = copyString(argv[2]);
                     if (command != 'p' && command != 'r') {
                         local = strtok(argv[3], "@");
                         domain = strtok(NULL, "");
                         if (command == 'a') {
-                            phone = strdup(argv[4]);
+                            phone = copyString(argv[4]);
                         }
                     }
                 }
@@ -62,18 +62,18 @@ int main(int argc, char *argv[]) {
             if (command != 'l' && command != 'x') {
                 if (command == 'c') {
                     splited = strtok(NULL, " \n");
-                    domain = strdup(splited);
+                    domain = copyString(splited);
                 } else {
                     splited = strtok(NULL, " \n");
-                    name = strdup(splited);
+                    name = copyString(splited);
                     if (command != 'p' && command != 'r') {
                         splited = strtok(NULL, "@");
-                        local = strdup(splited);
+                        local = copyString(splited);
                         splited = strtok(NULL, " \n");
-                        domain = strdup(splited);
+                        domain = copyString(splited);
                         if (command == 'a') {
                             splited = strtok(NULL, " \n");
-                            phone = strdup(splited);
+                            phone = copyString(splited);
                         }
                     }
                 }
@@ -134,17 +134,15 @@ int main(int argc, char *argv[]) {
 
 /* Adiciona um novo contacto */
 Link __a__(hash hashtable, char *name, char *local, char *domain, char *phone) {
-    Item new_contact = NULL;
-    Link new_node = NULL;
+    Link new = NULL;
 
     if (searchHash(hashtable, name) != NULL) {
         puts("Nome existente.");
     } else {
-        new_contact = newContact(name, local, domain, phone);
-        new_node = newNode(new_contact);
-        insertHash(hashtable, new_node);
+        new = newNode(newContact(name, local, domain, phone));
+        insertHash(hashtable, new);
     }
-    return new_node;
+    return new;
 }
 
 /* Lista os contactos introduzidos */
@@ -188,8 +186,8 @@ void __e__(hash hashtable, char *name, char *new_local, char *new_domain) {
     if (contact == NULL) {
         puts("Nome inexistente.");
     } else {
-        contact->data->local = strdup(new_local);
-        contact->data->domain = strdup(new_domain);
+        contact->data->local = copyString(new_local);
+        contact->data->domain = copyString(new_domain);
     }
 }
 
