@@ -16,7 +16,7 @@ typedef struct contact {
 } * Contact;
 
 
-char* strdup (const char *s);
+char* copyString (char *original);
 
 Contact newContact(char *name, char *local, char *domain, char *phone);
 

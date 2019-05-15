@@ -28,7 +28,6 @@ void destroyNode(Link node) {
 
     destroyContact(node->data);
     free(node);
-    node = NULL;
 }
 
 /* Insere um dado elemento na lista */

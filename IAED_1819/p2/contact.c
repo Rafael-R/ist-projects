@@ -7,23 +7,20 @@
 #include "contact.h"
 
 /* Copia uma string */
-char* strdup (const char *s) {
-    int size = strlen(s) + 1;
-    char *p = malloc(size);
-    if (p != NULL) {
-        memcpy(p, s, size);
-    }
-    return p;
+char* copyString (char *original) {
+    char *copy = (char*) malloc(sizeof(char) * strlen(original) + 1);
+    strcpy(copy, original);
+    return copy;
 }
 
 
 Contact newContact(char *name, char *local, char *domain, char *phone) {
     Contact contact = (Contact) malloc(sizeof(struct contact));
 
-    contact->name = strdup(name);
-    contact->local = strdup(local);
-    contact->domain = strdup(domain);
-    contact->phone = strdup(phone);
+    contact->name = copyString(name);
+    contact->local = copyString(local);
+    contact->domain = copyString(domain);
+    contact->phone = copyString(phone);
     return contact;
 }
 
@@ -42,5 +39,4 @@ void destroyContact(Contact contact) {
     free(contact->domain);
     free(contact->phone);
     free(contact);
-    contact = NULL;
 }
