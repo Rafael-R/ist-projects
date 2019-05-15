@@ -1,12 +1,13 @@
 /*
  * File:  hashtable.h
  * Author:  Rafael Rodrigues 89532
- * Description: Segundo Projeto da cadeira de IAED
+ * Description: Ficheiro que contem a declaracao das funcoes
+                referentes a hashtable e o tipo de dados.
 */
 
 #include "linkedlist.h"
 
-#define HASHSIZE 101
+#define HASHSIZE 1021
 #define key(node) (node->data->name)
 
 typedef Link* hash;

@@ -1,7 +1,8 @@
 /*
  * File:  Linkedlist.c
  * Author:  Rafael Rodrigues 89532
- * Description: Segundo Projeto da cadeira de IAED
+ * Description: Ficheiro que contem a implementacao das funcoes
+                referentes a listas ligadas e duplamente ligadas.
 */
 
 #include "linkedlist.h"
@@ -105,4 +106,5 @@ void removeDLL(Link *first, Link *last, Link del) {
         del->next_order->prev_order = del->prev_order;
         del->prev_order->next_order = del->next_order;
     }
+    destroyNode(del);
 }

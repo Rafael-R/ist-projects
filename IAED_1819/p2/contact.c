@@ -1,7 +1,8 @@
 /*
  * File:  contact.c
  * Author:  Rafael Rodrigues 89532
- * Description: Segundo Projeto da cadeira de IAED
+ * Description: Ficheiro que contem a implementacao das
+                funcoes referentes a contacto.
 */
 
 #include "contact.h"
@@ -13,7 +14,7 @@ char* copyString (char *original) {
     return copy;
 }
 
-
+/* Cria um novo contacto */
 Contact newContact(char *name, char *local, char *domain, char *phone) {
     Contact contact = (Contact) malloc(sizeof(struct contact));
 
@@ -24,14 +25,14 @@ Contact newContact(char *name, char *local, char *domain, char *phone) {
     return contact;
 }
 
-
+/* Imprime um dado contacto */
 void printContact(Contact contact) {
 
     printf("%s %s@%s %s\n", contact->name, contact->local,
                             contact->domain, contact->phone);
 }
 
-
+/* Destroi um dado cotacto */
 void destroyContact(Contact contact) {
 
     free(contact->name);

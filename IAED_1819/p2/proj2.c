@@ -60,11 +60,10 @@ int main(int argc, char *argv[]) {
             command = *splited;
 
             if (command != 'l' && command != 'x') {
+                splited = strtok(NULL, " \n");
                 if (command == 'c') {
-                    splited = strtok(NULL, " \n");
                     domain = copyString(splited);
                 } else {
-                    splited = strtok(NULL, " \n");
                     name = copyString(splited);
                     if (command != 'p' && command != 'r') {
                         splited = strtok(NULL, "@");
@@ -72,7 +71,7 @@ int main(int argc, char *argv[]) {
                         splited = strtok(NULL, " \n");
                         domain = copyString(splited);
                         if (command == 'a') {
-                            splited = strtok(NULL, " \n");
+                            splited = strtok(NULL, "\n");
                             phone = copyString(splited);
                         }
                     }
@@ -97,7 +96,6 @@ int main(int argc, char *argv[]) {
                 temp = __r__(hashtable, name);
                 if (temp != NULL) {
                     removeDLL(&first, &last, temp);
-                    destroyNode(temp);
                 }
                 break;
             case 'e':
