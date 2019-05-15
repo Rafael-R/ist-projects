@@ -1,7 +1,8 @@
 /*
  * File:  contact.h
  * Author:  Rafael Rodrigues 89532
- * Description: Segundo Projeto da cadeira de IAED
+ * Description: Ficheiro que contem a declaracao das funcoes
+                referentes a contacto e o tipo de dados.
 */
 
 #include <stdio.h>

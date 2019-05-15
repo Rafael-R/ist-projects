@@ -1,7 +1,8 @@
 /*
  * File:  Linkedlist.h
  * Author:  Rafael Rodrigues 89532
- * Description: Segundo Projeto da cadeira de IAED
+ * Description: Ficheiro que contem a declaracao das funcoes referentes a
+                listas ligadas e duplamente ligadas e o tipo de dados.
 */
 
 #include "contact.h"

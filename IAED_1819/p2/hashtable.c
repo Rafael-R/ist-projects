@@ -1,7 +1,8 @@
 /*
  * File:  hashtable.c
  * Author:  Rafael Rodrigues 89532
- * Description: Segundo Projeto da cadeira de IAED
+ * Description: Ficheiro que contem a implementacao das
+                funcoes referentes a hashtable.
 */
 
 #include "hashtable.h"
