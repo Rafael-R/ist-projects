@@ -27,9 +27,19 @@ Contact newContact(char *name, char *local, char *domain, char *phone) {
 
 /* Imprime um dado contacto */
 void printContact(Contact contact) {
+    char *original_name;
 
-    printf("%s %s@%s %s\n", contact->name, contact->local,
-                            contact->domain, contact->phone);
+    original_name = copyString(contact->name);
+    original_name = strtok(original_name, "_");
+
+    if (strcmp(contact->name, original_name) == 0) {
+        printf("%s %s@%s %s\n", contact->name, contact->local,
+                                contact->domain, contact->phone);
+    } else {
+        printf("%s (%s) %s@%s %s\n", contact->name, original_name,
+               contact->local, contact->domain, contact->phone);
+    }
+    free(original_name);
 }
 
 /* Destroi um dado cotacto */

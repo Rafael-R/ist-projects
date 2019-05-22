@@ -23,6 +23,8 @@ void __e__(hash hashtable, char *name, char *new_local, char *new_domain);
 
 void __c__(Link head, char *domain);
 
+void __P__(Link head, char *prefix);
+
 
 /* -------------------------------------------------------------------------- */
 
@@ -65,7 +67,7 @@ int main(int argc, char *argv[]) {
                     domain = copyString(splited);
                 } else {
                     name = copyString(splited);
-                    if (command != 'p' && command != 'r') {
+                    if (command != 'p' && command != 'r' && command != 'P') {
                         splited = strtok(NULL, "@");
                         local = copyString(splited);
                         splited = strtok(NULL, " \n");
@@ -104,6 +106,9 @@ int main(int argc, char *argv[]) {
             case 'c':
                 __c__(first, domain);
                 break;
+            case 'P':
+                __P__(first, name);
+                break;
         }
 
         if (command != 'l' && command != 'x') {
@@ -111,7 +116,7 @@ int main(int argc, char *argv[]) {
                 free(domain);
             } else {
                 free(name);
-                if (command != 'p' && command != 'r') {
+                if (command != 'p' && command != 'r' && command != 'P') {
                     free(local);
                     free(domain);
                     if (command == 'a') {
@@ -133,9 +138,16 @@ int main(int argc, char *argv[]) {
 /* Adiciona um novo contacto */
 Link __a__(hash hashtable, char *name, char *local, char *domain, char *phone) {
     Link new = NULL;
+    char sufix[] = {'_', '1', '\0'};
+    int len, i;
 
     if (searchHash(hashtable, name) != NULL) {
-        puts("Nome existente.");
+        len = strlen(name);
+        name = realloc(name, sizeof(char) * len + 3);
+        for (i = 0; i < 3; i++) {
+            name[len + i] = sufix[i];
+        }
+        new = __a__(hashtable, name, local, domain, phone);
     } else {
         new = newNode(newContact(name, local, domain, phone));
         insertHash(hashtable, new);
@@ -199,6 +211,26 @@ void __c__(Link head, char *domain) {
         }
     }
     printf("%s:%d\n", domain, count);
+}
+
+
+void __P__(Link head, char *prefix) {
+    int i, len, error = 0, count = 0;
+    char *name;
+
+    len = strlen(prefix);
+    for (; head != NULL; head = head->next_order) {
+        name = head->data->name;
+        for (i = 0; i < len; i++, name++) {
+            if (*name != prefix[i]) {
+                error++;
+            }
+        }
+        if (error == 0) {
+            count++;
+        }
+    }
+    printf("%d\n", count);
 }
 
 

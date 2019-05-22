@@ -27,6 +27,8 @@ void __A__(char description[], char attendant[]);
 
 void __R__(char description[], char attendant[]);
 
+void __z__();
+
 
 /* -------------------------------------------------------------------------- */
 
@@ -114,6 +116,9 @@ int main() {
 
             case 'R':
                 __R__(splited_input[0], splited_input[1]);
+                break;
+            case 'z':
+                __z__();
                 break;
         }
     }
@@ -276,6 +281,19 @@ void __R__(char description[], char attendant[]) {
             } events[e_index].num_attendants--;
         }
     }
+}
+
+
+void __z__() {
+    int i, count = 0;
+    char ze[] = {'Z', 'e', '\0'};
+
+    for (i = 0; i < num_events; i++) {
+        if (strcmp(events[i].responsible, ze) == 0) {
+            count++;
+        }
+    }
+    printf("%d\n", count);
 }
 
 
