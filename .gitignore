@@ -33,3 +33,12 @@ codigo_comum.pl
 puzzles_publicos.pl
 teste.py
 
+
+# SO
+
+lib
+inputs
+outputs
+fs.o
+main.o
+tecnicofs
