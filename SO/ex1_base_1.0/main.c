@@ -19,12 +19,12 @@ char inputCommands[MAX_COMMANDS][MAX_INPUT_SIZE];
 int numberCommands = 0;
 int headQueue = 0;
 
-static void displayUsage (const char* appName){
+static void displayUsage (const char* appName) {
     printf("Usage: %s\n", appName);
     exit(EXIT_FAILURE);
 }
 
-static void parseArgs (long argc, char* const argv[]){
+static void parseArgs (long argc, char* const argv[]) {
     if (argc != 4) {
         fprintf(stderr, "Invalid format:\n");
         displayUsage(argv[0]);
@@ -50,12 +50,12 @@ char* removeCommand() {
     return NULL;
 }
 
-void errorParse(){
+void errorParse() {
     fprintf(stderr, "Error: command invalid\n");
     //exit(EXIT_FAILURE);
 }
 
-void processInput(){
+void processInput() {
     char line[MAX_INPUT_SIZE];
 
     FILE* fptr;
@@ -94,7 +94,7 @@ void processInput(){
     fclose(fptr);
 }
 
-void applyCommands(){
+void applyCommands() {
     while(numberCommands > 0){
         const char* command = removeCommand();
         if (command == NULL){
@@ -133,6 +133,13 @@ void applyCommands(){
         }
     }
 }
+
+/*
+void* applicator(void* arg) {
+    return;
+}
+*/
+
 
 int main(int argc, char* argv[]) {
     parseArgs(argc, argv);
