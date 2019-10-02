@@ -39,6 +39,7 @@ teste.py
 lib
 inputs
 outputs
+
 fs.o
 main.o
 tecnicofs
