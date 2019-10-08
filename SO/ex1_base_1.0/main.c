@@ -10,6 +10,14 @@
 #define MAX_COMMANDS 150000
 #define MAX_INPUT_SIZE 100
 
+#if defined(MUTEX)
+    #define VAR 1
+#elif defined(RWLOCK)
+    #define VAR 2
+#else
+    #define VAR 0
+#endif
+
 char* inputFile;
 char* outputFile;
 int numberThreads;
@@ -18,6 +26,8 @@ tecnicofs* fs;
 char inputCommands[MAX_COMMANDS][MAX_INPUT_SIZE];
 int numberCommands = 0;
 int headQueue = 0;
+
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static void displayUsage (const char* appName) {
     printf("Usage: %s\n", appName);
@@ -43,7 +53,7 @@ int insertCommand(char* data) {
 }
 
 char* removeCommand() {
-    if((numberCommands + 1)){
+    if(numberCommands > 0){
         numberCommands--;
         return inputCommands[headQueue++];  
     }
@@ -52,7 +62,7 @@ char* removeCommand() {
 
 void errorParse() {
     fprintf(stderr, "Error: command invalid\n");
-    //exit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }
 
 void processInput() {
@@ -94,16 +104,21 @@ void processInput() {
     fclose(fptr);
 }
 
-void applyCommands() {
+void* applyCommands(void* arg){
     while(numberCommands > 0){
+        pthread_mutex_lock(&mutex);
         const char* command = removeCommand();
         if (command == NULL){
+            pthread_mutex_unlock(&mutex);
             continue;
         }
 
         char token;
         char name[MAX_INPUT_SIZE];
         int numTokens = sscanf(command, "%c %s", &token, name);
+
+        printf("Command: %c %s\n", token, name);
+        
         if (numTokens != 2) {
             fprintf(stderr, "Error: invalid command in Queue\n");
             exit(EXIT_FAILURE);
@@ -115,6 +130,7 @@ void applyCommands() {
             case 'c':
                 iNumber = obtainNewInumber(fs);
                 create(fs, name, iNumber);
+                pthread_mutex_unlock(&mutex);
                 break;
             case 'l':
                 searchResult = lookup(fs, name);
@@ -122,9 +138,11 @@ void applyCommands() {
                     printf("%s not found\n", name);
                 else
                     printf("%s found with inumber %d\n", name, searchResult);
+                pthread_mutex_unlock(&mutex);
                 break;
             case 'd':
                 delete(fs, name);
+                pthread_mutex_unlock(&mutex);
                 break;
             default: { /* error */
                 fprintf(stderr, "Error: command to apply\n");
@@ -132,16 +150,15 @@ void applyCommands() {
             }
         }
     }
+    pthread_exit(NULL);
 }
-
-/*
-void* applicator(void* arg) {
-    return;
-}
-*/
 
 
 int main(int argc, char* argv[]) {
+
+    int x = VAR;
+    printf("%d\n", x);
+
     parseArgs(argc, argv);
 
     fs = new_tecnicofs();
@@ -150,7 +167,15 @@ int main(int argc, char* argv[]) {
     clock_t start = clock();
     //---------------------------------
 
-    applyCommands();
+    pthread_t *threads = malloc(numberThreads * sizeof(pthread_t));
+
+    for (int i = 0; i < numberThreads; i++) {
+        pthread_create(&threads[i], NULL, applyCommands, NULL);
+    }
+    
+    for (int i = 0; i < numberThreads; i++) {
+        pthread_join(threads[i], NULL);
+    }
     
     //---------------------------------
     clock_t end = clock();

@@ -13,7 +13,9 @@ LDFLAGS=-lm
 all: tecnicofs
 
 tecnicofs: lib/bst.o fs.o main.o
-	$(LD) $(CFLAGS) $(LDFLAGS) -o tecnicofs lib/bst.o fs.o main.o
+	$(LD) $(CFLAGS) $(LDFLAGS)          lib/bst.o fs.o main.o -o tecnicofs-nosync -lpthread
+	$(LD) $(CFLAGS) $(LDFLAGS) -DMUTEX  lib/bst.o fs.o main.o -o tecnicofs-mutex  -lpthread
+	$(LD) $(CFLAGS) $(LDFLAGS) -DRWLOCK lib/bst.o fs.o main.o -o tecnicofs-rwlock -lpthread
 
 lib/bst.o: lib/bst.c lib/bst.h
 	$(CC) $(CFLAGS) -o lib/bst.o -c lib/bst.c
@@ -26,7 +28,4 @@ main.o: main.c fs.h lib/bst.h
 
 clean:
 	@echo Cleaning...
-	rm -f lib/*.o *.o tecnicofs
-
-run: tecnicofs
-	./tecnicofs
+	rm -f lib/*.o *.o tecnicofs-nosync tecnicofs-mutex tecnicofs-rwlock
