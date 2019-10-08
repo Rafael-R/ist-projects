@@ -16,8 +16,9 @@ tecnicofs* new_tecnicofs(){
 		exit(EXIT_FAILURE);
 	}
 	fs->bstRoot = NULL;
-	return fs;
-}
+	fs->nextINumber = 0;
+ 	return fs;
+ }
 
 void free_tecnicofs(tecnicofs* fs){
 	free_tree(fs->bstRoot);
