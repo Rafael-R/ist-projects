@@ -12,10 +12,10 @@ LDFLAGS=-lm
 
 all: tecnicofs
 
-tecnicofs: lib/bst.o fs.o main.o
-	$(LD) $(CFLAGS) $(LDFLAGS)          lib/bst.o fs.o main.o -o tecnicofs-nosync -lpthread
-	$(LD) $(CFLAGS) $(LDFLAGS) -DMUTEX  lib/bst.o fs.o main.o -o tecnicofs-mutex  -lpthread
-	$(LD) $(CFLAGS) $(LDFLAGS) -DRWLOCK lib/bst.o fs.o main.o -o tecnicofs-rwlock -lpthread
+tecnicofs: lib/bst.o fs.o main.o main-mutex.o main-rwlock.o
+	$(LD) $(CFLAGS) $(LDFLAGS)          lib/bst.o fs.o main.o        -o tecnicofs-nosync -lpthread
+	$(LD) $(CFLAGS) $(LDFLAGS) -DMUTEX  lib/bst.o fs.o main-mutex.o  -o tecnicofs-mutex  -lpthread
+	$(LD) $(CFLAGS) $(LDFLAGS) -DRWLOCK lib/bst.o fs.o main-rwlock.o -o tecnicofs-rwlock -lpthread
 
 lib/bst.o: lib/bst.c lib/bst.h
 	$(CC) $(CFLAGS) -o lib/bst.o -c lib/bst.c
@@ -23,8 +23,15 @@ lib/bst.o: lib/bst.c lib/bst.h
 fs.o: fs.c fs.h lib/bst.h
 	$(CC) $(CFLAGS) -o fs.o -c fs.c
 
+
+main-rwlock.o: main.c fs.h lib/bst.h
+	$(CC) $(CFLAGS) -DRWLOCK -o main-rwlock.o -c main.c
+
+main-mutex.o: main.c fs.h lib/bst.h
+	$(CC) $(CFLAGS) -DMUTEX  -o main-mutex.o  -c main.c
+
 main.o: main.c fs.h lib/bst.h
-	$(CC) $(CFLAGS) -o main.o -c main.c
+	$(CC) $(CFLAGS)          -o main.o        -c main.c
 
 clean:
 	@echo Cleaning...

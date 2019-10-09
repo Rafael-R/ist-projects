@@ -27,7 +27,9 @@ char inputCommands[MAX_COMMANDS][MAX_INPUT_SIZE];
 int numberCommands = 0;
 int headQueue = 0;
 
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex1;
+pthread_mutex_t mutex2;
+pthread_rwlock_t rwlock;
 
 static void displayUsage (const char* appName) {
     printf("Usage: %s\n", appName);
@@ -105,24 +107,38 @@ void processInput() {
 }
 
 void* applyCommands(void* arg){
+
+    if((pthread_mutex_init(&mutex1, NULL)) &&
+       (pthread_mutex_init(&mutex2, NULL))) {
+        fprintf(stderr, "Error: initializing lock\n");
+        exit(EXIT_FAILURE);
+    }
+    /*if((pthread_rwlock_init(&rwlock, NULL)) != 0) {
+        fprintf(stderr, "Error: initializing lock\n");
+        exit(EXIT_FAILURE);
+    }*/
+
     while(numberCommands > 0){
-        pthread_mutex_lock(&mutex);
+        pthread_mutex_lock(&mutex1);
+        //pthread_rwlock_rdlock(&rwlock);
         const char* command = removeCommand();
         if (command == NULL){
-            pthread_mutex_unlock(&mutex);
+            pthread_mutex_unlock(&mutex1);
+            //pthread_rwlock_unlock(&rwlock);
             continue;
         }
 
         char token;
         char name[MAX_INPUT_SIZE];
         int numTokens = sscanf(command, "%c %s", &token, name);
-
-        printf("Command: %c %s\n", token, name);
         
         if (numTokens != 2) {
             fprintf(stderr, "Error: invalid command in Queue\n");
             exit(EXIT_FAILURE);
         }
+
+        pthread_mutex_unlock(&mutex1);
+        pthread_mutex_lock(&mutex2);
 
         int searchResult;
         int iNumber;
@@ -130,7 +146,8 @@ void* applyCommands(void* arg){
             case 'c':
                 iNumber = obtainNewInumber(fs);
                 create(fs, name, iNumber);
-                pthread_mutex_unlock(&mutex);
+                pthread_mutex_unlock(&mutex2);
+                //pthread_rwlock_unlock(&rwlock);
                 break;
             case 'l':
                 searchResult = lookup(fs, name);
@@ -138,11 +155,13 @@ void* applyCommands(void* arg){
                     printf("%s not found\n", name);
                 else
                     printf("%s found with inumber %d\n", name, searchResult);
-                pthread_mutex_unlock(&mutex);
+                pthread_mutex_unlock(&mutex2);
+                //pthread_rwlock_unlock(&rwlock);
                 break;
             case 'd':
                 delete(fs, name);
-                pthread_mutex_unlock(&mutex);
+                pthread_mutex_unlock(&mutex2);
+                //pthread_rwlock_unlock(&rwlock);
                 break;
             default: { /* error */
                 fprintf(stderr, "Error: command to apply\n");
@@ -150,6 +169,17 @@ void* applyCommands(void* arg){
             }
         }
     }
+
+    if((pthread_mutex_destroy(&mutex1)) &&
+       (pthread_mutex_destroy(&mutex2))) {
+        fprintf(stderr, "Error: destroying lock\n");
+        exit(EXIT_FAILURE);
+    }
+    /*if((pthread_rwlock_destroy(&rwlock)) != 0) {
+        fprintf(stderr, "Error: destroying lock\n");
+        exit(EXIT_FAILURE);
+    }*/
+
     pthread_exit(NULL);
 }
 
@@ -170,11 +200,17 @@ int main(int argc, char* argv[]) {
     pthread_t *threads = malloc(numberThreads * sizeof(pthread_t));
 
     for (int i = 0; i < numberThreads; i++) {
-        pthread_create(&threads[i], NULL, applyCommands, NULL);
+        if((pthread_create(&threads[i], NULL, applyCommands, NULL)) != 0) {
+            fprintf(stderr, "Error: creating thread\n");
+            exit(EXIT_FAILURE);
+        }
     }
     
     for (int i = 0; i < numberThreads; i++) {
-        pthread_join(threads[i], NULL);
+        if((pthread_join(threads[i], NULL)) != 0) {
+            fprintf(stderr, "Error: joining thread\n");
+            exit(EXIT_FAILURE);
+        }
     }
     
     //---------------------------------
