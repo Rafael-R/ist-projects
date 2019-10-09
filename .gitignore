@@ -39,6 +39,12 @@ teste.py
 inputs
 outputs
 
+bst.o
 fs.o
 main.o
-tecnicofs
+main-mutex.o
+main-rwlock.o
+tecnicofs-nosync
+tecnicofs-mutex
+tecnicofs-rwlock
+
