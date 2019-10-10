@@ -41,7 +41,7 @@ outputs
 
 bst.o
 fs.o
-main.o
+main-nosync.o
 main-mutex.o
 main-rwlock.o
 tecnicofs-nosync

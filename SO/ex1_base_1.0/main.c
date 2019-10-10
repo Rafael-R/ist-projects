@@ -4,7 +4,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <pthread.h>
-#include <time.h>
+#include <sys/time.h>
 #include "fs.h"
 
 #define MAX_COMMANDS 150000
@@ -43,7 +43,12 @@ static void parseArgs (long argc, char* const argv[]) {
     }
     inputFile = argv[1];
     outputFile = argv[2];
-    numberThreads = atoi(argv[3]);
+
+    if (strcmp(argv[0], "./tecnicofs-nosync") == 0) {
+        numberThreads = 1;
+    } else {
+        numberThreads = atoi(argv[3]);
+    }
 }
 
 int insertCommand(char* data) {
@@ -113,14 +118,17 @@ void* applyCommands(void* arg){
         fprintf(stderr, "Error: initializing lock\n");
         exit(EXIT_FAILURE);
     }
+
     /*if((pthread_rwlock_init(&rwlock, NULL)) != 0) {
         fprintf(stderr, "Error: initializing lock\n");
         exit(EXIT_FAILURE);
     }*/
 
     while(numberCommands > 0){
+
         pthread_mutex_lock(&mutex1);
         //pthread_rwlock_rdlock(&rwlock);
+
         const char* command = removeCommand();
         if (command == NULL){
             pthread_mutex_unlock(&mutex1);
@@ -137,14 +145,17 @@ void* applyCommands(void* arg){
             exit(EXIT_FAILURE);
         }
 
+        int iNumber;
+        if (token == 'c') {
+            iNumber = obtainNewInumber(fs);
+        }
+
         pthread_mutex_unlock(&mutex1);
         pthread_mutex_lock(&mutex2);
 
         int searchResult;
-        int iNumber;
         switch (token) {
             case 'c':
-                iNumber = obtainNewInumber(fs);
                 create(fs, name, iNumber);
                 pthread_mutex_unlock(&mutex2);
                 //pthread_rwlock_unlock(&rwlock);
@@ -186,36 +197,35 @@ void* applyCommands(void* arg){
 
 int main(int argc, char* argv[]) {
 
-    int x = VAR;
-    printf("%d\n", x);
-
     parseArgs(argc, argv);
 
     fs = new_tecnicofs();
     processInput();
 
-    clock_t start = clock();
-    //---------------------------------
+    pthread_t* threads = (pthread_t*) malloc(numberThreads * sizeof(pthread_t));
 
-    pthread_t *threads = malloc(numberThreads * sizeof(pthread_t));
+    struct timeval start, end;
+
+    gettimeofday(&start, NULL);
 
     for (int i = 0; i < numberThreads; i++) {
-        if((pthread_create(&threads[i], NULL, applyCommands, NULL)) != 0) {
+        if((pthread_create(&threads[i], NULL, applyCommands, NULL))) {
             fprintf(stderr, "Error: creating thread\n");
             exit(EXIT_FAILURE);
         }
     }
     
     for (int i = 0; i < numberThreads; i++) {
-        if((pthread_join(threads[i], NULL)) != 0) {
+        if((pthread_join(threads[i], NULL))) {
             fprintf(stderr, "Error: joining thread\n");
             exit(EXIT_FAILURE);
         }
     }
-    
-    //---------------------------------
-    clock_t end = clock();
-    float duration = (float) (end - start) / CLOCKS_PER_SEC;
+
+    gettimeofday(&end, NULL);
+
+    float duration = (end.tv_sec - start.tv_sec) * 1000.0 +
+                     (end.tv_usec - start.tv_usec) / 1000.0;
 
     printf("TecnicoFS completed in %.4f seconds.\n", duration);
 
