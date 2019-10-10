@@ -197,14 +197,17 @@ void* applyCommands(void* arg){
 
 int main(int argc, char* argv[]) {
 
+    int x = VAR;
+    printf("%d\n", x);
+
     parseArgs(argc, argv);
 
     fs = new_tecnicofs();
     processInput();
 
-    pthread_t* threads = (pthread_t*) malloc(numberThreads * sizeof(pthread_t));
-
     struct timeval start, end;
+
+    pthread_t* threads = (pthread_t*) malloc(numberThreads * sizeof(pthread_t));
 
     gettimeofday(&start, NULL);
 
