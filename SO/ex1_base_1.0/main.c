@@ -10,20 +10,6 @@
 #define MAX_COMMANDS 150000
 #define MAX_INPUT_SIZE 100
 
-#if defined(MUTEX)
-    #define LOCK_DECLARATION pthread_mutex_t
-    #define LOCK_INIT pthread_mutex_init
-    #define LOCK_DESTROY pthread_mutex_destroy
-    #define LOCK_UNLOCK pthread_mutex_unlock
-#elif defined(RWLOCK)
-    #define LOCK_DECLARATION pthread_rwlock_t
-    #define LOCK_INIT pthread_rwlock_init
-    #define LOCK_DESTROY pthread_rwlock_destroy
-    #define LOCK_UNLOCK pthread_rwlock_unlock
-#else
-    #define NOSYNC 1
-#endif
-
 char* inputFile;
 char* outputFile;
 int numberThreads;
@@ -33,9 +19,25 @@ char inputCommands[MAX_COMMANDS][MAX_INPUT_SIZE];
 int numberCommands = 0;
 int headQueue = 0;
 
-#ifndef NOSYNC
-pthread_mutex_t commandsAccess;
-LOCK_DECLARATION directoryAccess;
+#if !defined(NOSYNC)
+    pthread_mutex_t commandsAccess;
+    #if defined(MUTEX)
+        pthread_mutex_t directoryAccess;
+        #define LOCK_INIT(lock) pthread_mutex_init(&lock, NULL)
+        #define LOCK_WRLOCK(lock) pthread_mutex_lock(&lock)
+        #define LOCK_RDLOCK(lock) pthread_mutex_lock(&lock)
+        #define LOCK_UNLOCK(lock) pthread_mutex_unlock(&lock)
+        #define LOCK_DESTROY(lock) pthread_mutex_destroy(&lock)
+    #elif defined(RWLOCK)
+        pthread_rwlock_t directoryAccess;
+        #define LOCK_INIT(lock) pthread_rwlock_init(&lock, NULL)
+        #define LOCK_WRLOCK(lock) pthread_rwlock_wrlock(&lock)
+        #define LOCK_RDLOCK(lock) pthread_rwlock_rdlock(&lock)
+        #define LOCK_UNLOCK(lock) pthread_rwlock_unlock(&lock)
+        #define LOCK_DESTROY(lock) pthread_rwlock_destroy(&lock)
+    #else
+        #define NOSYNC
+    #endif
 #endif
 
 static void displayUsage (const char* appName) {
@@ -115,9 +117,9 @@ void processInput() {
 
 void* applyCommands(void* arg){
 
-    #ifndef NOSYNC
+    #if !defined(NOSYNC)
         if((pthread_mutex_init(&commandsAccess, NULL)) != 0 &&
-           (LOCK_INIT(&directoryAccess, NULL)) != 0) {
+           (LOCK_INIT(directoryAccess)) != 0) {
             fprintf(stderr, "Error: initializing lock\n");
             exit(EXIT_FAILURE);
         }
@@ -125,13 +127,13 @@ void* applyCommands(void* arg){
 
     while(numberCommands > 0){
 
-        #ifndef NOSYNC
+        #if !defined(NOSYNC)
             pthread_mutex_lock(&commandsAccess);
         #endif
 
         const char* command = removeCommand();
         if (command == NULL){
-            #ifndef NOSYNC
+            #if !defined(NOSYNC)
                 pthread_mutex_unlock(&commandsAccess);
             #endif
             continue;
@@ -145,45 +147,53 @@ void* applyCommands(void* arg){
             fprintf(stderr, "Error: invalid command in Queue\n");
             exit(EXIT_FAILURE);
         }
-
+        
         int iNumber;
         if (token == 'c') {
             iNumber = obtainNewInumber(fs);
         }
 
-        #ifndef NOSYNC
-            pthread_mutex_unlock(&commandsAccess);
-        #endif
-
-        #ifdef MUTEX
-            pthread_mutex_lock(&directoryAccess);
-        #elif WRLOCK
-            pthread_rwlock_rdlock(&directoryAccess);
-            pthread_rwlock_wrlock(&directoryAccess);
-        #endif
+        #if !defined(NOSYNC)                            // O acesso ao vetor de comandos
+            pthread_mutex_unlock(&commandsAccess);      // e ao iNumber e' sempre protegido
+        #endif                                          // por um mutex.
 
         int searchResult;
         switch (token) {
             case 'c':
+                #if !defined(NOSYNC) 
+                    LOCK_WRLOCK(directoryAccess);
+                #endif
+
                 create(fs, name, iNumber);
-                #ifndef NOSYNC
-                    LOCK_UNLOCK(&directoryAccess);
+
+                #if !defined(NOSYNC)
+                    LOCK_UNLOCK(directoryAccess);
                 #endif
                 break;
             case 'l':
+                #if !defined(NOSYNC) 
+                    LOCK_RDLOCK(directoryAccess);
+                #endif
+
                 searchResult = lookup(fs, name);
                 if(!searchResult)
                     printf("%s not found\n", name);
                 else
                     printf("%s found with inumber %d\n", name, searchResult);
-                #ifndef NOSYNC
-                    LOCK_UNLOCK(&directoryAccess);
+
+                #if !defined(NOSYNC)
+                    LOCK_UNLOCK(directoryAccess);
                 #endif
                 break;
             case 'd':
+                #if !defined(NOSYNC) 
+                    LOCK_WRLOCK(directoryAccess);
+                #endif
+
                 delete(fs, name);
-                #ifndef NOSYNC
-                    LOCK_UNLOCK(&directoryAccess);
+
+                #if !defined(NOSYNC)
+                    LOCK_UNLOCK(directoryAccess);
                 #endif
                 break;
             default: { /* error */
@@ -193,10 +203,10 @@ void* applyCommands(void* arg){
         }
     }
 
-    #ifndef NOSYNC
+    #if !defined(NOSYNC)
         if((pthread_mutex_destroy(&commandsAccess)) != 0 &&
-           (LOCK_DESTROY(&directoryAccess)) != 0) {
-            fprintf(stderr, "Error: destroying lock\n");
+           (LOCK_DESTROY(directoryAccess)) != 0) {
+            fprintf(stderr, "Error: initializing lock\n");
             exit(EXIT_FAILURE);
         }
         pthread_exit(NULL);
@@ -204,7 +214,6 @@ void* applyCommands(void* arg){
         return NULL;
     #endif
 }
-
 
 int main(int argc, char* argv[]) {
 
@@ -215,13 +224,13 @@ int main(int argc, char* argv[]) {
 
     struct timeval start, end;
 
-    #ifndef NOSYNC
+    #if !defined(NOSYNC)
         pthread_t* threads = (pthread_t*) malloc(numberThreads * sizeof(pthread_t));
     #endif
 
     gettimeofday(&start, NULL);
 
-    #ifndef NOSYNC
+    #if !defined(NOSYNC)
         for (int i = 0; i < numberThreads; i++) {
             if((pthread_create(&threads[i], NULL, applyCommands, NULL)) != 0) {
                 fprintf(stderr, "Error: creating thread\n");
