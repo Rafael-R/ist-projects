@@ -24,10 +24,10 @@ int headQueue = 0;
     #if defined(MUTEX)
         pthread_mutex_t directoryAccess;
         #define LOCK_INIT(lock) pthread_mutex_init(&lock, NULL)
-        #define LOCK_WRLOCK(lock) pthread_mutex_lock(&lock)
-        #define LOCK_RDLOCK(lock) pthread_mutex_lock(&lock)
-        #define LOCK_UNLOCK(lock) pthread_mutex_unlock(&lock)
-        #define LOCK_DESTROY(lock) pthread_mutex_destroy(&lock)
+        #define LOCK_WRLOCK(lock) pthread_mutex_lock(&lock)         // Sendo que o mutex e' bloqueado
+        #define LOCK_RDLOCK(lock) pthread_mutex_lock(&lock)         // sempre da mesma forma, ao 
+        #define LOCK_UNLOCK(lock) pthread_mutex_unlock(&lock)       // contrario do rwlock, tem de
+        #define LOCK_DESTROY(lock) pthread_mutex_destroy(&lock)     // definido duas vezes
     #elif defined(RWLOCK)
         pthread_rwlock_t directoryAccess;
         #define LOCK_INIT(lock) pthread_rwlock_init(&lock, NULL)
@@ -211,7 +211,7 @@ void* applyCommands(void* arg){
         }
         pthread_exit(NULL);
     #else
-        return NULL;
+        return NULL;    // Return normal em caso de execucao sequencial
     #endif
 }
 
@@ -244,7 +244,7 @@ int main(int argc, char* argv[]) {
             }
         }
     #else
-        applyCommands(NULL);    // Execucao sequencial caso 
+        applyCommands(NULL);    // Execucao sequencial
     #endif
 
     gettimeofday(&end, NULL);
