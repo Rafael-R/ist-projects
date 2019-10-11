@@ -11,11 +11,17 @@
 #define MAX_INPUT_SIZE 100
 
 #if defined(MUTEX)
-    #define VAR 1
+    #define LOCK_DECLARATION pthread_mutex_t
+    #define LOCK_INIT pthread_mutex_init
+    #define LOCK_DESTROY pthread_mutex_destroy
+    #define LOCK_UNLOCK pthread_mutex_unlock
 #elif defined(RWLOCK)
-    #define VAR 2
+    #define LOCK_DECLARATION pthread_rwlock_t
+    #define LOCK_INIT pthread_rwlock_init
+    #define LOCK_DESTROY pthread_rwlock_destroy
+    #define LOCK_UNLOCK pthread_rwlock_unlock
 #else
-    #define VAR 0
+    #define NOSYNC 1
 #endif
 
 char* inputFile;
@@ -27,9 +33,10 @@ char inputCommands[MAX_COMMANDS][MAX_INPUT_SIZE];
 int numberCommands = 0;
 int headQueue = 0;
 
-pthread_mutex_t mutex1;
-pthread_mutex_t mutex2;
-pthread_rwlock_t rwlock;
+#ifndef NOSYNC
+pthread_mutex_t commandsAccess;
+LOCK_DECLARATION directoryAccess;
+#endif
 
 static void displayUsage (const char* appName) {
     printf("Usage: %s\n", appName);
@@ -43,12 +50,7 @@ static void parseArgs (long argc, char* const argv[]) {
     }
     inputFile = argv[1];
     outputFile = argv[2];
-
-    if (strcmp(argv[0], "./tecnicofs-nosync") == 0) {
-        numberThreads = 1;
-    } else {
-        numberThreads = atoi(argv[3]);
-    }
+    numberThreads = atoi(argv[3]);
 }
 
 int insertCommand(char* data) {
@@ -113,26 +115,25 @@ void processInput() {
 
 void* applyCommands(void* arg){
 
-    if((pthread_mutex_init(&mutex1, NULL)) &&
-       (pthread_mutex_init(&mutex2, NULL))) {
-        fprintf(stderr, "Error: initializing lock\n");
-        exit(EXIT_FAILURE);
-    }
-
-    /*if((pthread_rwlock_init(&rwlock, NULL)) != 0) {
-        fprintf(stderr, "Error: initializing lock\n");
-        exit(EXIT_FAILURE);
-    }*/
+    #ifndef NOSYNC
+        if((pthread_mutex_init(&commandsAccess, NULL)) != 0 &&
+           (LOCK_INIT(&directoryAccess, NULL)) != 0) {
+            fprintf(stderr, "Error: initializing lock\n");
+            exit(EXIT_FAILURE);
+        }
+    #endif
 
     while(numberCommands > 0){
 
-        pthread_mutex_lock(&mutex1);
-        //pthread_rwlock_rdlock(&rwlock);
+        #ifndef NOSYNC
+            pthread_mutex_lock(&commandsAccess);
+        #endif
 
         const char* command = removeCommand();
         if (command == NULL){
-            pthread_mutex_unlock(&mutex1);
-            //pthread_rwlock_unlock(&rwlock);
+            #ifndef NOSYNC
+                pthread_mutex_unlock(&commandsAccess);
+            #endif
             continue;
         }
 
@@ -150,15 +151,24 @@ void* applyCommands(void* arg){
             iNumber = obtainNewInumber(fs);
         }
 
-        pthread_mutex_unlock(&mutex1);
-        pthread_mutex_lock(&mutex2);
+        #ifndef NOSYNC
+            pthread_mutex_unlock(&commandsAccess);
+        #endif
+
+        #ifdef MUTEX
+            pthread_mutex_lock(&directoryAccess);
+        #elif WRLOCK
+            pthread_rwlock_rdlock(&directoryAccess);
+            pthread_rwlock_wrlock(&directoryAccess);
+        #endif
 
         int searchResult;
         switch (token) {
             case 'c':
                 create(fs, name, iNumber);
-                pthread_mutex_unlock(&mutex2);
-                //pthread_rwlock_unlock(&rwlock);
+                #ifndef NOSYNC
+                    LOCK_UNLOCK(&directoryAccess);
+                #endif
                 break;
             case 'l':
                 searchResult = lookup(fs, name);
@@ -166,13 +176,15 @@ void* applyCommands(void* arg){
                     printf("%s not found\n", name);
                 else
                     printf("%s found with inumber %d\n", name, searchResult);
-                pthread_mutex_unlock(&mutex2);
-                //pthread_rwlock_unlock(&rwlock);
+                #ifndef NOSYNC
+                    LOCK_UNLOCK(&directoryAccess);
+                #endif
                 break;
             case 'd':
                 delete(fs, name);
-                pthread_mutex_unlock(&mutex2);
-                //pthread_rwlock_unlock(&rwlock);
+                #ifndef NOSYNC
+                    LOCK_UNLOCK(&directoryAccess);
+                #endif
                 break;
             default: { /* error */
                 fprintf(stderr, "Error: command to apply\n");
@@ -181,24 +193,20 @@ void* applyCommands(void* arg){
         }
     }
 
-    if((pthread_mutex_destroy(&mutex1)) &&
-       (pthread_mutex_destroy(&mutex2))) {
-        fprintf(stderr, "Error: destroying lock\n");
-        exit(EXIT_FAILURE);
-    }
-    /*if((pthread_rwlock_destroy(&rwlock)) != 0) {
-        fprintf(stderr, "Error: destroying lock\n");
-        exit(EXIT_FAILURE);
-    }*/
-
-    pthread_exit(NULL);
+    #ifndef NOSYNC
+        if((pthread_mutex_destroy(&commandsAccess)) != 0 &&
+           (LOCK_DESTROY(&directoryAccess)) != 0) {
+            fprintf(stderr, "Error: destroying lock\n");
+            exit(EXIT_FAILURE);
+        }
+        pthread_exit(NULL);
+    #else
+        return NULL;
+    #endif
 }
 
 
 int main(int argc, char* argv[]) {
-
-    int x = VAR;
-    printf("%d\n", x);
 
     parseArgs(argc, argv);
 
@@ -207,23 +215,28 @@ int main(int argc, char* argv[]) {
 
     struct timeval start, end;
 
-    pthread_t* threads = (pthread_t*) malloc(numberThreads * sizeof(pthread_t));
+    #ifndef NOSYNC
+        pthread_t* threads = (pthread_t*) malloc(numberThreads * sizeof(pthread_t));
+    #endif
 
     gettimeofday(&start, NULL);
 
-    for (int i = 0; i < numberThreads; i++) {
-        if((pthread_create(&threads[i], NULL, applyCommands, NULL))) {
-            fprintf(stderr, "Error: creating thread\n");
-            exit(EXIT_FAILURE);
+    #ifndef NOSYNC
+        for (int i = 0; i < numberThreads; i++) {
+            if((pthread_create(&threads[i], NULL, applyCommands, NULL)) != 0) {
+                fprintf(stderr, "Error: creating thread\n");
+                exit(EXIT_FAILURE);
+            }
         }
-    }
-    
-    for (int i = 0; i < numberThreads; i++) {
-        if((pthread_join(threads[i], NULL))) {
-            fprintf(stderr, "Error: joining thread\n");
-            exit(EXIT_FAILURE);
+        for (int i = 0; i < numberThreads; i++) {
+            if((pthread_join(threads[i], NULL)) != 0) {
+                fprintf(stderr, "Error: joining thread\n");
+                exit(EXIT_FAILURE);
+            }
         }
-    }
+    #else
+        applyCommands(NULL);
+    #endif
 
     gettimeofday(&end, NULL);
 
