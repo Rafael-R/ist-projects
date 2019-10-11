@@ -244,13 +244,13 @@ int main(int argc, char* argv[]) {
             }
         }
     #else
-        applyCommands(NULL);
+        applyCommands(NULL);    // Execucao sequencial caso 
     #endif
 
     gettimeofday(&end, NULL);
 
-    float duration = (end.tv_sec - start.tv_sec) * 1000.0 +
-                     (end.tv_usec - start.tv_usec) / 1000.0;
+    double duration = (end.tv_sec - start.tv_sec) +
+                      ((end.tv_usec - start.tv_usec) / 1000000.0);
 
     printf("TecnicoFS completed in %.4f seconds.\n", duration);
 
