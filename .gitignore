@@ -1,6 +1,6 @@
 # Ignored Files by each folder
 
-# IAED 1819
+# IAED
 
 testes_enunciado
 testes_publicos
@@ -26,7 +26,7 @@ test-vg.sh
 test_all_dirs.sh
 
 
-# LP 1819
+# LP
 
 testes_publicos
 codigo_comum.pl
