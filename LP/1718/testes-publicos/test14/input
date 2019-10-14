@@ -1,0 +1,4 @@
+puzzle(5_1,P),verifica_parcial(P,[],5,[(1,2),(1,3),(1,5),(2,5),(3,5),(4,5)]),writeln('true');writeln('false').
+puzzle(5_1,P),verifica_parcial(P,[(1,1),(1,2),(1,3)],5,[(2,3)]),writeln('true');writeln('false').
+puzzle(5_1,P),verifica_parcial(P,[(1,1),(1,2),(1,3)],5,[]),writeln('true');writeln('false').
+puzzle(5_1,P),verifica_parcial(P,[(1,1),(1,2)],5,[(2,3)]),writeln('true');writeln('false').

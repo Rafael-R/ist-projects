@@ -1,0 +1,3 @@
+puzzle(4_1,P),propaga(P,(1,1),Posicoes),writeln(Posicoes);writeln('false').
+puzzle(4_1,P),propaga(P,(1,4),Posicoes),writeln(Posicoes);writeln('false').
+puzzle(4_1,P),propaga(P,(2,4),Posicoes),writeln(Posicoes);writeln('false').
