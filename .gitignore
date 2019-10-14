@@ -49,3 +49,11 @@ tecnicofs-mutex
 tecnicofs-rwlock
 ProjetoSO_G123.zip
 
+
+#PO
+
+CVS
+
+*.class
+*.jar
+
