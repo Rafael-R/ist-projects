@@ -1,4 +1,3 @@
-JAVADIR=
 JARNAME=po-uuilib
 
 all:
