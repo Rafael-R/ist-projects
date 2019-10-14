@@ -1,11 +1,20 @@
 # Ignored Files by each folder
 
 *.zip
+*.pdf
+*.sh
+*.o
+*.class
+*.jar
+**/CVS/
+**/testes_publicos/
+**/testes-publicos/
+**/testes_enunciado/
+**/testes-enunciado/
 
-# IAED
 
-testes_enunciado
-testes_publicos
+# ----- IAED -----
+
 tests-a_r
 tests-basic
 tests-big
@@ -14,48 +23,24 @@ tests-e
 tests-mix
 tests-p
 tests-r
-
 proj1
 proj2
-proj1.zip
-proj2.zip
-teste_pratico.zip
-
-run.sh
-runall.sh
-test.sh
-test-vg.sh
-test_all_dirs.sh
 
 
-# LP
+# ----- LP -----
 
-testes_publicos
 codigo_comum.pl
 puzzles_publicos.pl
+exemplos_puzzles.pl
 teste.py
 
 
-# SO
+# ----- SO -----
 
 inputs
 outputs
-
-bst.o
-fs.o
-main-nosync.o
-main-mutex.o
-main-rwlock.o
 tecnicofs-nosync
 tecnicofs-mutex
 tecnicofs-rwlock
-ProjetoSO_G123.zip
 
-
-#PO
-
-CVS
-
-*.class
-*.jar
-
+# --------------------
