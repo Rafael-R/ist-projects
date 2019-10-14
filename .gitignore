@@ -1,5 +1,7 @@
 # Ignored Files by each folder
 
+*.zip
+
 # IAED
 
 testes_enunciado
