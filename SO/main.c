@@ -96,9 +96,15 @@ void processInput() {
     while (fgets(line, sizeof(line)/sizeof(char), fptr)) {
         char token;
         char name[MAX_INPUT_SIZE];
+        char newName[MAX_INPUT_SIZE];
 
-        int numTokens = sscanf(line, "%c %s", &token, name);
+        int numTokens = sscanf(line, "%c ", &token);
 
+        if (token == 'r') {
+            numTokens += sscanf(line, "%s %s", name, newName);
+        } else {
+            numTokens += sscanf(line, "%s", name);
+        }
         /* perform minimal validation */
         if (numTokens < 1) {
             continue;
@@ -112,12 +118,12 @@ void processInput() {
                 if(insertCommand(line))
                     break;
                 return;
-//            case 'r':
-//                if(numTokens != 3)
-//                    errorParse();
-//                if(insertCommand(line))
-//                    break;
-//                return;
+            case 'r':
+                if(numTokens != 3)
+                    errorParse();
+                if(insertCommand(line))
+                    break;
+                return;
             case '#':
                 break;
             default: { /* error */
@@ -156,11 +162,14 @@ void* applyCommands(void* arg){
 
         char token;
         char name[MAX_INPUT_SIZE];
-        int numTokens = sscanf(command, "%c %s", &token, name);
+        char newName[MAX_INPUT_SIZE];
 
-        if (numTokens != 2) {
-            fprintf(stderr, "Error: invalid command in Queue\n");
-            exit(EXIT_FAILURE);
+        int numTokens = sscanf(command, "%c ", &token);
+
+        if (token == 'r') {
+            numTokens += sscanf(command, "%s %s", name, newName);
+        } else {
+            numTokens += sscanf(command, "%s", name);
         }
 
         int iNumber;
@@ -172,7 +181,8 @@ void* applyCommands(void* arg){
             pthread_mutex_unlock(&commandsAccess);      // e ao iNumber e' sempre protegido
         #endif                                          // por um mutex.
 
-        int searchResult;
+        int searchResult_name;
+        int searchResult_newName;
         switch (token) {
             case 'c':
                 #if !defined(NOSYNC)
@@ -190,11 +200,11 @@ void* applyCommands(void* arg){
                     LOCK_RDLOCK(directoryAccess);
                 #endif
 
-                searchResult = lookup(fs, name);
-                if(!searchResult)
+                searchResult_name = lookup(fs, name);
+                if(!searchResult_name)
                     printf("%s not found\n", name);
                 else
-                    printf("%s found with inumber %d\n", name, searchResult);
+                    printf("%s found with inumber %d\n", name, searchResult_name);
 
                 #if !defined(NOSYNC)
                     LOCK_UNLOCK(directoryAccess);
@@ -206,6 +216,23 @@ void* applyCommands(void* arg){
                 #endif
 
                 delete(fs, name);
+
+                #if !defined(NOSYNC)
+                    LOCK_UNLOCK(directoryAccess);
+                #endif
+                break;
+            case 'r':
+                #if !defined(NOSYNC)
+                    LOCK_WRLOCK(directoryAccess);
+                #endif
+
+                searchResult_name = lookup(fs, name);
+                searchResult_newName = lookup(fs, newName);
+
+                if(searchResult_name && !searchResult_newName) {
+                    delete(fs, name);
+                    create(fs, newName, searchResult_name);
+                }
 
                 #if !defined(NOSYNC)
                     LOCK_UNLOCK(directoryAccess);
@@ -235,7 +262,7 @@ int main(int argc, char* argv[]) {
 
     parseArgs(argc, argv);
 
-    fs = new_tecnicofs();
+    fs = new_tecnicofs(numberBuckets);
     processInput();
 
     struct timeval start, end;

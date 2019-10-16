@@ -1,5 +1,5 @@
-1 - Passara receber 4 argumentos
+1 - Passara receber 4 argumentos [Done]
 2 - Hash table (n bst's)
 3 - Execução incremental
-4 - Renomear Ficheiro
+4 - Renomear Ficheiro [Done (?)]
 5 - Script
