@@ -1,6 +1,7 @@
 #ifndef FS_H
 #define FS_H
 #include "lib/bst.h"
+#include "lib/hash.h"
 
 typedef struct tecnicofs {
     node* bstRoot;

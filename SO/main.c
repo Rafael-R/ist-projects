@@ -7,7 +7,7 @@
 #include <sys/time.h>
 #include "fs.h"
 
-#define MAX_COMMANDS 150000
+#define MAX_COMMANDS 10
 #define MAX_INPUT_SIZE 100
 
 char* inputFile;
@@ -41,10 +41,12 @@ int headQueue = 0;
     #endif
 #endif
 
+
 static void displayUsage (const char* appName) {
     printf("Usage: %s\n", appName);
     exit(EXIT_FAILURE);
 }
+
 
 static void parseArgs (long argc, char* const argv[]) {
     if (argc != 5) {
@@ -57,6 +59,7 @@ static void parseArgs (long argc, char* const argv[]) {
     numberBuckets = atoi(argv[4]);
 }
 
+
 int insertCommand(char* data) {
     if(numberCommands != MAX_COMMANDS) {
         strcpy(inputCommands[numberCommands++], data);
@@ -64,6 +67,7 @@ int insertCommand(char* data) {
     }
     return 0;
 }
+
 
 char* removeCommand() {
     if(numberCommands > 0){
@@ -73,10 +77,12 @@ char* removeCommand() {
     return NULL;
 }
 
+
 void errorParse() {
     fprintf(stderr, "Error: command invalid\n");
     exit(EXIT_FAILURE);
 }
+
 
 void processInput() {
     char line[MAX_INPUT_SIZE];
@@ -106,12 +112,12 @@ void processInput() {
                 if(insertCommand(line))
                     break;
                 return;
-            case 'r':
-                if(numTokens != 2)
-                    errorParse();
-                if(insertCommand(line))
-                    break;
-                return;
+//            case 'r':
+//                if(numTokens != 3)
+//                    errorParse();
+//                if(insertCommand(line))
+//                    break;
+//                return;
             case '#':
                 break;
             default: { /* error */
@@ -122,6 +128,7 @@ void processInput() {
 
     fclose(fptr);
 }
+
 
 void* applyCommands(void* arg){
 
@@ -222,6 +229,7 @@ void* applyCommands(void* arg){
         return NULL;    // Return normal em caso de execucao sequencial
     #endif
 }
+
 
 int main(int argc, char* argv[]) {
 
