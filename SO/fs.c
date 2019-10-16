@@ -9,7 +9,7 @@ int obtainNewInumber(tecnicofs* fs) {
 	return newInumber;
 }
 
-tecnicofs* new_tecnicofs(){
+tecnicofs* new_tecnicofs(int numberBuckets){
 	tecnicofs*fs = malloc(sizeof(tecnicofs));
 	if (!fs) {
 		perror("failed to allocate tecnicofs");
