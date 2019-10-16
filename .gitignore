@@ -24,7 +24,7 @@ tests-p
 tests-r
 proj1
 proj2
-
+IAED/**/*.sh
 
 # ----- LP -----
 
