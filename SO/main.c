@@ -13,6 +13,7 @@
 char* inputFile;
 char* outputFile;
 int numberThreads;
+int numberBuckets;
 tecnicofs* fs;
 
 char inputCommands[MAX_COMMANDS][MAX_INPUT_SIZE];
@@ -25,7 +26,7 @@ int headQueue = 0;
         pthread_mutex_t directoryAccess;
         #define LOCK_INIT(lock) pthread_mutex_init(&lock, NULL)
         #define LOCK_WRLOCK(lock) pthread_mutex_lock(&lock)         // Sendo que o mutex e' bloqueado
-        #define LOCK_RDLOCK(lock) pthread_mutex_lock(&lock)         // sempre da mesma forma, ao 
+        #define LOCK_RDLOCK(lock) pthread_mutex_lock(&lock)         // sempre da mesma forma, ao
         #define LOCK_UNLOCK(lock) pthread_mutex_unlock(&lock)       // contrario do rwlock, tem de
         #define LOCK_DESTROY(lock) pthread_mutex_destroy(&lock)     // definido duas vezes
     #elif defined(RWLOCK)
@@ -46,13 +47,14 @@ static void displayUsage (const char* appName) {
 }
 
 static void parseArgs (long argc, char* const argv[]) {
-    if (argc != 4) {
+    if (argc != 5) {
         fprintf(stderr, "Invalid format:\n");
         displayUsage(argv[0]);
     }
     inputFile = argv[1];
     outputFile = argv[2];
     numberThreads = atoi(argv[3]);
+    numberBuckets = atoi(argv[4]);
 }
 
 int insertCommand(char* data) {
@@ -66,7 +68,7 @@ int insertCommand(char* data) {
 char* removeCommand() {
     if(numberCommands > 0){
         numberCommands--;
-        return inputCommands[headQueue++];  
+        return inputCommands[headQueue++];
     }
     return NULL;
 }
@@ -99,6 +101,12 @@ void processInput() {
             case 'c':
             case 'l':
             case 'd':
+                if(numTokens != 2)
+                    errorParse();
+                if(insertCommand(line))
+                    break;
+                return;
+            case 'r':
                 if(numTokens != 2)
                     errorParse();
                 if(insertCommand(line))
@@ -142,12 +150,12 @@ void* applyCommands(void* arg){
         char token;
         char name[MAX_INPUT_SIZE];
         int numTokens = sscanf(command, "%c %s", &token, name);
-        
+
         if (numTokens != 2) {
             fprintf(stderr, "Error: invalid command in Queue\n");
             exit(EXIT_FAILURE);
         }
-        
+
         int iNumber;
         if (token == 'c') {
             iNumber = obtainNewInumber(fs);
@@ -160,7 +168,7 @@ void* applyCommands(void* arg){
         int searchResult;
         switch (token) {
             case 'c':
-                #if !defined(NOSYNC) 
+                #if !defined(NOSYNC)
                     LOCK_WRLOCK(directoryAccess);
                 #endif
 
@@ -171,7 +179,7 @@ void* applyCommands(void* arg){
                 #endif
                 break;
             case 'l':
-                #if !defined(NOSYNC) 
+                #if !defined(NOSYNC)
                     LOCK_RDLOCK(directoryAccess);
                 #endif
 
@@ -186,7 +194,7 @@ void* applyCommands(void* arg){
                 #endif
                 break;
             case 'd':
-                #if !defined(NOSYNC) 
+                #if !defined(NOSYNC)
                     LOCK_WRLOCK(directoryAccess);
                 #endif
 
