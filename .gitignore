@@ -5,7 +5,11 @@
 *.o
 *.class
 *.jar
+*.classpath
+*.project
+*.ucls
 **/CVS/
+**/bin/
 **/testes_publicos/
 **/testes-publicos/
 **/testes_enunciado/
