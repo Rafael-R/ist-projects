@@ -4,8 +4,8 @@
 #include "lib/hash.h"
 
 typedef struct tecnicofs {
-    node** bstRoots;
     int buckets;
+    node** bstRoots;
     int nextINumber;
 } tecnicofs;
 
