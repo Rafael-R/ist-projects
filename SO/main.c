@@ -7,7 +7,7 @@
 #include <sys/time.h>
 #include "fs.h"
 
-#define MAX_COMMANDS 150000
+#define MAX_COMMANDS 10
 #define MAX_INPUT_SIZE 100
 
 char* inputFile;
@@ -159,7 +159,8 @@ void* applyCommands(void* arg){
             pthread_mutex_unlock(&commandsAccess);      // e ao iNumber e' sempre protegido
         #endif                                          // por um mutex.
 
-        int searchResult;
+        int oldSearchResult;
+        int newSearchResult;
         switch (token) {
             case 'c':
                 #if !defined(NOSYNC) 
@@ -177,11 +178,11 @@ void* applyCommands(void* arg){
                     LOCK_RDLOCK(directoryAccess);
                 #endif
 
-                searchResult = lookup(fs, name);
-                if(!searchResult)
+                oldSearchResult = lookup(fs, name);
+                if(!oldSearchResult)
                     printf("%s not found\n", name);
                 else
-                    printf("%s found with inumber %d\n", name, searchResult);
+                    printf("%s found with inumber %d\n", name, oldSearchResult);
 
                 #if !defined(NOSYNC)
                     LOCK_UNLOCK(directoryAccess);
@@ -198,6 +199,17 @@ void* applyCommands(void* arg){
                     LOCK_UNLOCK(directoryAccess);
                 #endif
                 break;
+            /*case 'r':
+
+                oldSearchResult = lookup(fs, oldName);
+                newSearchResult = lookup(fs, newName);
+
+                if (oldSearchResult && !newSearchResult) {
+                    delete(fs, oldName);
+                    create(fs, newName, oldSearchResult);
+                }
+
+                break;*/
             default: { /* error */
                 fprintf(stderr, "Error: command to apply\n");
                 exit(EXIT_FAILURE);
