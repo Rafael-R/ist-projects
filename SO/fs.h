@@ -4,12 +4,13 @@
 #include "lib/hash.h"
 
 typedef struct tecnicofs {
-    node* bstRoot;
+    node** bstRoots;
+    int buckets;
     int nextINumber;
 } tecnicofs;
 
 int obtainNewInumber(tecnicofs* fs);
-tecnicofs* new_tecnicofs();
+tecnicofs* new_tecnicofs(int numberBuckets);
 void free_tecnicofs(tecnicofs* fs);
 void create(tecnicofs* fs, char *name, int inumber);
 void delete(tecnicofs* fs, char *name);
