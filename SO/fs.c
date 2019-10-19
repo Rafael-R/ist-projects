@@ -15,8 +15,8 @@ tecnicofs* new_tecnicofs(int numberBuckets){
 		perror("failed to allocate tecnicofs");
 		exit(EXIT_FAILURE);
 	}
-	fs->bstRoots = malloc(sizeof(node) * numberBuckets);
 	fs->buckets = numberBuckets;
+	fs->bstRoots = (node**) malloc(sizeof(node*) * fs->buckets);
 	for (size_t i = 0; i < fs->buckets; i++) 	{
 		fs->bstRoots[i] = NULL;
 	}
