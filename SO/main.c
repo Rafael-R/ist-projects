@@ -7,7 +7,7 @@
 #include <sys/time.h>
 #include "fs.h"
 
-#define MAX_COMMANDS 10
+#define MAX_COMMANDS 100    // 10
 #define MAX_INPUT_SIZE 100
 
 char* inputFile;
@@ -55,6 +55,14 @@ static void parseArgs (long argc, char* const argv[]) {
     outputFile = argv[2];
     numberThreads = atoi(argv[3]);
     numberBuckets = atoi(argv[4]);
+
+    if (numberThreads < 1) {
+        fprintf(stderr, "Error: invalid number of threads\n");
+        exit(EXIT_FAILURE);
+    } else if (numberBuckets < 1) {
+        fprintf(stderr, "Error: invalid number of buckets\n");
+        exit(EXIT_FAILURE);
+    }
 }
 
 int insertCommand(char* data) {
@@ -89,9 +97,11 @@ void processInput() {
 
     while (fgets(line, sizeof(line)/sizeof(char), fptr)) {
         char token;
-        char name[MAX_INPUT_SIZE];
+        char name[MAX_INPUT_SIZE], newName[MAX_INPUT_SIZE];
 
-        int numTokens = sscanf(line, "%c %s", &token, name);
+        int numTokens = sscanf(line, "%c %s %s", &token, name, newName);
+
+        printf("Command: %c %s %s\n", token, name, newName);
 
         /* perform minimal validation */
         if (numTokens < 1) {
@@ -102,6 +112,12 @@ void processInput() {
             case 'l':
             case 'd':
                 if(numTokens != 2)
+                    errorParse();
+                if(insertCommand(line))
+                    break;
+                return;
+            case 'r':
+                if(numTokens != 3)
                     errorParse();
                 if(insertCommand(line))
                     break;
@@ -127,6 +143,8 @@ void* applyCommands(void* arg){
         }
     #endif
 
+    // TODO: Corrigir lock no numberCommands
+
     while(numberCommands > 0){
 
         #if !defined(NOSYNC)
@@ -142,13 +160,9 @@ void* applyCommands(void* arg){
         }
 
         char token;
-        char name[MAX_INPUT_SIZE];
-        int numTokens = sscanf(command, "%c %s", &token, name);
+        char name[MAX_INPUT_SIZE], newName[MAX_INPUT_SIZE];
 
-        if (numTokens != 2) {
-            fprintf(stderr, "Error: invalid command in Queue\n");
-            exit(EXIT_FAILURE);
-        }
+        sscanf(command, "%c %s %s", &token, name, newName);
 
         int iNumber;
         if (token == 'c') {
@@ -160,7 +174,7 @@ void* applyCommands(void* arg){
         #endif                                          // por um mutex.
 
         int oldSearchResult;
-//        int newSearchResult;
+        int newSearchResult;
         switch (token) {
             case 'c':
                 #if !defined(NOSYNC)
@@ -199,17 +213,34 @@ void* applyCommands(void* arg){
                     LOCK_UNLOCK(directoryAccess);
                 #endif
                 break;
-            /*case 'r':
+            case 'r':
+                #if !defined(NOSYNC)
+                    LOCK_RDLOCK(directoryAccess);
+                #endif
 
-                oldSearchResult = lookup(fs, oldName);
+                oldSearchResult = lookup(fs, name);
                 newSearchResult = lookup(fs, newName);
 
+                #if !defined(NOSYNC)
+                    LOCK_UNLOCK(directoryAccess);
+                #endif
+
+
                 if (oldSearchResult && !newSearchResult) {
-                    delete(fs, oldName);
+
+                    #if !defined(NOSYNC)
+                        LOCK_WRLOCK(directoryAccess);
+                    #endif
+
+                    delete(fs, name);
                     create(fs, newName, oldSearchResult);
+
+                    #if !defined(NOSYNC)
+                        LOCK_UNLOCK(directoryAccess);
+                    #endif
                 }
 
-                break;*/
+                break;
             default: { /* error */
                 fprintf(stderr, "Error: command to apply\n");
                 exit(EXIT_FAILURE);
