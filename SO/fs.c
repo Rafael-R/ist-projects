@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "sync.h"
 
 
 int obtainNewInumber(tecnicofs* fs) {
@@ -17,8 +18,10 @@ tecnicofs* new_tecnicofs(int numberBuckets){
 	}
 	fs->buckets = numberBuckets;
 	fs->bstRoots = (node**) malloc(sizeof(node*) * fs->buckets);
+	fs->bstLocks = (LOCK_TYPE*) malloc(sizeof(LOCK_TYPE) * fs->buckets);
 	for (size_t i = 0; i < fs->buckets; i++) 	{
 		fs->bstRoots[i] = NULL;
+		sync_init(&(fs->bstLocks[i]));
 	}
 	fs->nextINumber = 0;
  	return fs;
@@ -27,25 +30,35 @@ tecnicofs* new_tecnicofs(int numberBuckets){
 void free_tecnicofs(tecnicofs* fs){
 	for (size_t i = 0; i < fs->buckets; i++) 	{
 		free_tree(fs->bstRoots[i]);
+		sync_destroy(&(fs->bstLocks[i]));
 	}
 	free(fs);
 }
 
 void create(tecnicofs* fs, char *name, int inumber){
 	int index = hash(name, fs->buckets);
+	sync_wrlock(&(fs->bstLocks[index]));
 	fs->bstRoots[index] = insert(fs->bstRoots[index], name, inumber);
+	sync_unlock(&(fs->bstLocks[index]));
 }
 
 void delete(tecnicofs* fs, char *name){
 	int index = hash(name, fs->buckets);
+	sync_wrlock(&(fs->bstLocks[index]));
 	fs->bstRoots[index] = remove_item(fs->bstRoots[index], name);
+	sync_unlock(&(fs->bstLocks[index]));
 }
 
 int lookup(tecnicofs* fs, char *name){
 	int index = hash(name, fs->buckets);
+	sync_rdlock(&(fs->bstLocks[index]));
+	int inumber = 0;
 	node* searchNode = search(fs->bstRoots[index], name);
-	if ( searchNode ) return searchNode->inumber;
-	return 0;
+	if ( searchNode ) {
+		inumber = searchNode->inumber;
+	}
+	sync_unlock(&(fs->bstLocks[index]));
+	return inumber;
 }
 
 void print_tecnicofs_tree(FILE * fp, tecnicofs *fs){

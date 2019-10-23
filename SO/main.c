@@ -1,45 +1,22 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <getopt.h>
 #include <string.h>
-#include <ctype.h>
 #include <pthread.h>
 #include <sys/time.h>
 #include "fs.h"
-
-#define MAX_COMMANDS 10
-#define MAX_INPUT_SIZE 100
+#include "constants.h"
 
 char* inputFile;
 char* outputFile;
 int numberThreads;
 int numberBuckets;
+pthread_mutex_t commandsAccess;
 tecnicofs* fs;
 
 char inputCommands[MAX_COMMANDS][MAX_INPUT_SIZE];
 int numberCommands = 0;
 int headQueue = 0;
 
-#if !defined(NOSYNC)
-    pthread_mutex_t commandsAccess;
-    #if defined(MUTEX)
-        pthread_mutex_t directoryAccess;
-        #define LOCK_INIT(lock) pthread_mutex_init(&lock, NULL)
-        #define LOCK_WRLOCK(lock) pthread_mutex_lock(&lock)         // Sendo que o mutex e' bloqueado
-        #define LOCK_RDLOCK(lock) pthread_mutex_lock(&lock)         // sempre da mesma forma, ao
-        #define LOCK_UNLOCK(lock) pthread_mutex_unlock(&lock)       // contrario do rwlock, tem de
-        #define LOCK_DESTROY(lock) pthread_mutex_destroy(&lock)     // definido duas vezes
-    #elif defined(RWLOCK)
-        pthread_rwlock_t directoryAccess;
-        #define LOCK_INIT(lock) pthread_rwlock_init(&lock, NULL)
-        #define LOCK_WRLOCK(lock) pthread_rwlock_wrlock(&lock)
-        #define LOCK_RDLOCK(lock) pthread_rwlock_rdlock(&lock)
-        #define LOCK_UNLOCK(lock) pthread_rwlock_unlock(&lock)
-        #define LOCK_DESTROY(lock) pthread_rwlock_destroy(&lock)
-    #else
-        #define NOSYNC
-    #endif
-#endif
 
 static void displayUsage (const char* appName) {
     printf("Usage: %s\n", appName);
@@ -86,16 +63,22 @@ void errorParse() {
     exit(EXIT_FAILURE);
 }
 
-void processInput() {
-    char line[MAX_INPUT_SIZE];
-
-    FILE* fptr;
-    if ((fptr = fopen(inputFile, "r")) == NULL) {
-        fprintf(stderr, "Error: invalid input file\n");
+FILE* openFile(char* filename) {
+    FILE *fptr;
+    fptr = fopen(filename, "w");
+    if (fptr == NULL) {
+        fprintf(stderr, "Error: invalid file\n");
         exit(EXIT_FAILURE);
     }
+    return fptr;
+}
 
-    while (fgets(line, sizeof(line)/sizeof(char), fptr)) {
+void* processInput() {
+    char line[MAX_INPUT_SIZE];
+
+    FILE* input = openFile(inputFile);
+
+    while (fgets(line, sizeof(line)/sizeof(char), input)) {
         char token;
         char name[MAX_INPUT_SIZE], newName[MAX_INPUT_SIZE];
 
@@ -115,13 +98,13 @@ void processInput() {
                     errorParse();
                 if(insertCommand(line))
                     break;
-                return;
+                return NULL;
             case 'r':
                 if(numTokens != 3)
                     errorParse();
                 if(insertCommand(line))
                     break;
-                return;
+                return NULL;
             case '#':
                 break;
             default: { /* error */
@@ -129,183 +112,112 @@ void processInput() {
             }
         }
     }
-
-    fclose(fptr);
+    fclose(input);
+    return NULL;
 }
 
-void* applyCommands(void* arg){
+void* applyCommands(){
 
-    #if !defined(NOSYNC)
-        if((pthread_mutex_init(&commandsAccess, NULL)) != 0 &&
-           (LOCK_INIT(directoryAccess)) != 0) {
-            fprintf(stderr, "Error: initializing lock\n");
-            exit(EXIT_FAILURE);
-        }
-    #endif
+    while(1){
+        mutex_lock(&commandsAccess);
 
-    // TODO: Corrigir lock no numberCommands
-
-    while(numberCommands > 0){
-
-        #if !defined(NOSYNC)
-            pthread_mutex_lock(&commandsAccess);
-        #endif
-
-        const char* command = removeCommand();
-        if (command == NULL){
-            #if !defined(NOSYNC)
-                pthread_mutex_unlock(&commandsAccess);
-            #endif
-            continue;
-        }
-
-        char token;
-        char name[MAX_INPUT_SIZE], newName[MAX_INPUT_SIZE];
-
-        sscanf(command, "%c %s %s", &token, name, newName);
-
-        int iNumber;
-        if (token == 'c') {
-            iNumber = obtainNewInumber(fs);
-        }
-
-        #if !defined(NOSYNC)                            // O acesso ao vetor de comandos
-            pthread_mutex_unlock(&commandsAccess);      // e ao iNumber e' sempre protegido
-        #endif                                          // por um mutex.
-
-        int oldSearchResult;
-        int newSearchResult;
-        switch (token) {
-            case 'c':
-                #if !defined(NOSYNC)
-                    LOCK_WRLOCK(directoryAccess);
-                #endif
-
-                create(fs, name, iNumber);
-
-                #if !defined(NOSYNC)
-                    LOCK_UNLOCK(directoryAccess);
-                #endif
-                break;
-            case 'l':
-                #if !defined(NOSYNC)
-                    LOCK_RDLOCK(directoryAccess);
-                #endif
-
-                oldSearchResult = lookup(fs, name);
-                if(!oldSearchResult)
-                    printf("%s not found\n", name);
-                else
-                    printf("%s found with inumber %d\n", name, oldSearchResult);
-
-                #if !defined(NOSYNC)
-                    LOCK_UNLOCK(directoryAccess);
-                #endif
-                break;
-            case 'd':
-                #if !defined(NOSYNC)
-                    LOCK_WRLOCK(directoryAccess);
-                #endif
-
-                delete(fs, name);
-
-                #if !defined(NOSYNC)
-                    LOCK_UNLOCK(directoryAccess);
-                #endif
-                break;
-            case 'r':
-                #if !defined(NOSYNC)
-                    LOCK_RDLOCK(directoryAccess);
-                #endif
-
-                oldSearchResult = lookup(fs, name);
-                newSearchResult = lookup(fs, newName);
-
-                #if !defined(NOSYNC)
-                    LOCK_UNLOCK(directoryAccess);
-                #endif
-
-
-                if (oldSearchResult && !newSearchResult) {
-
-                    #if !defined(NOSYNC)
-                        LOCK_WRLOCK(directoryAccess);
-                    #endif
-
-                    delete(fs, name);
-                    create(fs, newName, oldSearchResult);
-
-                    #if !defined(NOSYNC)
-                        LOCK_UNLOCK(directoryAccess);
-                    #endif
-                }
-
-                break;
-            default: { /* error */
-                fprintf(stderr, "Error: command to apply\n");
-                exit(EXIT_FAILURE);
+        if (numberCommands > 0) {
+            const char* command = removeCommand();
+            if (command == NULL){
+                mutex_unlock(&commandsAccess);
+                continue;
             }
+            char token;
+            char name[MAX_INPUT_SIZE], newName[MAX_INPUT_SIZE];
+            sscanf(command, "%c %s %s", &token, name, newName);
+
+            int iNumber;
+            switch (token) {
+                case 'c':
+                    iNumber = obtainNewInumber(fs);
+                    mutex_unlock(&commandsAccess);
+                    create(fs, name, iNumber);
+                    break;
+                case 'l':
+                    mutex_unlock(&commandsAccess);
+                    int searchResult = lookup(fs, name);
+                    if(!searchResult)
+                        printf("%s not found\n", name);
+                    else
+                        printf("%s found with inumber %d\n", name, searchResult);
+                    break;
+                case 'd':
+                    mutex_unlock(&commandsAccess);
+                    delete(fs, name);
+                    break;
+                case 'r':
+                    mutex_unlock(&commandsAccess);
+                    int oldSearchResult = lookup(fs, name);
+                    int newSearchResult = lookup(fs, newName);
+                    if (oldSearchResult && !newSearchResult) {
+                        delete(fs, name);
+                        create(fs, newName, oldSearchResult);
+                    }
+                    break;
+                default: { /* error */
+                    mutex_unlock(&commandsAccess);
+                    fprintf(stderr, "Error: command to apply\n");
+                    exit(EXIT_FAILURE);
+                }
+            }
+        } else {
+            mutex_unlock(&commandsAccess);
+            #if !defined(NOSYNC)
+                pthread_exit(NULL);
+            #else
+                return NULL;    // Return normal em caso de execucao sequencial
+            #endif
         }
     }
-
-    #if !defined(NOSYNC)
-        if((pthread_mutex_destroy(&commandsAccess)) != 0 &&
-           (LOCK_DESTROY(directoryAccess)) != 0) {
-            fprintf(stderr, "Error: initializing lock\n");
-            exit(EXIT_FAILURE);
-        }
-        pthread_exit(NULL);
-    #else
-        return NULL;    // Return normal em caso de execucao sequencial
-    #endif
 }
+
 
 int main(int argc, char* argv[]) {
 
     parseArgs(argc, argv);
 
     fs = new_tecnicofs(numberBuckets);
-    processInput();
+
+    #if !defined(NOSYNC)
+        pthread_t* threads = (pthread_t*) malloc((numberThreads + 1) * sizeof(pthread_t));
+    #endif
 
     struct timeval start, end;
 
-    #if !defined(NOSYNC)
-        pthread_t* threads = (pthread_t*) malloc(numberThreads * sizeof(pthread_t));
-    #endif
+    mutex_init(&commandsAccess);
 
     gettimeofday(&start, NULL);
 
     #if !defined(NOSYNC)
-        for (int i = 0; i < numberThreads; i++) {
-            if((pthread_create(&threads[i], NULL, applyCommands, NULL)) != 0) {
-                fprintf(stderr, "Error: creating thread\n");
-                exit(EXIT_FAILURE);
-            }
+        thread_create(&threads[0], processInput);
+        for (int i = 1; i < numberThreads + 1; i++) {
+            thread_create(&threads[i], applyCommands);
         }
-        for (int i = 0; i < numberThreads; i++) {
-            if((pthread_join(threads[i], NULL)) != 0) {
-                fprintf(stderr, "Error: joining thread\n");
-                exit(EXIT_FAILURE);
-            }
+        for (int i = 0; i < numberThreads + 1; i++) {
+            thread_join(threads[i]);
         }
     #else
-        applyCommands(NULL);    // Execucao sequencial
+        processInput();
+        applyCommands();    // Execucao sequencial
     #endif
 
     gettimeofday(&end, NULL);
+
+    mutex_destroy(&commandsAccess);
 
     double duration = (end.tv_sec - start.tv_sec) +
                       ((end.tv_usec - start.tv_usec) / 1000000.0);
 
     printf("TecnicoFS completed in %.4f seconds.\n", duration);
 
-    FILE* fptr;
-    if ((fptr = fopen(outputFile, "w")) == NULL) {
-        fprintf(stderr, "Error: invalid output file\n");
-        exit(EXIT_FAILURE);
-    }
-    print_tecnicofs_tree(fptr, fs);
-    fclose(fptr);
+    FILE* output = openFile(outputFile);
+    print_tecnicofs_tree(output, fs);
+    fclose(output);
 
     free_tecnicofs(fs);
     exit(EXIT_SUCCESS);
