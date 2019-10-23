@@ -1,11 +1,14 @@
 #ifndef FS_H
 #define FS_H
+
 #include "lib/bst.h"
 #include "lib/hash.h"
+#include "sync.h"
 
 typedef struct tecnicofs {
     int buckets;
     node** bstRoots;
+    LOCK_TYPE* bstLocks;
     int nextINumber;
 } tecnicofs;
 
