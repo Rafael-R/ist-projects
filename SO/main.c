@@ -7,7 +7,7 @@
 #include <sys/time.h>
 #include "fs.h"
 
-#define MAX_COMMANDS 100    // 10
+#define MAX_COMMANDS 10
 #define MAX_INPUT_SIZE 100
 
 char* inputFile;
