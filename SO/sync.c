@@ -52,7 +52,7 @@ void thread_join(pthread_t thread) {
 }
 
 void mutex_init(pthread_mutex_t* mutex){
-    #if !defined(NOSYNC)
+    #if defined(MUTEX) || defined(RWLOCK)
         if(pthread_mutex_init(mutex, NULL) != 0){
             fprintf(stderr, "Error: initializing mutex\n");
             exit(EXIT_FAILURE);
@@ -61,7 +61,7 @@ void mutex_init(pthread_mutex_t* mutex){
 }
 
 void mutex_destroy(pthread_mutex_t* mutex){
-    #if !defined(NOSYNC)
+    #if defined(MUTEX) || defined(RWLOCK)
         if(pthread_mutex_destroy(mutex) != 0){
             fprintf(stderr, "Error: destroying mutex\n");
             exit(EXIT_FAILURE);
@@ -70,7 +70,7 @@ void mutex_destroy(pthread_mutex_t* mutex){
 }
 
 void mutex_lock(pthread_mutex_t* mutex){
-    #if !defined(NOSYNC)
+    #if defined(MUTEX) || defined(RWLOCK)
         if(pthread_mutex_lock(mutex) != 0){
             fprintf(stderr, "Error: locking mutex\n");
             exit(EXIT_FAILURE);
@@ -79,7 +79,7 @@ void mutex_lock(pthread_mutex_t* mutex){
 }
 
 void mutex_unlock(pthread_mutex_t* mutex){
-    #if !defined(NOSYNC)
+    #if defined(MUTEX) || defined(RWLOCK)
         if(pthread_mutex_unlock(mutex) != 0){
             fprintf(stderr, "Error: unlocking mutex\n");
             exit(EXIT_FAILURE);

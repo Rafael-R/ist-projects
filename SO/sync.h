@@ -18,8 +18,7 @@
     #define LOCK_UNLOCK(lock)   pthread_rwlock_unlock(lock)
     #define LOCK_DESTROY(lock)  pthread_rwlock_destroy(lock)
 #else
-    #define NOSYNC
-    #define LOCK_TYPE void*
+    #define LOCK_TYPE           void*
     #define LOCK_INIT(lock)     nop(lock)
     #define LOCK_WRLOCK(lock)   nop(lock)
     #define LOCK_RDLOCK(lock)   nop(lock)

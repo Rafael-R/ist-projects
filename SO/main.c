@@ -168,7 +168,7 @@ void* applyCommands(){
             }
         } else {
             mutex_unlock(&commandsAccess);
-            #if !defined(NOSYNC)
+            #if defined(MUTEX) || defined(RWLOCK)
                 pthread_exit(NULL);
             #else
                 return NULL;    // Return normal em caso de execucao sequencial
@@ -184,7 +184,7 @@ int main(int argc, char* argv[]) {
 
     fs = new_tecnicofs(numberBuckets);
 
-    #if !defined(NOSYNC)
+    #if defined(MUTEX) || defined(RWLOCK)
         pthread_t* threads = (pthread_t*) malloc((numberThreads) * sizeof(pthread_t));
     #endif
 
@@ -196,7 +196,7 @@ int main(int argc, char* argv[]) {
 
     gettimeofday(&start, NULL);
 
-    #if !defined(NOSYNC)
+    #if defined(MUTEX) || defined(RWLOCK)
         for (int i = 0; i < numberThreads; i++) {
             thread_create(&threads[i], applyCommands);
         }
