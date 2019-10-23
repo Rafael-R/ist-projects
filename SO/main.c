@@ -122,6 +122,7 @@ void* applyCommands(){
         mutex_lock(&commandsAccess);
 
         if (numberCommands > 0) {
+
             const char* command = removeCommand();
             if (command == NULL){
                 mutex_unlock(&commandsAccess);
@@ -184,8 +185,10 @@ int main(int argc, char* argv[]) {
     fs = new_tecnicofs(numberBuckets);
 
     #if !defined(NOSYNC)
-        pthread_t* threads = (pthread_t*) malloc((numberThreads + 1) * sizeof(pthread_t));
+        pthread_t* threads = (pthread_t*) malloc((numberThreads) * sizeof(pthread_t));
     #endif
+
+    processInput();
 
     struct timeval start, end;
 
@@ -194,15 +197,13 @@ int main(int argc, char* argv[]) {
     gettimeofday(&start, NULL);
 
     #if !defined(NOSYNC)
-        thread_create(&threads[0], processInput);
-        for (int i = 1; i < numberThreads + 1; i++) {
+        for (int i = 0; i < numberThreads; i++) {
             thread_create(&threads[i], applyCommands);
         }
-        for (int i = 0; i < numberThreads + 1; i++) {
+        for (int i = 0; i < numberThreads; i++) {
             thread_join(threads[i]);
         }
     #else
-        processInput();
         applyCommands();    // Execucao sequencial
     #endif
 
