@@ -9,24 +9,22 @@ LDFLAGS=-lm
 
 all: tecnicofs
 
-tecnicofs: lib/bst.o lib/hash.o fs.o main.o
+tecnicofs: main fs lib
 	$(LD) $(CFLAGS) $(LDFLAGS) lib/bst.o lib/hash.o fs.o main-nosync.o -o tecnicofs-nosync -lpthread
 	$(LD) $(CFLAGS) $(LDFLAGS) lib/bst.o lib/hash.o fs.o main-mutex.o  -o tecnicofs-mutex  -lpthread
 	$(LD) $(CFLAGS) $(LDFLAGS) lib/bst.o lib/hash.o fs.o main-rwlock.o -o tecnicofs-rwlock -lpthread
 
-main.o: main.c fs.h lib/bst.h lib/hash.h
+main: main.c fs lib
 	$(CC) $(CFLAGS)          -c main.c -o main-nosync.o
 	$(CC) $(CFLAGS) -DMUTEX  -c main.c -o main-mutex.o
 	$(CC) $(CFLAGS) -DRWLOCK -c main.c -o main-rwlock.o
 
-fs.o: fs.c fs.h lib/bst.h lib/hash.h
+fs: fs.c fs.h lib
 	$(CC) $(CFLAGS) -o fs.o -c fs.c
 
-lib/hash.o: lib/hash.c lib/hash.h
-	$(CC) $(CFLAGS) -o lib/hash.o -c lib/hash.c
-
-lib/bst.o: lib/bst.c lib/bst.h
+lib: lib/bst.c lib/bst.h lib/hash.c lib/hash.h
 	$(CC) $(CFLAGS) -o lib/bst.o -c lib/bst.c
+	$(CC) $(CFLAGS) -o lib/hash.o -c lib/hash.c
 
 clean:
 	@echo Cleaning...

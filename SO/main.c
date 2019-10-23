@@ -26,7 +26,7 @@ int headQueue = 0;
         pthread_mutex_t directoryAccess;
         #define LOCK_INIT(lock) pthread_mutex_init(&lock, NULL)
         #define LOCK_WRLOCK(lock) pthread_mutex_lock(&lock)         // Sendo que o mutex e' bloqueado
-        #define LOCK_RDLOCK(lock) pthread_mutex_lock(&lock)         // sempre da mesma forma, ao 
+        #define LOCK_RDLOCK(lock) pthread_mutex_lock(&lock)         // sempre da mesma forma, ao
         #define LOCK_UNLOCK(lock) pthread_mutex_unlock(&lock)       // contrario do rwlock, tem de
         #define LOCK_DESTROY(lock) pthread_mutex_destroy(&lock)     // definido duas vezes
     #elif defined(RWLOCK)
@@ -68,7 +68,7 @@ int insertCommand(char* data) {
 char* removeCommand() {
     if(numberCommands > 0){
         numberCommands--;
-        return inputCommands[headQueue++];  
+        return inputCommands[headQueue++];
     }
     return NULL;
 }
@@ -144,12 +144,12 @@ void* applyCommands(void* arg){
         char token;
         char name[MAX_INPUT_SIZE];
         int numTokens = sscanf(command, "%c %s", &token, name);
-        
+
         if (numTokens != 2) {
             fprintf(stderr, "Error: invalid command in Queue\n");
             exit(EXIT_FAILURE);
         }
-        
+
         int iNumber;
         if (token == 'c') {
             iNumber = obtainNewInumber(fs);
@@ -160,10 +160,10 @@ void* applyCommands(void* arg){
         #endif                                          // por um mutex.
 
         int oldSearchResult;
-        int newSearchResult;
+//        int newSearchResult;
         switch (token) {
             case 'c':
-                #if !defined(NOSYNC) 
+                #if !defined(NOSYNC)
                     LOCK_WRLOCK(directoryAccess);
                 #endif
 
@@ -174,7 +174,7 @@ void* applyCommands(void* arg){
                 #endif
                 break;
             case 'l':
-                #if !defined(NOSYNC) 
+                #if !defined(NOSYNC)
                     LOCK_RDLOCK(directoryAccess);
                 #endif
 
@@ -189,7 +189,7 @@ void* applyCommands(void* arg){
                 #endif
                 break;
             case 'd':
-                #if !defined(NOSYNC) 
+                #if !defined(NOSYNC)
                     LOCK_WRLOCK(directoryAccess);
                 #endif
 
