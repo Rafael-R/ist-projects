@@ -9,7 +9,7 @@ LDFLAGS=-lm
 
 all: tecnicofs
 
-tecnicofs: main fs lib
+tecnicofs: main fs lib/bst.o lib/hash.o
 	$(LD) $(CFLAGS) $(LDFLAGS) lib/bst.o lib/hash.o fs.o main-nosync.o -o tecnicofs-nosync -lpthread
 	$(LD) $(CFLAGS) $(LDFLAGS) lib/bst.o lib/hash.o fs.o main-mutex.o  -o tecnicofs-mutex  -lpthread
 	$(LD) $(CFLAGS) $(LDFLAGS) lib/bst.o lib/hash.o fs.o main-rwlock.o -o tecnicofs-rwlock -lpthread
@@ -23,7 +23,7 @@ fs: fs.c fs.h lib
 	$(CC) $(CFLAGS) -o fs.o -c fs.c
 
 lib: lib/bst.c lib/bst.h lib/hash.c lib/hash.h
-	$(CC) $(CFLAGS) -o lib/bst.o -c lib/bst.c
+	$(CC) $(CFLAGS) -o lib/bst.o  -c lib/bst.c
 	$(CC) $(CFLAGS) -o lib/hash.o -c lib/hash.c
 
 clean:
