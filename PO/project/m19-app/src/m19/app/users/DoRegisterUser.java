@@ -9,20 +9,27 @@ import pt.tecnico.po.ui.DialogException;
  */
 public class DoRegisterUser extends Command<LibraryManager> {
 
-  // FIXME define input fields
+	private Input<String> name;
+	private Input<String> email;
 
-  /**
-   * @param receiver
-   */
-  public DoRegisterUser(LibraryManager receiver) {
-    super(Label.REGISTER_USER, receiver);
-    // FIXME initialize input fields
-  }
+	/**
+	 * @param receiver
+	 */
+	public DoRegisterUser(LibraryManager receiver) {
+		super(Label.REGISTER_USER, receiver);
+		name = _form.addStringInput(Message.requestUserName());
+		email = _form.addStringInput(Message.requestUserEMail());
+	}
 
-  /** @see pt.tecnico.po.ui.Command#execute() */
-  @Override
-  public final void execute() throws DialogException {
-    // FIXME implement command
-  }
+	/** @see pt.tecnico.po.ui.Command#execute() */
+	@Override
+	public final void execute() throws DialogException, UserRegistrationFailedException {
+		_form.parse();
+		try {
+			_receiver-registerUser(name.value(), email.value());
+		} catch () {
+			throw new UserRegistrationFailedException(name.value(), email.value());
+		}
+	}
 
 }
