@@ -2,7 +2,7 @@ package m19.users;
 
 import java.util.ArrayList;
 import java.util.List;
-import m19.Observable;
+import m19.works.Observable;
 
 public class User implements Observer {
 
@@ -18,8 +18,9 @@ public class User implements Observer {
         _notifications.add(new Notification(message));
     }
 
-    public void notify() {
-
+    @Override
+    public void notify(String message) {
+        addNotification(message);
     }
 
 }
