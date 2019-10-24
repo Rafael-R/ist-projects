@@ -2,6 +2,7 @@ package m19.app.main;
 
 import m19.LibraryManager;
 import pt.tecnico.po.ui.Command;
+import pt.tecnico.po.ui.Input;
 import pt.tecnico.po.ui.DialogException;
 
 /**
@@ -9,26 +10,26 @@ import pt.tecnico.po.ui.DialogException;
  */
 public class DoOpen extends Command<LibraryManager> {
 
-  // FIXME define input fields if needed
+	private Input<String> filename;
 
-  /**
-   * @param receiver
-   */
-  public DoOpen(LibraryManager receiver) {
-    super(Label.OPEN, receiver);
-    // FIXME initialize input fields if needed
-  }
+	/**
+	 * @param receiver
+	 */
+	public DoOpen(LibraryManager receiver) {
+		super(Label.OPEN, receiver);
+		filename = _form.addStringInput(Message.openFile());
+	}
 
-  /** @see pt.tecnico.po.ui.Command#execute() */
-  @Override
-  public final void execute() throws DialogException {
-    /*try {
-      // FIXME implement command
-    } catch (FailedToOpenFileException fnfe) {
-      throw new FileOpenFailedException(fnfe.getName());
-    } catch (ClassNotFoundException | IOException e) {
-      e.printStackTrace();
-    }*/
-  }
-
+	/** @see pt.tecnico.po.ui.Command#execute() */
+	@Override
+	public final void execute() throws DialogException {
+		/*try {
+			_form.parse();
+			_receiver.load(filename.value());
+		} catch (FailedToOpenFileException fnfe) {
+			throw new FileOpenFailedException(fnfe.getName());
+		} catch (ClassNotFoundException | IOException e) {
+			e.printStackTrace();
+		}*/
+	}
 }
