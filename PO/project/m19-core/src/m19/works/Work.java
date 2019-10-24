@@ -7,25 +7,29 @@ public abstract class Work implements Observable {
 
     private ArrayList<Observer> observers = new ArrayList<Observer>();
     
-    private int _id;
-    private int _numberCopies;
-    private String _title;
-    private int _price;
+    protected int _id;
+    protected int _numberCopies;
+    protected int _actualCopies;
+    protected String _title;
+    protected int _price;
+    protected Category _category;
 
-    public Work(int id, int numberCopies, String title, int price) {
+    public Work(int id, int numberCopies, String title, int price, Category category) {
         _id = id;
         _numberCopies = numberCopies;
+        _actualCopies = _numberCopies;
         _title = title;
         _price = price;
+        _category = category;
     }
 
     public void returnWork() {
-        _numberCopies++;
+        _actualCopies++;
         notifyObservers();
     }
 
     public boolean verifyAvailability() {
-        if (_numberCopies == 0) {
+        if (_actualCopies == 0) {
 
         }
     }

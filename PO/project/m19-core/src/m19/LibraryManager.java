@@ -76,7 +76,7 @@ public class LibraryManager {
 
 	// User functions
 
-	public void registerUser(Strig name, String email) {
+	public void registerUser(String name, String email) {
 		_library.registerUser(name, email);
 	}
 
