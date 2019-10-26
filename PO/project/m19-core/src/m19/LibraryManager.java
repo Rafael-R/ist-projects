@@ -5,6 +5,9 @@ import m19.exceptions.BadEntrySpecificationException;
 import m19.exceptions.FailedToOpenFileException;
 import m19.exceptions.ImportFileException;
 import m19.exceptions.MissingFileAssociationException;
+import m19.users.User;
+import m19.app.exceptions.NoSuchUserException;
+import m19.app.exceptions.UserRegistrationFailedException;
 
 /**
  * The façade class.
@@ -76,8 +79,29 @@ public class LibraryManager {
 
 	// User functions
 
-	public void registerUser(String name, String email) {
-		_library.registerUser(name, email);
+	public int registerUser(String name, String email) throws UserRegistrationFailedException {
+		if (name.isEmpty() | email.isEmpty()) {
+			throw new UserRegistrationFailedException(name, email);
+		} else {
+			return _library.registerUser(name, email);
+		}
+	}
+
+	public String showUser(int id) throws NoSuchUserException {
+		User user = _library.getUser(id);
+		if (user == null) {
+			throw new NoSuchUserException(id);
+		} else {
+			return user.toString();
+		}
+	}
+
+	public String showUsers() {
+		String string = "";
+		for (int i = 0; i < _library.getLastUserId(); i++) {
+			string += _library.getUser(i).toString() + "\n";
+		}
+		return string;
 	}
 
 }

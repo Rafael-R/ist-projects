@@ -2,7 +2,9 @@ package m19.app.users;
 
 import m19.LibraryManager;
 import pt.tecnico.po.ui.Command;
+import pt.tecnico.po.ui.Input;
 import pt.tecnico.po.ui.DialogException;
+import m19.app.exceptions.UserRegistrationFailedException;
 
 /**
  * 4.2.1. Register new user.
@@ -11,6 +13,7 @@ public class DoRegisterUser extends Command<LibraryManager> {
 
 	private Input<String> name;
 	private Input<String> email;
+	private int id;
 
 	/**
 	 * @param receiver
@@ -26,8 +29,9 @@ public class DoRegisterUser extends Command<LibraryManager> {
 	public final void execute() throws DialogException, UserRegistrationFailedException {
 		_form.parse();
 		try {
-			_receiver-registerUser(name.value(), email.value());
-		} catch () {
+			id = _receiver.registerUser(name.value(), email.value());
+			_display.popup(Message.userRegistrationSuccessful(id));
+		} catch (UserRegistrationFailedException e) {
 			throw new UserRegistrationFailedException(name.value(), email.value());
 		}
 	}

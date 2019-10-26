@@ -5,5 +5,5 @@ import m19.users.*;
 
 public interface Rule {
 
-    boolean verify(Work work, User user);
+    public boolean verify(Work work, User user);
 }
