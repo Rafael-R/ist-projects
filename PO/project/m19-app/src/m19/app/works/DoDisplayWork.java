@@ -1,6 +1,8 @@
 package m19.app.works;
 
 import m19.LibraryManager;
+import m19.app.exceptions.NoSuchWorkException;
+import m19.exceptions.InvalidWorkIdException;
 import pt.tecnico.po.ui.Command;
 import pt.tecnico.po.ui.Input;
 import pt.tecnico.po.ui.DialogException;
@@ -22,10 +24,14 @@ public class DoDisplayWork extends Command<LibraryManager> {
 
 	/** @see pt.tecnico.po.ui.Command#execute() */
 	@Override
-	public final void execute() throws DialogException {
+	public final void execute() throws DialogException, NoSuchWorkException {
 		_form.parse();
-		_display.addLine(_receiver.displayWork(id.value()));
-		_display.display();
+		try {
+			_display.addLine(_receiver.displayWork(id.value()));
+			_display.display();
+		} catch (InvalidWorkIdException e) {
+			throw new NoSuchWorkException(e.getId());
+		}
 	}
   
 }

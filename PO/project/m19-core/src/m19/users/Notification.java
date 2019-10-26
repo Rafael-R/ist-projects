@@ -8,7 +8,8 @@ public class Notification {
         _message = message;
     }
 
-    public String getMessage() {
+    @Override
+    public String toString() {
         return _message;
     }
 }
