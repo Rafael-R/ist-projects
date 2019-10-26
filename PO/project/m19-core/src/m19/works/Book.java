@@ -12,11 +12,18 @@ public class Book extends Work {
     }
 
     @Override
+    public boolean hasTerm(String term) {
+        if (_author.contains(term) || _ISBN.contains(term) ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
     public String toString() {
-        return _id.toString() + " - " + _actualCopies.toString() + " de " +
-               _numberCopies.toString() + " - Livro - " + _title + " - " + 
-               _price.toString() + " - " + _category.toString() + " - " +
-               _author + " - " + _ISBN;
+        return _id + " - " + _actualCopies + " de " + _numberCopies + " - Livro - " +
+        _title + " - " + _price + " - " + _category + " - " + _author + " - " + _ISBN;
     }
 
 }

@@ -6,8 +6,8 @@ import m19.users.*;
 public class SuspenseUserRule implements Rule {
 
     @Override
-    boolean verify(Work work, User user) {
-        
+    public boolean verify(Work work, User user) {
+        return true;
     }
     
 }

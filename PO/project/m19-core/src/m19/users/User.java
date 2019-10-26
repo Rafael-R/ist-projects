@@ -7,12 +7,19 @@ import m19.works.Observable;
 public class User implements Observer {
 
     private int _id;
-    private String name = "";
-    private String email = "";
-    private boolean state = true;
-    private Classification _classification;
+    private String _name;
+    private String _email;
+    private boolean _state = true;
+    private Classification _classification = new Normal();
+    private int _fine = 0;
     private ArrayList<Notification> _notifications = new ArrayList<Notification>();
 
+
+    public User(int id, String name, String email) {
+        _id = id;
+        _name = name;
+        _email = email;
+    }
 
     public void addNotification(String message) {
         _notifications.add(new Notification(message));
@@ -23,4 +30,16 @@ public class User implements Observer {
         addNotification(message);
     }
 
+    @Override
+    public String toString() {
+        String string =  _id + " - " + _name + " - " + _email + " - " +
+                         _classification + " - ";
+
+        if (_state == true) {
+            string += "ACTIVO";
+        } else {
+            string += "SUSPENSO" + " - EUR " + _fine;
+        }
+        return string;
+    }
 }

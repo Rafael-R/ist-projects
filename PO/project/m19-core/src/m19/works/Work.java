@@ -30,13 +30,13 @@ public abstract class Work implements Observable {
 
     public boolean verifyAvailability() {
         if (_actualCopies == 0) {
-
+            return false;
+        } else {
+            return true;
         }
     }
 
-    public boolean hasTerm(String term) {
-        
-    }
+    public abstract boolean hasTerm(String term);
 
     public void addObserver(Observer observer) {
         observers.add(observer);

@@ -8,17 +8,18 @@ import pt.tecnico.po.ui.Command;
  */
 public class DoShowUsers extends Command<LibraryManager> {
 
-  /**
-   * @param receiver
-   */
-  public DoShowUsers(LibraryManager receiver) {
-    super(Label.SHOW_USERS, receiver);
-  }
+	/**
+	 * @param receiver
+	 */
+	public DoShowUsers(LibraryManager receiver) {
+		super(Label.SHOW_USERS, receiver);
+	}
 
-  /** @see pt.tecnico.po.ui.Command#execute() */
-  @Override
-  public final void execute() {
-    // FIXME implement command
-  }
-  
+	/** @see pt.tecnico.po.ui.Command#execute() */
+	@Override
+	public final void execute() {
+		_display.addLine(_receiver.showUsers());
+		_display.display();
+	}
+	
 }

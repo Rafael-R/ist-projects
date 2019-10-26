@@ -12,11 +12,18 @@ public class Dvd extends Work {
     }
 
     @Override
+    public boolean hasTerm(String term) {
+        if (_director.contains(term) || _IGAC.contains(term) ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
     public String toString() {
-        return _id.toString() + " - " + _actualCopies.toString() + " de " +
-               _numberCopies.toString() + " - DVD - " + _title + " - " + 
-               _price.toString() + " - " + _category.toString() + " - " +
-               _director + " - " + _IGAC;
+        return _id + " - " + _actualCopies + " de " + _numberCopies + " - DVD - " +
+        _title + " - " + _price + " - " + _category + " - " + _director + " - " + _IGAC;
     }
     
 }
