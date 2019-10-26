@@ -2,6 +2,8 @@ package m19;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
@@ -40,25 +42,26 @@ public class Library implements Serializable {
 	 */
 	void importFile(String filename) throws BadEntrySpecificationException, IOException {
 		BufferedReader reader = new BufferedReader(new FileReader(filename));
-  		String line; 
-  		while ((line = reader.readLine()) != null) 
-			String[] inputs = line.split(":");
-			switch (inputs[0]) {
-				case "USER":
-					addUser(inputs[1], inputs[2])
-					break;
-				case "DVD":
-					for (int i = 0; i < inputs[6]; i++) {
-						addDvd(inputs[1], inputs[2], inputs[3], inputs[4], inputs[5], inputs[6]);
-					}
-					break;
-				case "BOOK":
-					for (int i = 0; i < inputs[6]; i++) {
-						addBook(inputs[1], inputs[2], inputs[3], inputs[4], inputs[5], inputs[6]);
-					}
-					break;
-				default:
-					break;
+		String line;
+		String[] inputs;
+		int price, copies;
+  		while ((line = reader.readLine()) != null) {
+			inputs = line.split(":");
+			if (inputs[0].equals("USER")) {
+				addUser(inputs[1], inputs[2]);
+			} else {
+				price = Integer.parseInt(inputs[3]);
+				copies = Integer.parseInt(inputs[6]);
+				switch (inputs[0]) {
+					case "DVD":
+						addDvd(inputs[1], inputs[2], price, inputs[4], inputs[5], copies);
+						break;
+					case "BOOK":
+						addBook(inputs[1], inputs[2], price, inputs[4], inputs[5], copies);
+						break;
+					default:
+						break;
+				}
 			}
 		} 
 	}
@@ -106,7 +109,7 @@ public class Library implements Serializable {
 	public void addDvd(String title, String director, int price,
 					   String category, String igac, int copies) {
 		int id = _workId++;
-		Work work = new Dvd(title, director, price, category, igac, copies);
+		Work work = new Dvd(id, title, director, price, category, igac, copies);
 		_works.put(id, work);
 	}
 
@@ -125,4 +128,8 @@ public class Library implements Serializable {
 		return _works.get(id).toString();
 	}
 
+	public boolean workHasTerm(int id, String term) {
+		return _works.get(id).hasTerm(term);
+	}
+	
 }

@@ -3,27 +3,25 @@ package m19.works;
 public class Dvd extends Work {
     
     private String _director;
-    private String _IGAC;
+    private String _igac;
 
-    public Dvd(int id, int numberCopies, String title, int price, Category category, String director, String IGAC) {
-        super(id, numberCopies, title, price, category);
+    public Dvd(int id, String title, String director, int price, 
+            String category, String igac, int copies) {
+        super(id, title, price, category, copies);
         _director = director;
-        _IGAC = IGAC;
+        _igac = igac;
     }
 
     @Override
     public boolean hasTerm(String term) {
-        if (_director.contains(term) || _IGAC.contains(term) ) {
-            return true;
-        } else {
-            return false;
-        }
+        return super.hasTerm(term) || 
+               _director.toLowerCase().contains(term.toLowerCase());
     }
 
     @Override
     public String toString() {
-        return _id + " - " + _actualCopies + " de " + _numberCopies + " - DVD - " +
-        _title + " - " + _price + " - " + _category + " - " + _director + " - " + _IGAC;
+        return _id + " - " + _availableCopies + " de " + _copies + " - DVD - " +
+        _title + " - " + _price + " - " + _category + " - " + _director + " - " + _igac;
     }
     
 }
