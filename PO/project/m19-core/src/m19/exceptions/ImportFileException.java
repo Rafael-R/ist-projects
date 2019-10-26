@@ -5,28 +5,28 @@ package m19.exceptions;
  */
 public class ImportFileException extends Exception {
 
-  /** Serial number for serialization. */
-  private static final long serialVersionUID = 201901101348L;
+	/** Serial number for serialization. */
+	private static final long serialVersionUID = 201901101348L;
 
-  /**
-   * Default constructor
-   */
-  public ImportFileException() {
-    // do nothing
-  }
+	/**
+	 * Default constructor
+	 */
+	public ImportFileException() {
+		// do nothing
+	}
 
-  /**
-   * @param description
-   */
-  public ImportFileException(String description) {
-    super(description);
-  }
+	/**
+	 * @param description
+	 */
+	public ImportFileException(String description) {
+		super(description);
+	}
 
-  /**
-   * @param cause
-   */
-  public ImportFileException(Exception cause) {
-    super(cause);
-  }
+	/**
+	 * @param cause
+	 */
+	public ImportFileException(Exception cause) {
+		super(cause);
+	}
 
 }

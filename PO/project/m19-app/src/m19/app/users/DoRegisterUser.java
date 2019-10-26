@@ -5,6 +5,7 @@ import pt.tecnico.po.ui.Command;
 import pt.tecnico.po.ui.Input;
 import pt.tecnico.po.ui.DialogException;
 import m19.app.exceptions.UserRegistrationFailedException;
+import m19.exceptions.InvalidNameOrEmailException;
 
 /**
  * 4.2.1. Register new user.
@@ -31,8 +32,8 @@ public class DoRegisterUser extends Command<LibraryManager> {
 		try {
 			id = _receiver.registerUser(name.value(), email.value());
 			_display.popup(Message.userRegistrationSuccessful(id));
-		} catch (UserRegistrationFailedException e) {
-			throw new UserRegistrationFailedException(name.value(), email.value());
+		} catch (InvalidNameOrEmailException e) {
+			throw new UserRegistrationFailedException(e.getName(), e.getEmail());
 		}
 	}
 

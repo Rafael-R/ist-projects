@@ -2,12 +2,13 @@ package m19;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
 import m19.users.*;
 import m19.works.*;
-import m19.exceptions.*;
+import m19.exceptions.BadEntrySpecificationException;
 
 /**
  * Class that represents the library as a whole.
@@ -21,14 +22,10 @@ public class Library implements Serializable {
 	private int _workId = 0;
 	private int _date = 0;
 	private Map<Integer, User> _users = new TreeMap<Integer, User>();
-
+	private Map<Integer, Work> _works = new TreeMap<Integer, Work>();
 	
 
 	// FIXME define contructor(s)
-
-	public int getLastUserId() {
-		return _userId;
-	}
 
 	// FIXME define methods
 
@@ -57,9 +54,13 @@ public class Library implements Serializable {
 	}
 
 
-	// User functions
+	// Users functions
 
-	public int registerUser(String name, String email) {
+	public int getLastUserId() {
+		return _userId;
+	}
+
+	public int addUser(String name, String email) {
 		int id = _userId++;
 		User user = new User(id, name, email);
 		_users.put(id, user);
@@ -70,4 +71,24 @@ public class Library implements Serializable {
 		return _users.get(id);
 	}
 
+	public String getUserString(int id) {
+		return _users.get(id).toString();
+	}
+
+
+	// Works functions
+
+	public int getLastWorkId() {
+		return _workId;
+	}
+
+	public Work getWork(int id) {
+		return _works.get(id);
+	}
+
+	public String getWorkString(int id) {
+		return _works.get(id).toString();
+	}
+
+	
 }

@@ -2,6 +2,7 @@ package m19.app.users;
 
 import m19.LibraryManager;
 import m19.app.exceptions.NoSuchUserException;
+import m19.exceptions.InvalidUserIdException;
 import pt.tecnico.po.ui.Command;
 import pt.tecnico.po.ui.Input;
 import pt.tecnico.po.ui.DialogException;
@@ -28,8 +29,8 @@ public class DoShowUser extends Command<LibraryManager> {
 		try {
 			_display.addLine(_receiver.showUser(id.value()));
 			_display.display();
-		} catch (NoSuchUserException e) {
-			throw new NoSuchUserException(id.value());
+		} catch (InvalidUserIdException e) {
+			throw new NoSuchUserException(e.getId());
 		}
 	}
 
