@@ -99,6 +99,18 @@ public class Library implements Serializable {
 		return _users.get(id).toString();
 	}
 
+	public String getUserNotifications(int id) {
+		return _users.get(id).getNotifications();
+	}
+
+	public boolean getUserState(int id) {
+		return _users.get(id).getState();
+	}
+
+	public void userPayFine(int id) {
+		_users.get(id).payFine();
+	}
+
 
 	// Works functions
 
@@ -131,5 +143,5 @@ public class Library implements Serializable {
 	public boolean workHasTerm(int id, String term) {
 		return _works.get(id).hasTerm(term);
 	}
-	
+
 }

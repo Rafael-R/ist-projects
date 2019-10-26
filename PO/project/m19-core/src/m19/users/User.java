@@ -21,6 +21,28 @@ public class User implements Observer {
         _email = email;
     }
 
+    public boolean getState() {
+        return _state;
+    }
+
+    public void setState(boolean state) {
+        _state = state;
+    }
+
+    public void payFine() {
+        _state = true;
+        _fine = 0;
+    }
+
+    public String getNotifications() {
+        String string = "";
+        for (Notification notification : _notifications) {
+            string += notification + "\n";
+        }
+        _notifications.clear();
+        return string;
+    }
+
     public void addNotification(String message) {
         _notifications.add(new Notification(message));
     }

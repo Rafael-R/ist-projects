@@ -3,7 +3,7 @@ package m19.works;
 import java.util.ArrayList;
 import m19.users.Observer;
 
-public abstract class Work implements Observable {
+public class Work implements Observable {
 
     private ArrayList<Observer> observers = new ArrayList<Observer>();
     
@@ -35,9 +35,14 @@ public abstract class Work implements Observable {
         _availableCopies = copies;
     }
 
+    public void requestWork() {
+        _availableCopies--;
+        notifyObservers("REQUISIÇÃO");
+    }
+
     public void returnWork() {
         _availableCopies++;
-        notifyObservers();
+        notifyObservers("ENTREGA");
     }
 
     public boolean verifyAvailability() {
@@ -61,9 +66,9 @@ public abstract class Work implements Observable {
     }
 
     @Override
-    public void notifyObservers() {
+    public void notifyObservers(String message) {
         for (Observer observer : observers) {
-            observer.notify("DISPONIBILIDADE: " + this.toString());
+            observer.notify(message + ": " + this.toString());
             removeObserver(observer);
         }
     }

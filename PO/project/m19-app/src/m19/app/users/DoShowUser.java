@@ -1,8 +1,8 @@
 package m19.app.users;
 
 import m19.LibraryManager;
-import m19.app.exceptions.NoSuchUserException;
 import m19.exceptions.InvalidUserIdException;
+import m19.app.exceptions.NoSuchUserException;
 import pt.tecnico.po.ui.Command;
 import pt.tecnico.po.ui.Input;
 import pt.tecnico.po.ui.DialogException;

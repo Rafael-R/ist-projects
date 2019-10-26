@@ -7,7 +7,9 @@ import m19.exceptions.FailedToOpenFileException;
 import m19.exceptions.ImportFileException;
 import m19.exceptions.InvalidNameOrEmailException;
 import m19.exceptions.InvalidUserIdException;
+import m19.exceptions.InvalidWorkIdException;
 import m19.exceptions.MissingFileAssociationException;
+import m19.exceptions.UserNotSuspendedException;
 
 /**
  * The façade class.
@@ -91,6 +93,14 @@ public class LibraryManager {
 		}
 	}
 
+	public String showUserNotifications(int id) throws InvalidUserIdException {
+		if (_library.getUser(id) == null) {
+			throw new InvalidUserIdException(id);
+		} else {
+			return _library.getUserNotifications(id);
+		}
+	}
+
 	public String showUsers() {
 		String string = "";
 		for (int i = 0; i < _library.getLastUserId(); i++) {
@@ -99,11 +109,25 @@ public class LibraryManager {
 		return string;
 	}
 
+	public void payFine(int id) throws InvalidUserIdException, UserNotSuspendedException {
+		if (_library.getUser(id) == null) {
+			throw new InvalidUserIdException(id);
+		} else if (_library.getUserState(id) == true) {
+			throw new UserNotSuspendedException(id);
+		} else {
+			_library.userPayFine(id);
+		}
+	}
+
 
 	// Works functions
 
-	public String displayWork(int id) {
-		return _library.getWorkString(id);
+	public String displayWork(int id) throws InvalidWorkIdException {
+		if (_library.getWork(id) == null) {
+			throw new InvalidWorkIdException(id);
+		} else {
+			return _library.getWorkString(id);
+		}
 	}
 
 	public String displayWorks() {

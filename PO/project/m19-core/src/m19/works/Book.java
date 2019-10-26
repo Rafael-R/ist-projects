@@ -12,6 +12,9 @@ public class Book extends Work {
         _isbn = isbn;
     }
 
+    /**
+	 * @param term
+	 */
     @Override
     public boolean hasTerm(String term) {
         return super.hasTerm(term) ||
