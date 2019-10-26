@@ -117,7 +117,7 @@ public class LibraryManager {
 	public String performSearch(String term) {
 		String string = "";
 		for (int i = 0; i < _library.getLastWorkId(); i++) {
-			if (_library.getWork(i).hasTerm(term)) {
+			if (_library.workHasTerm(i, term)) {
 				string += _library.getWorkString(i) + "\n";
 			}
 		}

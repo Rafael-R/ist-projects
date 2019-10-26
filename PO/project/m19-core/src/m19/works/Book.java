@@ -14,16 +14,13 @@ public class Book extends Work {
 
     @Override
     public boolean hasTerm(String term) {
-        if (_author.contains(term) || _isbn.contains(term) ) {
-            return true;
-        } else {
-            return false;
-        }
+        return super.hasTerm(term) ||
+               _author.toLowerCase().contains(term.toLowerCase());
     }
 
     @Override
     public String toString() {
-        return _id + " - " + _actualCopies + " de " + _numberCopies + " - Livro - " +
+        return _id + " - " + _availableCopies + " de " + _copies + " - Livro - " +
         _title + " - " + _price + " - " + _category + " - " + _author + " - " + _isbn;
     }
 

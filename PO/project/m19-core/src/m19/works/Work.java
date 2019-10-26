@@ -8,16 +8,14 @@ public abstract class Work implements Observable {
     private ArrayList<Observer> observers = new ArrayList<Observer>();
     
     protected int _id;
-    protected int _numberCopies;
-    protected int _actualCopies;
+    protected int _copies;
+    protected int _availableCopies;
     protected String _title;
     protected int _price;
     protected Category _category;
 
     public Work(int id, String title, int price, String category, int copies) {
         _id = id;
-        _numberCopies = numberCopies;
-        _actualCopies = _numberCopies;
         _title = title;
         _price = price;
         switch (category) {
@@ -33,23 +31,26 @@ public abstract class Work implements Observable {
             default:
                 break;
         }
-        _category = category;
+        _copies = copies;
+        _availableCopies = copies;
     }
 
     public void returnWork() {
-        _actualCopies++;
+        _availableCopies++;
         notifyObservers();
     }
 
     public boolean verifyAvailability() {
-        if (_actualCopies == 0) {
+        if (_availableCopies == 0) {
             return false;
         } else {
             return true;
         }
     }
 
-    public abstract boolean hasTerm(String term);
+    public boolean hasTerm(String term) {
+        return _title.toLowerCase().contains(term.toLowerCase());
+    }
 
     public void addObserver(Observer observer) {
         observers.add(observer);
