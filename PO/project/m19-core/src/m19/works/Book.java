@@ -3,17 +3,18 @@ package m19.works;
 public class Book extends Work {
     
     private String _author;
-    private String _ISBN;
+    private String _isbn;
 
-    public Book(int id, int numberCopies, String title, int price, Category category, String author, String ISBN) {
-        super(id, numberCopies, title, price, category);
+    public Book(int id, String title, String author, int price, 
+                String category, String isbn, int copies) {
+        super(id, title, price, category, copies);
         _author = author;
-        _ISBN = ISBN;
+        _isbn = isbn;
     }
 
     @Override
     public boolean hasTerm(String term) {
-        if (_author.contains(term) || _ISBN.contains(term) ) {
+        if (_author.contains(term) || _isbn.contains(term) ) {
             return true;
         } else {
             return false;
@@ -23,7 +24,7 @@ public class Book extends Work {
     @Override
     public String toString() {
         return _id + " - " + _actualCopies + " de " + _numberCopies + " - Livro - " +
-        _title + " - " + _price + " - " + _category + " - " + _author + " - " + _ISBN;
+        _title + " - " + _price + " - " + _category + " - " + _author + " - " + _isbn;
     }
 
 }

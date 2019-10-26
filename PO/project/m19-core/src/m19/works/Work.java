@@ -14,12 +14,25 @@ public abstract class Work implements Observable {
     protected int _price;
     protected Category _category;
 
-    public Work(int id, int numberCopies, String title, int price, Category category) {
+    public Work(int id, String title, int price, String category, int copies) {
         _id = id;
         _numberCopies = numberCopies;
         _actualCopies = _numberCopies;
         _title = title;
         _price = price;
+        switch (category) {
+            case "FICTION":
+                _category = new FictionWork();
+                break;
+            case "SCITECH":
+                _category = new ScitechWork();
+                break;
+            case "REFERENCE":
+                _category = new ReferenceWork();
+                break;
+            default:
+                break;
+        }
         _category = category;
     }
 

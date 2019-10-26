@@ -39,7 +39,28 @@ public class Library implements Serializable {
 	 * @throws IOException
 	 */
 	void importFile(String filename) throws BadEntrySpecificationException, IOException {
-		// FIXME implement method
+		BufferedReader reader = new BufferedReader(new FileReader(filename));
+  		String line; 
+  		while ((line = reader.readLine()) != null) 
+			String[] inputs = line.split(":");
+			switch (inputs[0]) {
+				case "USER":
+					addUser(inputs[1], inputs[2])
+					break;
+				case "DVD":
+					for (int i = 0; i < inputs[6]; i++) {
+						addDvd(inputs[1], inputs[2], inputs[3], inputs[4], inputs[5], inputs[6]);
+					}
+					break;
+				case "BOOK":
+					for (int i = 0; i < inputs[6]; i++) {
+						addBook(inputs[1], inputs[2], inputs[3], inputs[4], inputs[5], inputs[6]);
+					}
+					break;
+				default:
+					break;
+			}
+		} 
 	}
 
 
@@ -82,6 +103,20 @@ public class Library implements Serializable {
 		return _workId;
 	}
 
+	public void addDvd(String title, String director, int price,
+					   String category, String igac, int copies) {
+		int id = _workId++;
+		Work work = new Dvd(title, director, price, category, igac, copies);
+		_works.put(id, work);
+	}
+
+	public void addBook(String title, String author, int price,
+						String category, String isbn, int copies) {
+		int id = _workId++;
+		Work work = new Book(id, title, author, price, category, isbn, copies);
+		_works.put(id, work);
+	}
+
 	public Work getWork(int id) {
 		return _works.get(id);
 	}
@@ -90,5 +125,4 @@ public class Library implements Serializable {
 		return _works.get(id).toString();
 	}
 
-	
 }
