@@ -1,13 +1,13 @@
 package m19;
 
 import java.io.IOException;
+
 import m19.exceptions.BadEntrySpecificationException;
 import m19.exceptions.FailedToOpenFileException;
 import m19.exceptions.ImportFileException;
+import m19.exceptions.InvalidNameOrEmailException;
+import m19.exceptions.InvalidUserIdException;
 import m19.exceptions.MissingFileAssociationException;
-import m19.users.User;
-import m19.app.exceptions.NoSuchUserException;
-import m19.app.exceptions.UserRegistrationFailedException;
 
 /**
  * The façade class.
@@ -16,10 +16,6 @@ public class LibraryManager {
 
 	private Library _library = new Library();
 	private String _filename;
-
-	// FIXME define other attributes
-
-	// FIXME define contructor(s)
 
 
 	// File management related functions
@@ -77,31 +73,56 @@ public class LibraryManager {
 	}
 
 
-	// User functions
+	// Users functions
 
-	public int registerUser(String name, String email) throws UserRegistrationFailedException {
+	public int registerUser(String name, String email) throws InvalidNameOrEmailException {
 		if (name.isEmpty() | email.isEmpty()) {
-			throw new UserRegistrationFailedException(name, email);
+			throw new InvalidNameOrEmailException(name, email);
 		} else {
-			return _library.registerUser(name, email);
+			return _library.addUser(name, email);
 		}
 	}
 
-	public String showUser(int id) throws NoSuchUserException {
-		User user = _library.getUser(id);
-		if (user == null) {
-			throw new NoSuchUserException(id);
+	public String showUser(int id) throws InvalidUserIdException {
+		if (_library.getUser(id) == null) {
+			throw new InvalidUserIdException(id);
 		} else {
-			return user.toString();
+			return _library.getUserString(id);
 		}
 	}
 
 	public String showUsers() {
 		String string = "";
 		for (int i = 0; i < _library.getLastUserId(); i++) {
-			string += _library.getUser(i).toString() + "\n";
+			string += _library.getUserString(i) + "\n";
 		}
 		return string;
 	}
+
+
+	// Works functions
+
+	public String displayWork(int id) {
+		return _library.getWorkString(id);
+	}
+
+	public String displayWorks() {
+		String string = "";
+		for (int i = 0; i < _library.getLastWorkId(); i++) {
+			string += _library.getWorkString(i) + "\n";
+		}
+		return string;
+	}
+
+	public String performSearch(String term) {
+		String string = "";
+		for (int i = 0; i < _library.getLastWorkId(); i++) {
+			if (_library.getWork(i).hasTerm(term)) {
+				string += _library.getWorkString(i) + "\n";
+			}
+		}
+		return string;
+	}
+
 
 }
