@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "sync.h"
 
 
 int obtainNewInumber(tecnicofs* fs) {

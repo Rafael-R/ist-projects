@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
-#include <sys/time.h>
 #include "fs.h"
 #include "constants.h"
+#include "timer.h"
 
 char* inputFile;
 char* outputFile;
@@ -190,11 +190,11 @@ int main(int argc, char* argv[]) {
 
     processInput();
 
-    struct timeval start, end;
+    TIMER start, end;
 
     mutex_init(&commandsAccess);
 
-    gettimeofday(&start, NULL);
+    TIMER_READ(start);
 
     #if defined(MUTEX) || defined(RWLOCK)
         for (int i = 0; i < numberThreads; i++) {
@@ -207,14 +207,11 @@ int main(int argc, char* argv[]) {
         applyCommands();    // Execucao sequencial
     #endif
 
-    gettimeofday(&end, NULL);
+    TIMER_READ(end);
 
     mutex_destroy(&commandsAccess);
 
-    double duration = (end.tv_sec - start.tv_sec) +
-                      ((end.tv_usec - start.tv_usec) / 1000000.0);
-
-    printf("TecnicoFS completed in %.4f seconds.\n", duration);
+    printf("TecnicoFS completed in %.4f seconds.\n", TIMER_GET_DURATION(start, end));
 
     FILE* output = openFile(outputFile);
     print_tecnicofs_tree(output, fs);
