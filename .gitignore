@@ -15,7 +15,6 @@
 **/testes_enunciado/
 **/testes-enunciado/
 
-
 # ----- IAED -----
 
 tests-a_r
@@ -37,7 +36,6 @@ puzzles_publicos.pl
 exemplos_puzzles.pl
 teste.py
 
-
 # ----- SO -----
 
 outputs
@@ -45,5 +43,8 @@ tecnicofs-nosync
 tecnicofs-mutex
 tecnicofs-rwlock
 
+# ----- PO -----
+
+daily_tests
 
 # --------------------
