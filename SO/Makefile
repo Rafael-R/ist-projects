@@ -31,7 +31,7 @@ fs.o: fs.c fs.h lib/bst.h lib/hash.h
 
 sync.o: sync.c sync.h constants.h
 
-main.o: main.c fs.h lib/bst.h lib/hash.h constants.h sync.h
+main.o: main.c fs.h lib/bst.h lib/hash.h constants.h timer.h sync.h
 tecnicofs-nosync: lib/bst.o lib/hash.o fs.o sync.o main.o
 
 ### MUTEX ###
@@ -48,7 +48,7 @@ sync-mutex.o: CFLAGS+=-DMUTEX
 sync-mutex.o: sync.c sync.h constants.h
 
 main-mutex.o: CFLAGS+=-DMUTEX
-main-mutex.o: main.c fs.h lib/bst.h lib/hash.h constants.h sync.h
+main-mutex.o: main.c fs.h lib/bst.h lib/hash.h constants.h timer.h sync.h
 tecnicofs-mutex: lib/bst-mutex.o lib/hash-mutex.o fs-mutex.o sync-mutex.o main-mutex.o
 
 ### RWLOCK ###
@@ -65,7 +65,7 @@ sync-rwlock.o: CFLAGS+=-DRWLOCK
 sync-rwlock.o: sync.c sync.h constants.h
 
 main-rwlock.o: CFLAGS+=-DRWLOCK
-main-rwlock.o: main.c fs.h lib/bst.h lib/hash.h constants.h sync.h
+main-rwlock.o: main.c fs.h lib/bst.h lib/hash.h constants.h timer.h sync.h
 tecnicofs-rwlock: lib/bst-rwlock.o lib/hash-rwlock.o fs-rwlock.o sync-rwlock.o main-rwlock.o
 
 
