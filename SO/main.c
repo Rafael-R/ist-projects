@@ -10,12 +10,14 @@ char* inputFile;
 char* outputFile;
 int numberThreads;
 int numberBuckets;
-pthread_mutex_t commandsAccess;
 tecnicofs* fs;
 
 char inputCommands[MAX_COMMANDS][MAX_INPUT_SIZE];
 int numberCommands = 0;
 int headQueue = 0;
+
+sem_t commandsAccess;
+sem_t inputAccess;
 
 
 static void displayUsage (const char* appName) {
@@ -42,49 +44,50 @@ static void parseArgs (long argc, char* const argv[]) {
     }
 }
 
-int insertCommand(char* data) {
-    if(numberCommands != MAX_COMMANDS) {
-        strcpy(inputCommands[numberCommands++], data);
-        return 1;
+void insertCommand(char* data) {
+    if(numberCommands == MAX_COMMANDS) {
+        semaphore_wait(&inputAccess);
     }
-    return 0;
+    strcpy(inputCommands[numberCommands++], data);
 }
 
 char* removeCommand() {
     if(numberCommands > 0){
         numberCommands--;
+        semaphore_post(&inputAccess);
         return inputCommands[headQueue++];
     }
     return NULL;
 }
 
-void errorParse() {
-    fprintf(stderr, "Error: command invalid\n");
+void errorParse(int lineNumber){
+    fprintf(stderr, "Error: line %d invalid\n", lineNumber);
     exit(EXIT_FAILURE);
 }
 
-FILE* openFile(char* filename) {
-    FILE *fptr;
-    fptr = fopen(filename, "w");
-    if (fptr == NULL) {
-        fprintf(stderr, "Error: invalid file\n");
+FILE* openFile(char* filename, const char* mode) {
+    FILE* fptr;
+    fptr = fopen(filename, mode);
+    if(!fptr){
+        fprintf(stderr, "Error: Opening file: %s\n", filename);
         exit(EXIT_FAILURE);
     }
     return fptr;
 }
 
-void* processInput() {
+void* processInput(void* arg) {
+    
+    FILE* input = (FILE*) arg;
     char line[MAX_INPUT_SIZE];
-
-    FILE* input = openFile(inputFile);
+    int lineNumber = 0;
 
     while (fgets(line, sizeof(line)/sizeof(char), input)) {
         char token;
-        char name[MAX_INPUT_SIZE], newName[MAX_INPUT_SIZE];
+        char name[MAX_INPUT_SIZE];
+        char newName[MAX_INPUT_SIZE];
+        lineNumber++;
 
         int numTokens = sscanf(line, "%c %s %s", &token, name, newName);
-
-        printf("Command: %c %s %s\n", token, name, newName);
 
         /* perform minimal validation */
         if (numTokens < 1) {
@@ -94,53 +97,52 @@ void* processInput() {
             case 'c':
             case 'l':
             case 'd':
-                if(numTokens != 2)
-                    errorParse();
-                if(insertCommand(line))
+                if(numTokens != 2) {
+                    errorParse(lineNumber);
+                } else {
+                    insertCommand(line);
                     break;
-                return NULL;
+                }
             case 'r':
-                if(numTokens != 3)
-                    errorParse();
-                if(insertCommand(line))
+                if(numTokens != 3) {
+                    errorParse(lineNumber);
+                } else {
+                    insertCommand(line);
                     break;
-                return NULL;
+                }
             case '#':
                 break;
             default: { /* error */
-                errorParse();
+                errorParse(lineNumber);
             }
         }
     }
-    fclose(input);
     return NULL;
 }
 
 void* applyCommands(){
-
     while(1){
-        mutex_lock(&commandsAccess);
-
+        semaphore_wait(&commandsAccess);
         if (numberCommands > 0) {
-
             const char* command = removeCommand();
             if (command == NULL){
-                mutex_unlock(&commandsAccess);
+                semaphore_post(&commandsAccess);
                 continue;
             }
             char token;
             char name[MAX_INPUT_SIZE], newName[MAX_INPUT_SIZE];
             sscanf(command, "%c %s %s", &token, name, newName);
+            printf("command: %s", command);
 
             int iNumber;
             switch (token) {
                 case 'c':
                     iNumber = obtainNewInumber(fs);
-                    mutex_unlock(&commandsAccess);
+                    semaphore_post(&commandsAccess);
                     create(fs, name, iNumber);
                     break;
                 case 'l':
-                    mutex_unlock(&commandsAccess);
+                    semaphore_post(&commandsAccess);
                     int searchResult = lookup(fs, name);
                     if(!searchResult)
                         printf("%s not found\n", name);
@@ -148,11 +150,11 @@ void* applyCommands(){
                         printf("%s found with inumber %d\n", name, searchResult);
                     break;
                 case 'd':
-                    mutex_unlock(&commandsAccess);
+                    semaphore_post(&commandsAccess);
                     delete(fs, name);
                     break;
                 case 'r':
-                    mutex_unlock(&commandsAccess);
+                    semaphore_post(&commandsAccess);
                     int oldSearchResult = lookup(fs, name);
                     int newSearchResult = lookup(fs, newName);
                     if (oldSearchResult && !newSearchResult) {
@@ -161,59 +163,66 @@ void* applyCommands(){
                     }
                     break;
                 default: { /* error */
-                    mutex_unlock(&commandsAccess);
                     fprintf(stderr, "Error: command to apply\n");
                     exit(EXIT_FAILURE);
                 }
             }
         } else {
-            mutex_unlock(&commandsAccess);
-            #if defined(MUTEX) || defined(RWLOCK)
-                pthread_exit(NULL);
-            #else
-                return NULL;    // Return normal em caso de execucao sequencial
-            #endif
+            semaphore_post(&commandsAccess);
+            return NULL;
         }
     }
 }
 
 
 int main(int argc, char* argv[]) {
+    TIMER start, end;
 
     parseArgs(argc, argv);
 
     fs = new_tecnicofs(numberBuckets);
 
     #if defined(MUTEX) || defined(RWLOCK)
-        pthread_t* threads = (pthread_t*) malloc((numberThreads) * sizeof(pthread_t));
+        pthread_t* threads = (pthread_t*) malloc((numberThreads + 1) * sizeof(pthread_t));
     #endif
 
-    processInput();
+    semaphore_init(&commandsAccess, 1);
 
-    TIMER start, end;
-
-    mutex_init(&commandsAccess);
+    FILE* input = openFile(inputFile, "r");
+    semaphore_init(&inputAccess, 1);
 
     TIMER_READ(start);
 
     #if defined(MUTEX) || defined(RWLOCK)
-        for (int i = 0; i < numberThreads; i++) {
-            thread_create(&threads[i], applyCommands);
+        thread_create(&threads[0], processInput, (void *)input);
+        for (int i = 1; i < numberThreads; i++) {
+            thread_create(&threads[i], applyCommands, NULL);
         }
         for (int i = 0; i < numberThreads; i++) {
             thread_join(threads[i]);
         }
     #else
-        applyCommands();    // Execucao sequencial
+        while (!feof(input)) {
+            processInput((void *)input);
+            applyCommands();    // Execucao sequencial
+        }
     #endif
 
     TIMER_READ(end);
 
-    mutex_destroy(&commandsAccess);
+    semaphore_destroy(&inputAccess);
+    fclose(input);
+    
+    semaphore_destroy(&commandsAccess);
 
     printf("TecnicoFS completed in %.4f seconds.\n", TIMER_GET_DURATION(start, end));
 
-    FILE* output = openFile(outputFile);
+    #if defined(MUTEX) || defined(RWLOCK)
+        free(threads);
+    #endif
+
+    
+    FILE* output = openFile(outputFile, "w");
     print_tecnicofs_tree(output, fs);
     fclose(output);
 

@@ -16,9 +16,9 @@ tecnicofs* new_tecnicofs(int numberBuckets){
 		exit(EXIT_FAILURE);
 	}
 	fs->buckets = numberBuckets;
-	fs->bstRoots = (node**) malloc(sizeof(node*) * fs->buckets);
-	fs->bstLocks = (LOCK_TYPE*) malloc(sizeof(LOCK_TYPE) * fs->buckets);
-	for (size_t i = 0; i < fs->buckets; i++) 	{
+	fs->bstRoots = (node**) malloc(sizeof(node*) * numberBuckets);
+	fs->bstLocks = (LOCK_TYPE*) malloc(sizeof(LOCK_TYPE) * numberBuckets);
+	for (int i = 0; i < numberBuckets; i++) 	{
 		fs->bstRoots[i] = NULL;
 		sync_init(&(fs->bstLocks[i]));
 	}
@@ -27,10 +27,12 @@ tecnicofs* new_tecnicofs(int numberBuckets){
 }
 
 void free_tecnicofs(tecnicofs* fs){
-	for (size_t i = 0; i < fs->buckets; i++) 	{
+	for (int i = 0; i < fs->buckets; i++) 	{
 		free_tree(fs->bstRoots[i]);
 		sync_destroy(&(fs->bstLocks[i]));
 	}
+	free(fs->bstRoots);
+	free(fs->bstLocks);
 	free(fs);
 }
 

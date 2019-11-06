@@ -2,6 +2,7 @@
 #define SYNC_H
 
 #include <pthread.h>
+#include <semaphore.h> 
 
 #if defined(MUTEX)
     #define LOCK_TYPE           pthread_mutex_t
@@ -31,12 +32,12 @@ void sync_destroy(LOCK_TYPE * sync);
 void sync_wrlock(LOCK_TYPE * sync);
 void sync_rdlock(LOCK_TYPE * sync);
 void sync_unlock(LOCK_TYPE * sync);
-void thread_create(pthread_t *thread, void *(*function) (void *));
+void thread_create(pthread_t *thread, void *(*function) (void *), void *arg);
 void thread_join(pthread_t thread);
-void mutex_init(pthread_mutex_t* mutex);
-void mutex_lock(pthread_mutex_t* mutex);
-void mutex_unlock(pthread_mutex_t* mutex);
-void mutex_destroy(pthread_mutex_t* mutex);
+void semaphore_init(sem_t* semaphore, unsigned int value);
+void semaphore_wait(sem_t* semaphore);
+void semaphore_post(sem_t* semaphore);
+void semaphore_destroy(sem_t* semaphore);
 int nop(void* pointer);
 
 #endif /* SYNC_H */

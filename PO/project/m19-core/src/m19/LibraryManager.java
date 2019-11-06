@@ -77,16 +77,16 @@ public class LibraryManager {
 
 	// Users functions
 
-	public int registerUser(String name, String email) throws InvalidNameOrEmailException {
+	public int registerUser(String name, String email) throws InvalidUserDataException {
 		if (name.isEmpty() | email.isEmpty()) {
-			throw new InvalidNameOrEmailException(name, email);
+			throw new InvalidUserDataException(name, email);
 		} else {
-			return _library.addUser(name, email);
+			return _library.registerUser(name, email);
 		}
 	}
 
 	public String showUser(int id) throws InvalidUserIdException {
-		if (_library.getUser(id) == null) {
+		if (_library.fetchUser(id) == null) {
 			throw new InvalidUserIdException(id);
 		} else {
 			return _library.getUserString(id);
@@ -94,7 +94,7 @@ public class LibraryManager {
 	}
 
 	public String showUserNotifications(int id) throws InvalidUserIdException {
-		if (_library.getUser(id) == null) {
+		if (_library.fetchUser(id) == null) {
 			throw new InvalidUserIdException(id);
 		} else {
 			return _library.getUserNotifications(id);
@@ -110,7 +110,7 @@ public class LibraryManager {
 	}
 
 	public void payFine(int id) throws InvalidUserIdException, UserNotSuspendedException {
-		if (_library.getUser(id) == null) {
+		if (_library.fetchUser(id) == null) {
 			throw new InvalidUserIdException(id);
 		} else if (_library.getUserState(id) == true) {
 			throw new UserNotSuspendedException(id);
@@ -123,7 +123,7 @@ public class LibraryManager {
 	// Works functions
 
 	public String displayWork(int id) throws InvalidWorkIdException {
-		if (_library.getWork(id) == null) {
+		if (_library.fetchWork(id) == null) {
 			throw new InvalidWorkIdException(id);
 		} else {
 			return _library.getWorkString(id);
