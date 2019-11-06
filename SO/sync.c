@@ -42,8 +42,8 @@ void sync_unlock(LOCK_TYPE* sync){
     }
 }
 
-void thread_create(pthread_t *thread, void *(*function) (void *)) {
-    int ret = pthread_create(thread, NULL, function, NULL);
+void thread_create(pthread_t *thread, void *(*function) (void *), void *arg) {
+    int ret = pthread_create(thread, NULL, function, arg);
     if(ret != 0){
         fprintf(stderr, "Error: creating thread\n");
         exit(EXIT_FAILURE);
@@ -58,44 +58,44 @@ void thread_join(pthread_t thread) {
     }
 }
 
-void mutex_init(pthread_mutex_t* mutex){
+void semaphore_init(sem_t* semaphore, unsigned int value){
     #if defined(MUTEX) || defined(RWLOCK)
-        int ret = pthread_mutex_init(mutex, NULL);
+        int ret = sem_init(semaphore, 0, value);
         if(ret != 0){
-            fprintf(stderr, "Error: initializing mutex\n");
+            fprintf(stderr, "Error: initializing semaphore\n");
             exit(EXIT_FAILURE);
         }
     #endif
 }
 
-void mutex_destroy(pthread_mutex_t* mutex){
+void semaphore_destroy(sem_t* semaphore){
     #if defined(MUTEX) || defined(RWLOCK)
-        int ret = pthread_mutex_destroy(mutex);
+        int ret = sem_destroy(semaphore);
         if(ret != 0){
-            fprintf(stderr, "Error: destroying mutex\n");
+            fprintf(stderr, "Error: destroying semaphore\n");
             exit(EXIT_FAILURE);
         }
     #endif
 }
 
-void mutex_lock(pthread_mutex_t* mutex){
+void semaphore_wait(sem_t* semaphore){
     #if defined(MUTEX) || defined(RWLOCK)
-        int ret = pthread_mutex_lock(mutex);
+        int ret = sem_wait(semaphore);
         if(ret != 0){
-            fprintf(stderr, "Error: locking mutex\n");
+            fprintf(stderr, "Error: locking semaphore\n");
             exit(EXIT_FAILURE);
         }
     #endif
 }
 
-void mutex_unlock(pthread_mutex_t* mutex){
+void semaphore_post(sem_t* semaphore){
     #if defined(MUTEX) || defined(RWLOCK)
-        int ret = pthread_mutex_unlock(mutex);
+        int ret = sem_post(semaphore);
         if(ret != 0){
-            fprintf(stderr, "Error: unlocking mutex\n");
+            fprintf(stderr, "Error: unlocking semaphore\n");
             exit(EXIT_FAILURE);
         }
-     #endif
+    #endif
 }
 
 int nop(void* pointer){

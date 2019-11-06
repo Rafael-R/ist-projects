@@ -7,10 +7,12 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import m19.users.*;
 import m19.works.*;
 import m19.exceptions.BadEntrySpecificationException;
+import m19.exceptions.UnknownDataException;
 
 /**
  * Class that represents the library as a whole.
@@ -40,30 +42,31 @@ public class Library implements Serializable {
 	 * @throws BadEntrySpecificationException
 	 * @throws IOException
 	 */
-	void importFile(String filename) throws BadEntrySpecificationException, IOException {
+	void importFile(String filename) throws IOException, BadEntrySpecificationException {
 		BufferedReader reader = new BufferedReader(new FileReader(filename));
 		String line;
-		String[] inputs;
-		int price, copies;
   		while ((line = reader.readLine()) != null) {
-			inputs = line.split(":");
-			if (inputs[0].equals("USER")) {
-				addUser(inputs[1], inputs[2]);
-			} else {
-				price = Integer.parseInt(inputs[3]);
-				copies = Integer.parseInt(inputs[6]);
-				switch (inputs[0]) {
-					case "DVD":
-						addDvd(inputs[1], inputs[2], price, inputs[4], inputs[5], copies);
-						break;
-					case "BOOK":
-						addBook(inputs[1], inputs[2], price, inputs[4], inputs[5], copies);
-						break;
-					default:
-						break;
-				}
+			String[] fields = line.split(":");
+			try {
+				registerFromFields(fields);
+			} catch (UnknownDataException e) {
+				throw new BadEntrySpecificationException(e.getData());
 			}
 		} 
+	}
+
+	void registerFromFields(String[] fields) throws UnknownDataException {
+
+		Pattern patternUser = Pattern.compile("^(USER)");
+		Pattern patternWork = Pattern.compile("^(DVD|BOOK)");
+
+		if (patternUser.matcher(fields[0]).matches()) {
+			registerUser(fields[1], fields[2]);
+		} else if (patternWork.matcher(fields[0]).matches()) {
+			registerWork(fields);
+		} else {
+			throw new UnknownDataException(fields[0]);
+		}
 	}
 
 
@@ -84,14 +87,14 @@ public class Library implements Serializable {
 		return _userId;
 	}
 
-	public int addUser(String name, String email) {
+	public int registerUser(String name, String email) {
 		int id = _userId++;
 		User user = new User(id, name, email);
 		_users.put(id, user);
 		return id;
 	}
 
-	public User getUser(int id) {
+	public User fetchtUser(int id) {
 		return _users.get(id);
 	}
 
@@ -118,21 +121,25 @@ public class Library implements Serializable {
 		return _workId;
 	}
 
-	public void addDvd(String title, String director, int price,
-					   String category, String igac, int copies) {
+	void registerWork(String[] fields) {
+		int price = Integer.parseInt(fields[3]);
+		int copies = Integer.parseInt(fields[6]);
 		int id = _workId++;
-		Work work = new Dvd(id, title, director, price, category, igac, copies);
+		Work work;
+		switch (fields[0]) {
+			case "DVD":
+				work = new Dvd(id, fields[1], fields[2], price, fields[4], fields[5], copies);
+				break;
+			case "BOOK":
+				work = new Book(id, fields[1], fields[2], price, fields[4], fields[5], copies);
+				break;
+			default:
+				break;
+		}
 		_works.put(id, work);
 	}
 
-	public void addBook(String title, String author, int price,
-						String category, String isbn, int copies) {
-		int id = _workId++;
-		Work work = new Book(id, title, author, price, category, isbn, copies);
-		_works.put(id, work);
-	}
-
-	public Work getWork(int id) {
+	public Work fetchWork(int id) {
 		return _works.get(id);
 	}
 
