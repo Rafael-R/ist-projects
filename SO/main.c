@@ -16,8 +16,9 @@ char inputCommands[MAX_COMMANDS][MAX_INPUT_SIZE];
 int numberCommands = 0;
 int headQueue = 0;
 
-sem_t commandsAccess;
-sem_t binarySem;
+pthread_mutex_t commandLock;
+pthread_mutex_t insertLock;
+pthread_mutex_t removeLock;
 sem_t fullBuffer;
 sem_t emptyBuffer;
 
@@ -38,48 +39,40 @@ static void parseArgs (long argc, char* const argv[]) {
     #if defined(MUTEX) || defined(RWLOCK)
         numberThreads = atoi(argv[3]);
         numberBuckets = atoi(argv[4]);
+        if (numberThreads < 1) {
+            fprintf(stderr, "Error: invalid number of threads\n");
+            exit(EXIT_FAILURE);
+        } else if (numberBuckets < 1) {
+            fprintf(stderr, "Error: invalid number of buckets\n");
+            exit(EXIT_FAILURE);
+        }
     #else
         numberThreads = 1;
         numberBuckets = 1;
     #endif
-
-    if (numberThreads < 1) {
-        fprintf(stderr, "Error: invalid number of threads\n");
-        exit(EXIT_FAILURE);
-    } else if (numberBuckets < 1) {
-        fprintf(stderr, "Error: invalid number of buckets\n");
-        exit(EXIT_FAILURE);
-    }
 }
 
 void insertCommand(char* data) {
-    if(numberCommands == MAX_COMMANDS) {
-        semaphore_wait(&emptyBuffer);
-        semaphore_wait(&binarySem);
+    semaphore_wait(&emptyBuffer);
+    mutex_lock(&insertLock);
 
-        strcpy(inputCommands[numberCommands++], data);
+    strcpy(inputCommands[numberCommands], data);
+    numberCommands = (numberCommands + 1) % MAX_COMMANDS;
 
-        semaphore_post(&binarySem);
-        semaphore_post(&fullBuffer);
-    } else {
-        strcpy(inputCommands[numberCommands++], data);
-    }
+    mutex_unlock(&insertLock);
+    semaphore_post(&fullBuffer);
 }
 
 char* removeCommand() {
-    if(numberCommands == 0) {
-        semaphore_wait(&fullBuffer);
-        semaphore_wait(&binarySem);
+    semaphore_wait(&fullBuffer);
+    mutex_lock(&removeLock);
 
-        numberCommands--;
-        return inputCommands[headQueue++];
+    char* command = inputCommands[headQueue];
+    headQueue = (headQueue + 1) % MAX_COMMANDS;
 
-        semaphore_post(&binarySem);
-        semaphore_post(&emptyBuffer );
-    } else {
-        numberCommands--;
-        return inputCommands[headQueue++];
-    }
+    mutex_unlock(&removeLock);
+    semaphore_post(&emptyBuffer);
+    return command;
 }
 
 void errorParse(int lineNumber){
@@ -97,17 +90,16 @@ FILE* openFile(char* filename, const char* mode) {
     return fptr;
 }
 
-void* processInput(void* arg) {
-
-    FILE* input = (FILE*) arg;
+void* processInput() {
+    FILE* input = openFile(inputFile, "r");
     char line[MAX_INPUT_SIZE];
-    static int lineNumber = 0;
+    int lineNumber = 0;
 
     while(fgets(line, sizeof(line)/sizeof(char), input)) {
-        char token;
-        char name[MAX_INPUT_SIZE];
-        char newName[MAX_INPUT_SIZE];
         lineNumber++;
+
+        char token;
+        char name[MAX_INPUT_SIZE], newName[MAX_INPUT_SIZE];
 
         int numTokens = sscanf(line, "%c %s %s", &token, name, newName);
 
@@ -139,52 +131,50 @@ void* processInput(void* arg) {
             }
         }
     }
-    insertCommand("q\n");
-    return NULL;
+    fclose(input);
+    for (int i = 0; i < numberThreads; i++) {
+        insertCommand(EXIT_COMMAND);
+    }
+    pthread_exit(NULL);
 }
 
 void* applyCommands(){
     while(1){
-        semaphore_wait(&commandsAccess);
+        mutex_lock(&commandLock);
         const char* command = removeCommand();
 
         char token;
         char name[MAX_INPUT_SIZE], newName[MAX_INPUT_SIZE];
         sscanf(command, "%c %s %s", &token, name, newName);
-        printf("Command: %c %s %s\n", token, name, newName);
 
         int iNumber;
         switch (token) {
             case 'c':
                 iNumber = obtainNewInumber(fs);
-                semaphore_post(&commandsAccess);
-                create(fs, name, iNumber);
+                mutex_unlock(&commandLock);
+                create_file(fs, name, iNumber);
                 break;
             case 'l':
-                semaphore_post(&commandsAccess);
-                int searchResult = lookup(fs, name);
+                mutex_unlock(&commandLock);
+                int searchResult = lookup_file(fs, name);
                 if(!searchResult)
                     printf("%s not found\n", name);
                 else
                     printf("%s found with inumber %d\n", name, searchResult);
                 break;
             case 'd':
-                semaphore_post(&commandsAccess);
-                delete(fs, name);
+                mutex_unlock(&commandLock);
+                delete_file(fs, name);
                 break;
             case 'r':
-                semaphore_post(&commandsAccess);
-                int oldSearchResult = lookup(fs, name);
-                int newSearchResult = lookup(fs, newName);
-                if (oldSearchResult && !newSearchResult) {
-                    delete(fs, name);
-                    create(fs, newName, oldSearchResult);
-                }
+                mutex_unlock(&commandLock);
+                rename_file(fs, name, newName);
                 break;
             case 'q':
-                semaphore_post(&commandsAccess);
-                return NULL;
+                mutex_unlock(&commandLock);
+                pthread_exit(NULL);
             default: { /* error */
+                mutex_unlock(&commandLock);
                 fprintf(stderr, "Error: command to apply\n");
                 exit(EXIT_FAILURE);
             }
@@ -194,7 +184,6 @@ void* applyCommands(){
 
 
 int main(int argc, char* argv[]) {
-    TIMER start, end;
 
     parseArgs(argc, argv);
 
@@ -202,19 +191,20 @@ int main(int argc, char* argv[]) {
 
     pthread_t* threads = (pthread_t*) malloc((numberThreads + 1) * sizeof(pthread_t));
 
-    semaphore_init(&commandsAccess, 1);
-
-    FILE* input = openFile(inputFile, "r");
-    semaphore_init(&binarySem, 1);
+    mutex_init(&commandLock);
+    mutex_init(&insertLock);
+    mutex_init(&removeLock);
+    semaphore_init(&emptyBuffer, MAX_COMMANDS);
     semaphore_init(&fullBuffer, 0);
-    semaphore_init(&emptyBuffer, 1);
+
+    TIMER start, end;
 
     TIMER_READ(start);
 
-    thread_create(&threads[0], processInput, (void *)input);
+    thread_create(&threads[0], processInput);
 
     for (int i = 1; i < numberThreads + 1; i++) {
-        thread_create(&threads[i], applyCommands, NULL);
+        thread_create(&threads[i], applyCommands);
     }
     for (int i = 0; i < numberThreads + 1; i++) {
         thread_join(threads[i]);
@@ -224,17 +214,13 @@ int main(int argc, char* argv[]) {
 
     semaphore_destroy(&emptyBuffer);
     semaphore_destroy(&fullBuffer);
-    semaphore_destroy(&binarySem);
-    fclose(input);
+    mutex_destroy(&removeLock);
+    mutex_destroy(&insertLock);
+    mutex_destroy(&commandLock);
 
-    semaphore_destroy(&commandsAccess);
+    free(threads);
 
     printf("TecnicoFS completed in %.4f seconds.\n", TIMER_GET_DURATION(start, end));
-
-    #if defined(MUTEX) || defined(RWLOCK)
-        free(threads);
-    #endif
-
 
     FILE* output = openFile(outputFile, "w");
     print_tecnicofs_tree(output, fs);
