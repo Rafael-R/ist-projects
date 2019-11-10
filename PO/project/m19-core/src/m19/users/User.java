@@ -3,7 +3,7 @@ package m19.users;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class User implements Serializable, Observer {
+public class User implements Serializable, Comparable<User>, Observer {
 
     private static final long serialVersionUID = 201911092304L;
 
@@ -54,6 +54,15 @@ public class User implements Serializable, Observer {
 
     public void addNotification(String message) {
         _notifications.add(new Notification(message));
+    }
+
+    @Override
+    public int compareTo(User other) {
+        if (this._name == other._name) {
+            return Integer.compare(this._id, other._id);
+        } else {
+            return this._name.compareTo(other._name);
+        }
     }
 
     @Override
