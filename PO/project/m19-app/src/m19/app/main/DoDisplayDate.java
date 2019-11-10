@@ -18,8 +18,7 @@ public class DoDisplayDate extends Command<LibraryManager> {
 	/** @see pt.tecnico.po.ui.Command#execute() */
 	@Override
 	public final void execute() {
-		int currentDate = _receiver.getDate();
-		_display.popup(Message.currentDate(currentDate));
+		_display.popup(Message.currentDate(_receiver.getDate()));
 	}
 	
 }

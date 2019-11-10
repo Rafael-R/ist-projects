@@ -1,11 +1,12 @@
 package m19.works;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import m19.users.Observer;
 
-public class Work implements Observable {
+public class Work implements Serializable, Observable {
 
-    private ArrayList<Observer> observers = new ArrayList<Observer>();
+    private static final long serialVersionUID = 201911092305L;
     
     protected int _id;
     protected int _copies;
@@ -13,6 +14,7 @@ public class Work implements Observable {
     protected String _title;
     protected int _price;
     protected Category _category;
+    private ArrayList<Observer> observers = new ArrayList<Observer>();
 
     public Work(int id, String title, int price, String category, int copies) {
         _id = id;

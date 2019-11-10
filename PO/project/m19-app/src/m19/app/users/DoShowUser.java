@@ -24,7 +24,7 @@ public class DoShowUser extends Command<LibraryManager> {
 
 	/** @see pt.tecnico.po.ui.Command#execute() */
 	@Override
-	public final void execute() throws DialogException, NoSuchUserException {
+	public final void execute() throws DialogException {
 		_form.parse();
 		try {
 			_display.addLine(_receiver.showUser(id.value()));

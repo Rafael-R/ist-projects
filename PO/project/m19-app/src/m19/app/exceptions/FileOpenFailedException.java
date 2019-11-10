@@ -7,25 +7,25 @@ import pt.tecnico.po.ui.DialogException;
  */
 public class FileOpenFailedException extends DialogException {
 
-  /** Serial number for serialization. */
-  static final long serialVersionUID = 201901091828L;
+	/** Serial number for serialization. */
+	static final long serialVersionUID = 201901091828L;
 
-  /**
-   * Bad file name.
-   */
-  private String _name;
+	/**
+	 * Bad file name.
+	 */
+	private String _name;
 
-  /**
-   * @param name
-   */
-  public FileOpenFailedException(String name) {
-    _name = name;
-  }
+	/**
+	 * @param name
+	 */
+	public FileOpenFailedException(String name) {
+		_name = name;
+	}
 
-  /** @see pt.tecnico.po.ui.DialogException#getMessage() */
-  @Override
-  public String getMessage() {
-    return Message.fileNotFound(_name);
-  }
+	/** @see pt.tecnico.po.ui.DialogException#getMessage() */
+	@Override
+	public String getMessage() {
+		return Message.fileNotFound(_name);
+	}
 
 }

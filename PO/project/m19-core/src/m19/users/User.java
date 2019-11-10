@@ -1,10 +1,11 @@
 package m19.users;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
-import m19.works.Observable;
 
-public class User implements Observer {
+public class User implements Serializable, Observer {
+
+    private static final long serialVersionUID = 201911092304L;
 
     private int _id;
     private String _name;
@@ -29,9 +30,17 @@ public class User implements Observer {
         _state = state;
     }
 
+    public int getFine() {
+        return _fine;
+    }
+
     public void payFine() {
         _state = true;
         _fine = 0;
+    }
+
+    public void update() {
+        //TODO: update user state
     }
 
     public String getNotifications() {

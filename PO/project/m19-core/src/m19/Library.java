@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
@@ -31,8 +30,7 @@ public class Library implements Serializable {
 
 	// FIXME define contructor(s)
 
-	// FIXME define methods
-
+	
 	/**
 	 * Read the text input file at the beginning of the program and populates the
 	 * instances of the various possible types (books, DVDs, users).
@@ -42,7 +40,7 @@ public class Library implements Serializable {
 	 * @throws BadEntrySpecificationException
 	 * @throws IOException
 	 */
-	void importFile(String filename) throws IOException, BadEntrySpecificationException {
+	void importFile(String filename) throws BadEntrySpecificationException, IOException {
 		BufferedReader reader = new BufferedReader(new FileReader(filename));
 		String line;
   		while ((line = reader.readLine()) != null) {
@@ -52,7 +50,8 @@ public class Library implements Serializable {
 			} catch (UnknownDataException e) {
 				throw new BadEntrySpecificationException(e.getData());
 			}
-		} 
+		}
+		reader.close();
 	}
 
 	void registerFromFields(String[] fields) throws UnknownDataException {
@@ -94,7 +93,7 @@ public class Library implements Serializable {
 		return id;
 	}
 
-	public User fetchtUser(int id) {
+	public User fetchUser(int id) {
 		return _users.get(id);
 	}
 
@@ -110,8 +109,14 @@ public class Library implements Serializable {
 		return _users.get(id).getState();
 	}
 
+	public int getUserFine(int id) {
+		return _users.get(id).getFine();
+	}
+
 	public void userPayFine(int id) {
-		_users.get(id).payFine();
+		User user = _users.get(id);
+		user.payFine();
+		user.update();
 	}
 
 
@@ -122,19 +127,14 @@ public class Library implements Serializable {
 	}
 
 	void registerWork(String[] fields) {
+		Work work;
+		int id = _workId++;
 		int price = Integer.parseInt(fields[3]);
 		int copies = Integer.parseInt(fields[6]);
-		int id = _workId++;
-		Work work;
-		switch (fields[0]) {
-			case "DVD":
-				work = new Dvd(id, fields[1], fields[2], price, fields[4], fields[5], copies);
-				break;
-			case "BOOK":
-				work = new Book(id, fields[1], fields[2], price, fields[4], fields[5], copies);
-				break;
-			default:
-				break;
+		if (fields[0].equals("DVD")) {
+			work = new Dvd(id, fields[1], fields[2], price, fields[4], fields[5], copies);
+		} else {
+			work = new Book(id, fields[1], fields[2], price, fields[4], fields[5], copies);
 		}
 		_works.put(id, work);
 	}

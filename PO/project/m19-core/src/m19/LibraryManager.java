@@ -1,15 +1,14 @@
 package m19;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
-import m19.exceptions.BadEntrySpecificationException;
-import m19.exceptions.FailedToOpenFileException;
-import m19.exceptions.ImportFileException;
-import m19.exceptions.InvalidNameOrEmailException;
-import m19.exceptions.InvalidUserIdException;
-import m19.exceptions.InvalidWorkIdException;
-import m19.exceptions.MissingFileAssociationException;
-import m19.exceptions.UserNotSuspendedException;
+import m19.exceptions.*;
 
 /**
  * The façade class.
@@ -28,7 +27,12 @@ public class LibraryManager {
 	 * @throws FileNotFoundException
 	 */
 	public void save() throws MissingFileAssociationException, IOException {
-		// FIXME implement method
+		if (_filename == null) {
+			throw new MissingFileAssociationException();
+		}
+		ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(_filename)));
+    	out.writeObject(_library);
+    	out.close();
 	}
 
 	/**
@@ -48,7 +52,14 @@ public class LibraryManager {
 	 * @throws ClassNotFoundException
 	 */
 	public void load(String filename) throws FailedToOpenFileException, IOException, ClassNotFoundException {
-		// FIXME implement method
+		ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(filename)));
+		_library = (Library) in.readObject();
+		in.close();
+		_filename = filename;
+	}
+
+	public String getFilename() {
+		return _filename;
 	}
 
 	/**
@@ -101,6 +112,14 @@ public class LibraryManager {
 		}
 	}
 
+	public int showUserFine(int id) throws InvalidUserIdException {
+		if (_library.fetchUser(id) == null) {
+			throw new InvalidUserIdException(id);
+		} else {
+			return _library.getUserFine(id);
+		}
+	}
+
 	public String showUsers() {
 		String string = "";
 		for (int i = 0; i < _library.getLastUserId(); i++) {
@@ -108,7 +127,7 @@ public class LibraryManager {
 		}
 		return string;
 	}
-
+	
 	public void payFine(int id) throws InvalidUserIdException, UserNotSuspendedException {
 		if (_library.fetchUser(id) == null) {
 			throw new InvalidUserIdException(id);
@@ -148,5 +167,21 @@ public class LibraryManager {
 		return string;
 	}
 
+
+	// Requests functions
+
+	public void requestWork(int userId, int workId) throws RuleVerificationException {
+		//TODO: Define method
+		if (userId == workId) {
+			throw new RuleVerificationException(userId, workId, 3);
+		}
+	}
+
+	public void returnWork(int userId, int workId) throws WorkNotRequestedByUserException {
+		//TODO: Define method
+		if (userId == workId) {
+			throw new WorkNotRequestedByUserException(workId, userId);
+		}
+	}
 
 }
