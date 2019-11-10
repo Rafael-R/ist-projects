@@ -1,6 +1,8 @@
 package m19.works;
 
-public interface Category {
+import java.io.Serializable;
+
+public interface Category extends Serializable {
     
     public String toString();
 

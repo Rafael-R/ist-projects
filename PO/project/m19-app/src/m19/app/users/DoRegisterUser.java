@@ -27,7 +27,7 @@ public class DoRegisterUser extends Command<LibraryManager> {
 
 	/** @see pt.tecnico.po.ui.Command#execute() */
 	@Override
-	public final void execute() throws DialogException, UserRegistrationFailedException {
+	public final void execute() throws DialogException {
 		_form.parse();
 		try {
 			id = _receiver.registerUser(name.value(), email.value());

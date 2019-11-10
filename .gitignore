@@ -8,6 +8,7 @@
 *.classpath
 *.project
 *.ucls
+*.lua
 **/CVS/
 **/bin/
 **/testes_publicos/
@@ -46,5 +47,6 @@ tecnicofs-rwlock
 # ----- PO -----
 
 daily_tests
+PO/works
 
 # --------------------
