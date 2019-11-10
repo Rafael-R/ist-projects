@@ -15,9 +15,10 @@ typedef struct tecnicofs {
 int obtainNewInumber(tecnicofs* fs);
 tecnicofs* new_tecnicofs(int numberBuckets);
 void free_tecnicofs(tecnicofs* fs);
-void create(tecnicofs* fs, char *name, int inumber);
-void delete(tecnicofs* fs, char *name);
-int lookup(tecnicofs* fs, char *name);
+void create_file(tecnicofs* fs, char *name, int inumber);
+void delete_file(tecnicofs* fs, char *name);
+int lookup_file(tecnicofs* fs, char *name);
+void rename_file(tecnicofs* fs, char *name, char *newName);
 void print_tecnicofs_tree(FILE * fp, tecnicofs *fs);
 
 #endif /* FS_H */
