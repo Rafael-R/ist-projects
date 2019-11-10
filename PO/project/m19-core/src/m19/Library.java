@@ -6,7 +6,11 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.List;
+import java.util.LinkedList;
 import java.util.regex.Pattern;
+import java.util.Collections;
+import java.util.Comparator;
 
 import m19.users.*;
 import m19.works.*;
@@ -107,6 +111,17 @@ public class Library implements Serializable {
 
 	public boolean getUserState(int id) {
 		return _users.get(id).getState();
+	}
+
+	public String getSortedUsers() {
+		String users = "";
+		List<Map.Entry<Integer, User>> list =
+                new LinkedList<Map.Entry<Integer, User>>(_users.entrySet());
+		Collections.sort(list, new UserComparator());
+		for (Map.Entry<Integer, User> entry : list) {
+            users += entry.getValue().toString() + "\n";
+		}
+		return users;
 	}
 
 	public int getUserFine(int id) {

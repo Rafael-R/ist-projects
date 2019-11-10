@@ -16,17 +16,17 @@ import pt.tecnico.po.ui.Input;
  */
 public class DoRequestWork extends Command<LibraryManager> {
 
-	private int userId;
-	private int workId;
-	private String option;
+	private Input<Integer> userId;
+	private Input<Integer> workId;
+	private Input<String> option;
 
 	/**
 	 * @param receiver
 	 */
 	public DoRequestWork(LibraryManager receiver) {
 		super(Label.REQUEST_WORK, receiver);
-		userId = _form.addIntegerInput(Message.requestUserId()).value();
-		workId = _form.addIntegerInput(Message.requestWorkId()).value();
+		userId = _form.addIntegerInput(Message.requestUserId());
+		workId = _form.addIntegerInput(Message.requestWorkId());
 	}
 
 	/** @see pt.tecnico.po.ui.Command#execute() */

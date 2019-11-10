@@ -3,6 +3,7 @@ package m19;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -52,10 +53,14 @@ public class LibraryManager {
 	 * @throws ClassNotFoundException
 	 */
 	public void load(String filename) throws FailedToOpenFileException, IOException, ClassNotFoundException {
-		ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(filename)));
-		_library = (Library) in.readObject();
-		in.close();
-		_filename = filename;
+		try {
+			ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(filename)));
+			_library = (Library) in.readObject();
+			in.close();
+			_filename = filename;
+		} catch (FileNotFoundException e) {
+			throw new FailedToOpenFileException(filename);
+		}
 	}
 
 	public String getFilename() {
@@ -121,11 +126,7 @@ public class LibraryManager {
 	}
 
 	public String showUsers() {
-		String string = "";
-		for (int i = 0; i < _library.getLastUserId(); i++) {
-			string += _library.getUserString(i) + "\n";
-		}
-		return string;
+		return _library.getSortedUsers();
 	}
 	
 	public void payFine(int id) throws InvalidUserIdException, UserNotSuspendedException {

@@ -16,17 +16,17 @@ import pt.tecnico.po.ui.Input;
  */
 public class DoReturnWork extends Command<LibraryManager> {
 
-	private int userId;
-	private int workId;
-	private String option;
+	private Input<Integer> userId;
+	private Input<Integer> workId;
+	private Input<String> option;
 
 	/**
 	 * @param receiver
 	 */
 	public DoReturnWork(LibraryManager receiver) {
 		super(Label.RETURN_WORK, receiver);
-		userId = _form.addIntegerInput(Message.requestUserId()).value();
-		workId = _form.addIntegerInput(Message.requestWorkId()).value();
+		userId = _form.addIntegerInput(Message.requestUserId());
+		workId = _form.addIntegerInput(Message.requestWorkId());
 	}
 
 	/** @see pt.tecnico.po.ui.Command#execute() */
@@ -36,7 +36,7 @@ public class DoReturnWork extends Command<LibraryManager> {
 		/*try {
 			_receiver.returnWork(userId, workId);
 			_display.popup(Message.showFine(userId, _receiver.showUserFine(userId)));
-			option = _form.addStringInput(Message.requestFinePaymentChoice()).value();
+			option = _form.addStringInput(Message.requestFinePaymentChoice());
 			if (option.equals("s")) {
 				_receiver.payFine(userId);
 			}
