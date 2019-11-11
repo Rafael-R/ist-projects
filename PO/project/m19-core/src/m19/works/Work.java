@@ -37,12 +37,20 @@ public class Work implements Serializable, Observable {
         _availableCopies = copies;
     }
 
-    public void requestWork() {
+    public int getPrice() {
+        return _price;
+    }
+
+    public String getCategory() {
+        return _category.toString();
+    }
+
+    public void requestCopie() {
         _availableCopies--;
         notifyObservers("REQUISIÇÃO");
     }
 
-    public void returnWork() {
+    public void returnCopie() {
         _availableCopies++;
         notifyObservers("ENTREGA");
     }

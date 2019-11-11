@@ -19,6 +19,7 @@ public class DoRequestWork extends Command<LibraryManager> {
 	private Input<Integer> userId;
 	private Input<Integer> workId;
 	private Input<String> option;
+	private int returnDay;
 
 	/**
 	 * @param receiver
@@ -32,24 +33,23 @@ public class DoRequestWork extends Command<LibraryManager> {
 	/** @see pt.tecnico.po.ui.Command#execute() */
 	@Override
 	public final void execute() throws DialogException {
-		//TODO: todo
-		/*try {
-			_receiver.requestWork(userId, workId);
-			//TODO: implementar ReturnDay().
+		try {
+			returnDay = _receiver.requestWork(userId.value(), workId.value());
+			_display.popup(Message.workReturnDay(workId.value(), returnDay));
 		} catch (InvalidUserIdException e) {
 			throw new NoSuchUserException(e.getId());
 		} catch (InvalidWorkIdException e) {
 			throw new NoSuchWorkException(e.getId());
 		} catch (RuleVerificationException e) {
 			if (e.getRuleIndex() == 3) {
-				option = _form.addStringInput(Message.requestReturnNotificationPreference()).value();
+				option = _form.addStringInput(Message.requestReturnNotificationPreference());
 				if (option.equals("s")) {
-					//TODO add obsserver to observable list
+					_receiver.addObserver(workId.value(), userId.value());
 				}
 			} else {
 				throw new RuleFailedException(e.getUser(), e.getWork(), e.getRuleIndex());
 			}
-		}*/
+		}
 	}
 
 }

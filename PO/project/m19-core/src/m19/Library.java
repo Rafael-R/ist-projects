@@ -7,15 +7,16 @@ import java.io.FileReader;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.regex.Pattern;
 import java.util.Collections;
-import java.util.Comparator;
 
 import m19.users.*;
 import m19.works.*;
 import m19.exceptions.BadEntrySpecificationException;
 import m19.exceptions.UnknownDataException;
+import m19.rules.*;
 
 /**
  * Class that represents the library as a whole.
@@ -30,10 +31,19 @@ public class Library implements Serializable {
 	private int _date = 0;
 	private Map<Integer, User> _users = new TreeMap<Integer, User>();
 	private Map<Integer, Work> _works = new TreeMap<Integer, Work>();
-	
+	private List<Rule> _rules = new ArrayList<>();
 
-	// FIXME define contructor(s)
+	public Library() {
+		_rules.add(new DuplicateWorkRequestRule());
+		_rules.add(new SuspenseUserRule());
+		_rules.add(new NoCopiesRule());
+		_rules.add(new MaxNumberRequestsRule());
+		_rules.add(new ReferenceWorksRule());
+		_rules.add(new MaxWorkPriceRule());
+	}
 
+
+	// File management related functions
 	
 	/**
 	 * Read the text input file at the beginning of the program and populates the
@@ -164,6 +174,23 @@ public class Library implements Serializable {
 
 	public boolean workHasTerm(int id, String term) {
 		return _works.get(id).hasTerm(term);
+	}
+
+
+	// Requests functions
+
+	public int request(int userId, int workId) {
+		int index = 0;
+		User user = fetchUser(userId);
+		Work work = fetchWork(workId);
+		for (Rule rule : _rules) {
+			index++;
+			if (!rule.verify(work, user)) {
+				return index;
+			}
+		}
+		//TODO: implement method
+		return index;
 	}
 
 }

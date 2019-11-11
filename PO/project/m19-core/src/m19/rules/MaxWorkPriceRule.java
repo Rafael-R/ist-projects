@@ -7,7 +7,15 @@ public class MaxWorkPriceRule implements Rule {
 
     @Override
     public boolean verify(Work work, User user) {
-        return true;
-    }
+        if (work.getPrice() > 25) {
+            if (user.getClassification().equals("CUMPRIDOR")) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return true;
+        }
+    }   
 
 }

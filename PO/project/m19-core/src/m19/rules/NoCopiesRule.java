@@ -7,7 +7,7 @@ public class NoCopiesRule implements Rule {
 
     @Override
     public boolean verify(Work work, User user) {
-        return true;
+        return work.verifyAvailability();
     }
     
 }

@@ -7,7 +7,7 @@ public class ReferenceWorksRule implements Rule {
 
     @Override
     public boolean verify(Work work, User user) {
-        return true;
+        return !work.getCategory().equals("Referência");
     }
     
 }

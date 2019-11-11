@@ -1,7 +1,11 @@
 package m19.users;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.ArrayList;
+
+import m19.requests.Request;
+
 
 public class User implements Serializable, Comparable<User>, Observer {
 
@@ -13,7 +17,8 @@ public class User implements Serializable, Comparable<User>, Observer {
     private boolean _state = true;
     private Classification _classification = new Normal();
     private int _fine = 0;
-    private ArrayList<Notification> _notifications = new ArrayList<Notification>();
+    private List<Request> _requests = new ArrayList<Request>();
+    private List<Notification> _notifications = new ArrayList<Notification>();
 
 
     public User(int id, String name, String email) {
@@ -30,6 +35,10 @@ public class User implements Serializable, Comparable<User>, Observer {
         _state = state;
     }
 
+    public String getClassification() {
+        return _classification.toString();
+    }
+
     public int getFine() {
         return _fine;
     }
@@ -41,6 +50,10 @@ public class User implements Serializable, Comparable<User>, Observer {
 
     public void update() {
         //TODO: update user state
+    }
+
+    public void addRequest(Request request) {
+        _requests.add(request);
     }
 
     public String getNotifications() {
