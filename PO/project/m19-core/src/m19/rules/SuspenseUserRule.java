@@ -7,7 +7,7 @@ public class SuspenseUserRule implements Rule {
 
     @Override
     public boolean verify(Work work, User user) {
-        return true;
+        return user.getState();
     }
     
 }

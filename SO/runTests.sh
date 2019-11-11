@@ -4,7 +4,7 @@
 
 if [ $# != 4 ] ; then
     echo "Usage: $0 <inputdir> <outputdir> <maxthreads> <numbuckets>"
-    echo "Example: $0 tests_in tests_out 10 10"
+    echo "Example: $0 tests_in tests_out 5 5"
     exit 1
 fi
 

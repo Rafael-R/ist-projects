@@ -168,17 +168,32 @@ public class LibraryManager {
 		return string;
 	}
 
+	public void addObserver(int workId, int userId) {
+		//TODO: implement method
+	}
+
 
 	// Requests functions
 
-	public void requestWork(int userId, int workId) throws RuleVerificationException {
-		//TODO: Define method
-		if (userId == workId) {
+	public int requestWork(int userId, int workId) throws InvalidUserIdException, InvalidWorkIdException, RuleVerificationException {
+		if (_library.fetchUser(userId) == null) {
+			throw new InvalidUserIdException(userId);
+		} else if (_library.fetchWork(workId) == null) {
+			throw new InvalidWorkIdException(workId);
+		}
+		int index = _library.request(userId, workId);
+		if (index != 0) {
 			throw new RuleVerificationException(userId, workId, 3);
 		}
+		return 1;
 	}
 
-	public void returnWork(int userId, int workId) throws WorkNotRequestedByUserException {
+	public void returnWork(int userId, int workId) throws InvalidUserIdException, InvalidWorkIdException, WorkNotRequestedByUserException {
+		if (_library.fetchUser(userId) == null) {
+			throw new InvalidUserIdException(userId);
+		} else if (_library.fetchWork(workId) == null) {
+			throw new InvalidWorkIdException(workId);
+		}
 		//TODO: Define method
 		if (userId == workId) {
 			throw new WorkNotRequestedByUserException(workId, userId);
