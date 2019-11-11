@@ -13,6 +13,8 @@ outputdir="$2"
 maxthreads="$3"
 numbuckets="$4"
 
+mkdir -p $outputdir
+
 for test_in in $inputdir/*.*; do
 
     test="${test_in##*/}"
