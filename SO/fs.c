@@ -18,7 +18,7 @@ tecnicofs* new_tecnicofs(int numberBuckets){
 	fs->buckets = numberBuckets;
 	fs->bstRoots = (node**) malloc(sizeof(node*) * numberBuckets);
 	fs->bstLocks = (LOCK_TYPE*) malloc(sizeof(LOCK_TYPE) * numberBuckets);
-	for (int i = 0; i < numberBuckets; i++) 	{
+	for (int i = 0; i < numberBuckets; i++) {
 		fs->bstRoots[i] = NULL;
 		sync_init(&(fs->bstLocks[i]));
 	}
@@ -55,7 +55,7 @@ int lookup_file(tecnicofs* fs, char *name){
 	sync_rdlock(&(fs->bstLocks[index]));
 	int inumber = 0;
 	node* searchNode = search(fs->bstRoots[index], name);
-	if ( searchNode ) {
+	if (searchNode) {
 		inumber = searchNode->inumber;
 	}
 	sync_unlock(&(fs->bstLocks[index]));
@@ -65,7 +65,7 @@ int lookup_file(tecnicofs* fs, char *name){
 void rename_file(tecnicofs* fs, char *oldName, char *newName) {
 	int oldIndex = hash(oldName, fs->buckets);
 	int newIndex = hash(newName, fs->buckets);
-	int oldInumber = 0, newInumber = 1;
+	int oldInumber = 0, newInumber = 1;		// Por default assumem-se os casos de erro
 
 	if (oldIndex < newIndex) {
 		oldInumber = lookup_file(fs, oldName);
