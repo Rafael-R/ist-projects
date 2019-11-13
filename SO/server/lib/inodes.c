@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "inodes.h"
-#include "../tecnicofs-api-constants.h"
+#include "../../tecnicofs-api-constants.h"
 
 inode_t inode_table[INODE_TABLE_SIZE];
 pthread_mutex_t inode_table_lock;
@@ -46,7 +46,7 @@ void inode_table_destroy(){
         if(inode_table[i].owner!=FREE_INODE && inode_table[i].fileContent)
             free(inode_table[i].fileContent);
     }
-    
+
     if(pthread_mutex_destroy(&inode_table_lock) != 0){
         perror("Failed to destroy inode table mutex.\n");
         exit(EXIT_FAILURE);
@@ -178,7 +178,7 @@ int inode_set(int inumber, char *fileContents, int len){
         unlock_inode_table();
         return -1;
     }
-    
+
     if(inode_table[inumber].fileContent)
         free(inode_table[inumber].fileContent);
 

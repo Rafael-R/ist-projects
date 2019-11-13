@@ -6,9 +6,8 @@
 #include "constants.h"
 #include "timer.h"
 
-char* inputFile;
+char* socketName;
 char* outputFile;
-int numberThreads;
 int numberBuckets;
 tecnicofs* fs;
 
@@ -29,25 +28,20 @@ static void displayUsage (const char* appName) {
 }
 
 static void parseArgs (long argc, char* const argv[]) {
-    if (argc != 5) {
+    if (argc != 4) {
         fprintf(stderr, "Invalid format:\n");
         displayUsage(argv[0]);
     }
-    inputFile = argv[1];
+    socketName = argv[1];
     outputFile = argv[2];
 
     #if defined(MUTEX) || defined(RWLOCK)
-        numberThreads = atoi(argv[3]);
-        numberBuckets = atoi(argv[4]);
-        if (numberThreads < 1) {
-            fprintf(stderr, "Error: invalid number of threads\n");
-            exit(EXIT_FAILURE);
-        } else if (numberBuckets < 1) {
+        numberBuckets = atoi(argv[3]);
+        if (numberBuckets < 1) {
             fprintf(stderr, "Error: invalid number of buckets\n");
             exit(EXIT_FAILURE);
         }
     #else
-        numberThreads = 1;
         numberBuckets = 1;
     #endif
 }
