@@ -33,4 +33,6 @@ for test in $testdir/*.out; do
 
 done
 
+rm works
+
 unset CLASSPATH
