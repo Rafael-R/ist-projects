@@ -2,6 +2,7 @@
 #define TECNICOFS_CLIENT_API_H
 
 #include "../tecnicofs-api-constants.h"
+#include "../tecnicofs-api-common.h"
 
 
 int tfsMount(char * address);

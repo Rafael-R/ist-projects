@@ -2,15 +2,22 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <sys/time.h>
+#include "../tecnicofs-api-common.h"
 #include "fs.h"
-#include "constants.h"
-#include "timer.h"
 
-char* socketName;
+#define TIMER                           struct timeval
+#define TIMER_READ(time)                if(gettimeofday(&(time), NULL)){perror("gettimeofday failed"); exit(EXIT_FAILURE);}
+#define TIMER_GET_DURATION(start, stop) \
+    (((double)(stop.tv_sec)  + (double)(stop.tv_usec / 1000000.0)) - \
+     ((double)(start.tv_sec) + (double)(start.tv_usec / 1000000.0)))
+
+
+char socketName[] = "/tmp/";
 char* outputFile;
 int numberBuckets;
-tecnicofs* fs;
 
+tecnicofs* fs;
 char inputCommands[MAX_COMMANDS][MAX_INPUT_SIZE];
 int numberCommands = 0;
 int headQueue = 0;
@@ -32,7 +39,7 @@ static void parseArgs (long argc, char* const argv[]) {
         fprintf(stderr, "Invalid format:\n");
         displayUsage(argv[0]);
     }
-    socketName = argv[1];
+    strcat(socketName, argv[1]);
     outputFile = argv[2];
 
     #if defined(MUTEX) || defined(RWLOCK)
@@ -84,6 +91,7 @@ FILE* openFile(char* filename, const char* mode) {
     return fptr;
 }
 
+/*
 void* processInput() {
     FILE* input = openFile(inputFile, "r");
     char line[MAX_INPUT_SIZE];
@@ -97,7 +105,7 @@ void* processInput() {
 
         int numTokens = sscanf(line, "%c %s %s", &token, name, newName);
 
-        /* perform minimal validation */
+        // perform minimal validation
         if (numTokens < 1) {
             continue;
         }
@@ -120,7 +128,7 @@ void* processInput() {
                 }
             case '#':
                 break;
-            default: { /* error */
+            default: { // error
                 errorParse(lineNumber);
             }
         }
@@ -131,6 +139,7 @@ void* processInput() {
     }
     pthread_exit(NULL);
 }
+*/
 
 void* applyCommands(){
     while(1){
@@ -176,13 +185,81 @@ void* applyCommands(){
     }
 }
 
+void* connection_handler(void* arg) {
+    int client_socket = *(int*) arg;
+    int status;
+    char *message, command[MAX_INPUT_SIZE];
+
+    //Send some messages to the client
+    message = "Greetings! I am your connection handler\n";
+    write(client_socket , message , strlen(message));
+
+    message = "Now type something and i shall repeat what you type \n";
+    write(client_socket , message , strlen(message));
+
+    //Receive a message from client
+    while (1) {
+        
+        status = recv(client_socket, command, MAX_INPUT_SIZE, 0);
+        check_status(status, "connection_handler: readline error");
+        if (status == 0) {
+            return NULL;
+        }
+        
+		command[status] = '\0';
+		
+		printf("Command: %s\n", command);
+		
+		//clear the message buffer
+		memset(command, 0, MAX_INPUT_SIZE);
+    }
+} 
+
 
 int main(int argc, char* argv[]) {
+
+    int server_socket, client_socket, status, *new_socket;
+    struct sockaddr_un server_addr, client_addr;
 
     parseArgs(argc, argv);
 
     fs = new_tecnicofs(numberBuckets);
 
+    // Cria socket stream
+    server_socket = socket(AF_UNIX, SOCK_STREAM, 0);
+    check_status(server_socket, "server: can't open stream socket");
+
+    // Elimina o nome, para o caso de já existir.
+    unlink(socketName);
+
+    bzero((char *)&server_addr, sizeof(server_addr));
+    serv_addr.sun_family = AF_UNIX;
+    strcpy(serv_addr.sun_path, socketName);
+
+    status = bind(server_socket, (struct sockaddr*) &server_addr, sizeof(server_addr));
+    check_status(status, "server: can't bind local address");
+
+    status = listen(server_socket, MAX_CLIENTS);
+    check_status(status, "server: can't listen");
+
+    while (1) {
+
+        client_socket = accept(server_socket, (struct sockaddr*) NULL, NULL);
+        check_status(client_socket, "server: can't accept socket");
+
+        pthread_t client_thread;
+        new_socket = malloc(1);
+        *new_sock = client_socket;
+
+        thread_create(&client_thread, connection_handler, (void*) &new_socket);
+        thread_join(client_thread, NULL);
+
+    }
+
+    return 0;
+}
+
+/*
     pthread_t* threads = (pthread_t*) malloc((numberThreads + 1) * sizeof(pthread_t));
 
     mutex_init(&commandLock);
@@ -223,3 +300,5 @@ int main(int argc, char* argv[]) {
     free_tecnicofs(fs);
     exit(EXIT_SUCCESS);
 }
+
+*/
