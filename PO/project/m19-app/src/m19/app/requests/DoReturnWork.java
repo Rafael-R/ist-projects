@@ -34,6 +34,7 @@ public class DoReturnWork extends Command<LibraryManager> {
 	/** @see pt.tecnico.po.ui.Command#execute() */
 	@Override
 	public final void execute() throws DialogException {
+		_form.parse();
 		try {
 			_receiver.returnWork(userId.value(), workId.value());
 			_display.popup(Message.showFine(userId.value(), _receiver.showUserFine(userId.value())));

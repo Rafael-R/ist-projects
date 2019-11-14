@@ -18,9 +18,6 @@ public class DoSave extends Command<LibraryManager> {
 	 */
 	public DoSave(LibraryManager receiver) {
 		super(Label.SAVE, receiver);
-		if (_receiver.getFilename() == null) {
-			filename = _form.addStringInput(Message.newSaveAs());
-		}
 	}
 
 	/** @see pt.tecnico.po.ui.Command#execute() */
@@ -28,6 +25,7 @@ public class DoSave extends Command<LibraryManager> {
 	public final void execute() {
 		try {
 			if (_receiver.getFilename() == null) {
+				filename = _form.addStringInput(Message.newSaveAs());
 				_form.parse();
                 _receiver.saveAs(filename.value());
 			} else {

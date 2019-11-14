@@ -33,6 +33,7 @@ public class DoRequestWork extends Command<LibraryManager> {
 	/** @see pt.tecnico.po.ui.Command#execute() */
 	@Override
 	public final void execute() throws DialogException {
+		_form.parse();
 		try {
 			returnDay = _receiver.requestWork(userId.value(), workId.value());
 			_display.popup(Message.workReturnDay(workId.value(), returnDay));
