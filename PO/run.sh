@@ -1,6 +1,6 @@
 #!/bin/bash
 # Shell Script
-# Projeto de Sistemas Operativos 2019/2020
+# Projeto de Programação com Objetos 2019/2020
 
 if [ $# != 1 ] ; then
     echo "Usage: $0 <tests_dir>"
