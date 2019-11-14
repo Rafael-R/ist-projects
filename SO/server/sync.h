@@ -33,7 +33,7 @@ void sync_wrlock(LOCK_TYPE * sync);
 void sync_rdlock(LOCK_TYPE * sync);
 void sync_unlock(LOCK_TYPE * sync);
 
-void thread_create(pthread_t *thread, void *(*function) (void *));
+void thread_create(pthread_t *thread, void *(*function) (void *), void* arg);
 void thread_join(pthread_t thread);
 
 void mutex_init(pthread_mutex_t* mutex);

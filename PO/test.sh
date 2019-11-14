@@ -31,9 +31,9 @@ for test in $testdir/*.out; do
     DIFF=$(diff -b $test_out $test_outhyp)
 
     if [ "$DIFF" != "" ]; then
-        echo -e "${RED}The output of test ${test##*/} differs from expected"
+        echo -e "${RED}The output of test ${test##*/} differs from expected."
     else
-        echo -e "${GREEN}The output of test [${test##*/}] matches expected"
+        echo -e "${GREEN}The output of test [${test##*/}] matches expected."
     fi
 
 done

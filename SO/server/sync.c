@@ -42,8 +42,8 @@ void sync_unlock(LOCK_TYPE* sync){
     }
 }
 
-void thread_create(pthread_t *thread, void *(*function) (void *)) {
-    int status = pthread_create(thread, NULL, function, NULL);
+void thread_create(pthread_t *thread, void *(*function) (void *), void* arg) {
+    int status = pthread_create(thread, NULL, function, arg);
     if(status != 0){
         fprintf(stderr, "Error: creating thread\n");
         exit(EXIT_FAILURE);

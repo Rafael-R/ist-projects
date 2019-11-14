@@ -26,13 +26,30 @@ public class Library implements Serializable {
 	/** Serial number for serialization. */
 	private static final long serialVersionUID = 201901101348L;
 
+	/** TODO */
 	private int _userId = 0;
+
+	/** TODO */
 	private int _workId = 0;
+
+	/** TODO */
 	private int _date = 0;
+
+	/** TODO */
 	private Map<Integer, User> _users = new TreeMap<Integer, User>();
+
+	/** TODO */
 	private Map<Integer, Work> _works = new TreeMap<Integer, Work>();
+
+	/** TODO */
 	private List<Rule> _rules = new ArrayList<>();
 
+	/**
+	 * 
+	 * @param filename
+	 * @throws BadEntrySpecificationException
+	 * @throws IOException
+	 */
 	public Library() {
 		_rules.add(new DuplicateWorkRequestRule());
 		_rules.add(new SuspenseUserRule());
@@ -68,6 +85,11 @@ public class Library implements Serializable {
 		reader.close();
 	}
 
+	/**
+	 * 
+	 * @param fields
+	 * @throws UnknownDataException
+	 */
 	void registerFromFields(String[] fields) throws UnknownDataException {
 
 		Pattern patternUser = Pattern.compile("^(USER)");
@@ -85,10 +107,18 @@ public class Library implements Serializable {
 
 	// Date functions
 
+	/**
+	 * 
+	 * @return
+	 */
 	public int getDate() {
 		return _date;
 	}
 
+	/**
+	 * 
+	 * @param daysToAdvance
+	 */
 	public void advanceDate(int daysToAdvance) {
 		_date += daysToAdvance;
 	}
@@ -96,10 +126,20 @@ public class Library implements Serializable {
 
 	// Users functions
 
+	/**
+	 * 
+	 * @return
+	 */
 	public int getLastUserId() {
 		return _userId;
 	}
 
+	/**
+	 * Registers a new user
+	 * @param name New user's name
+	 * @param email New user's email
+	 * @return New user's id
+	 */
 	public int registerUser(String name, String email) {
 		int id = _userId++;
 		User user = new User(id, name, email);
@@ -107,22 +147,46 @@ public class Library implements Serializable {
 		return id;
 	}
 
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 */
 	public User fetchUser(int id) {
 		return _users.get(id);
 	}
 
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 */
 	public String getUserString(int id) {
 		return _users.get(id).toString();
 	}
 
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 */
 	public String getUserNotifications(int id) {
 		return _users.get(id).getNotifications();
 	}
 
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 */
 	public boolean getUserState(int id) {
 		return _users.get(id).getState();
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public String getSortedUsers() {
 		String users = "";
 		List<Map.Entry<Integer, User>> list =
@@ -134,10 +198,19 @@ public class Library implements Serializable {
 		return users;
 	}
 
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 */
 	public int getUserFine(int id) {
 		return _users.get(id).getFine();
 	}
 
+	/**
+	 * 
+	 * @param id
+	 */
 	public void userPayFine(int id) {
 		User user = _users.get(id);
 		user.payFine();
@@ -147,10 +220,18 @@ public class Library implements Serializable {
 
 	// Works functions
 
+	/**
+	 * 
+	 * @return
+	 */
 	public int getLastWorkId() {
 		return _workId;
 	}
 
+	/**
+	 * 
+	 * @param fields
+	 */
 	void registerWork(String[] fields) {
 		Work work;
 		int id = _workId++;
@@ -164,14 +245,30 @@ public class Library implements Serializable {
 		_works.put(id, work);
 	}
 
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 */
 	public Work fetchWork(int id) {
 		return _works.get(id);
 	}
 
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 */
 	public String getWorkString(int id) {
 		return _works.get(id).toString();
 	}
 
+	/**
+	 * 
+	 * @param id
+	 * @param term
+	 * @return
+	 */
 	public boolean workHasTerm(int id, String term) {
 		return _works.get(id).hasTerm(term);
 	}
@@ -179,6 +276,12 @@ public class Library implements Serializable {
 
 	// Requests functions
 
+	/**
+	 * 
+	 * @param userId 
+	 * @param workId
+	 * @return index of the failed rule
+	 */
 	public int request(int userId, int workId) {
 		int index = 0;
 		User user = fetchUser(userId);
