@@ -1,20 +1,31 @@
 # Makefile
 # Projeto de Sistemas Operativos 2019/2020
 
-SOURCE = ../tecnicofs-api-common.c
-OBJ = $(SOURCE:%.c=%.o)
+SOURCES = main.c tecnicofs-client-api.c
+OBJS = $(SOURCES:%.c=%.o)
 CC   = gcc
 LD   = gcc
 CFLAGS =-Wall -std=gnu99 -I../ -g
-LDFLAGS=-lm -pthread
+TARGET = client
 
 .PHONY: all clean
 
-all: client
+all: $(TARGET)
 
-client: $(OBJ)
-	$(LD) $(CFLAGS) $(SOURCE) main.c -o client
+$(TARGET):
+	$(LD) $(CFLAGS) $^ -o $@
+
+
+tecnicofs-client-api.o: tecnicofs-client-api.c tecnicofs-client-api.h ../tecnicofs-api-common.h
+
+main.o: main.c tecnicofs-client-api.h
+
+client: ../tecnicofs-api-common.o main.o
+
+
+%.o:
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm -f client
+	rm -f $(OBJS) $(TARGET)
 
