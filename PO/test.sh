@@ -15,6 +15,8 @@ NC='\033[0m'
 
 export CLASSPATH=po-uuilib/po-uuilib.jar:project/m19-core/m19-core.jar:project/m19-app/m19-app.jar
 
+make
+
 for test in $testdir/*.out; do
 
     test="${test%%.*}"
@@ -38,6 +40,8 @@ for test in $testdir/*.out; do
     fi
 
 done
+
+make clean
 
 rm works
 

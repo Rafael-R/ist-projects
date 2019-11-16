@@ -155,7 +155,7 @@ public class LibraryManager {
 
 	public String displayWorks() {
 		String string = "";
-		for (int i = 0; i < _library.getLastWorkId(); i++) {
+		for (int i = 0; i < _library.getCurrentWorkId(); i++) {
 			string += _library.getWorkString(i) + "\n";
 		}
 		return string;
@@ -163,7 +163,7 @@ public class LibraryManager {
 
 	public String performSearch(String term) {
 		String string = "";
-		for (int i = 0; i < _library.getLastWorkId(); i++) {
+		for (int i = 0; i < _library.getCurrentWorkId(); i++) {
 			if (_library.workHasTerm(i, term)) {
 				string += _library.getWorkString(i) + "\n";
 			}
@@ -197,7 +197,7 @@ public class LibraryManager {
 		} else if (_library.fetchWork(workId) == null) {
 			throw new InvalidWorkIdException(workId);
 		}
-		//TODO: Define method
+		//TODO: implement method
 		if (userId == workId) {
 			throw new WorkNotRequestedByUserException(workId, userId);
 		}
