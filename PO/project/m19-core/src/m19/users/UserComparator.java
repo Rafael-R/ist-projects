@@ -1,7 +1,6 @@
 package m19.users;
 
 import java.util.Comparator;
-import java.util.Map;
 
 public class UserComparator implements Comparator<User> {
 

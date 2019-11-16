@@ -5,6 +5,8 @@ import m19.users.*;
 
 public class MaxWorkPriceRule implements Rule {
 
+    private static final long serialVersionUID = 201911161602L;
+
     @Override
     public boolean verify(Work work, User user) {
         if (work.getPrice() > 25) {
