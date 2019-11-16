@@ -26,22 +26,22 @@ public class Library implements Serializable {
 	/** Serial number for serialization. */
 	private static final long serialVersionUID = 201901101348L;
 
-	/** TODO */
+	/** Current user id */
 	private int _userId = 0;
 
-	/** TODO */
+	/** Current work id */
 	private int _workId = 0;
 
-	/** TODO */
+	/** Current date */
 	private int _date = 0;
 
-	/** TODO */
+	/** Users registered in the library */
 	private Map<Integer, User> _users = new TreeMap<Integer, User>();
 
-	/** TODO */
+	/** Works registered in the library */
 	private Map<Integer, Work> _works = new TreeMap<Integer, Work>();
 
-	/** TODO */
+	/** Rules to make a request */
 	private List<Rule> _rules = new ArrayList<>();
 
 	/**
@@ -86,9 +86,10 @@ public class Library implements Serializable {
 	}
 
 	/**
-	 * 
+	 * Parse the data imported from the file
 	 * @param fields
 	 * @throws UnknownDataException
+	 * @see m19.Library.importFile
 	 */
 	void registerFromFields(String[] fields) throws UnknownDataException {
 
@@ -108,15 +109,14 @@ public class Library implements Serializable {
 	// Date functions
 
 	/**
-	 * 
-	 * @return
+	 * @return current date
 	 */
 	public int getDate() {
 		return _date;
 	}
 
 	/**
-	 * 
+	 * Advance the date by the given days
 	 * @param daysToAdvance
 	 */
 	public void advanceDate(int daysToAdvance) {
@@ -127,15 +127,14 @@ public class Library implements Serializable {
 	// Users functions
 
 	/**
-	 * 
-	 * @return
+	 * @return current user id
 	 */
-	public int getLastUserId() {
+	public int getCurrentUserId() {
 		return _userId;
 	}
 
 	/**
-	 * Registers a new user
+	 * Register a new user
 	 * @param name New user's name
 	 * @param email New user's email
 	 * @return New user's id
@@ -148,61 +147,60 @@ public class Library implements Serializable {
 	}
 
 	/**
-	 * 
-	 * @param id
-	 * @return
+	 * Get the user with the given id.
+	 * @param id User's id
+	 * @return User
 	 */
 	public User fetchUser(int id) {
 		return _users.get(id);
 	}
 
 	/**
-	 * 
-	 * @param id
-	 * @return
+	 * Get the string of the user with the given id.
+	 * @param id User's id
+	 * @return User's string
 	 */
 	public String getUserString(int id) {
 		return _users.get(id).toString();
 	}
 
 	/**
-	 * 
-	 * @param id
-	 * @return
+	 * Get the notifications of the user with the given id.
+	 * @param id User's id
+	 * @return User's notifications
 	 */
 	public String getUserNotifications(int id) {
 		return _users.get(id).getNotifications();
 	}
 
 	/**
-	 * 
-	 * @param id
-	 * @return
+	 * Get the state of the user with the given id.
+	 * @param id User's id
+	 * @return User's state
 	 */
 	public boolean getUserState(int id) {
 		return _users.get(id).getState();
 	}
 
 	/**
-	 * 
-	 * @return
+	 * @return a list with all the users.
 	 */
 	public List<User> getUsers() {
 		return new ArrayList<User>(_users.values());
 	}
 
 	/**
-	 * 
-	 * @param id
-	 * @return
+	 * Get the fine of the user with the given id.
+	 * @param id User's id
+	 * @return User's fine
 	 */
 	public int getUserFine(int id) {
 		return _users.get(id).getFine();
 	}
 
 	/**
-	 * 
-	 * @param id
+	 * Pay the fine of the user with the given id.
+	 * @param id User's id
 	 */
 	public void userPayFine(int id) {
 		User user = _users.get(id);
@@ -214,15 +212,14 @@ public class Library implements Serializable {
 	// Works functions
 
 	/**
-	 * 
-	 * @return
+	 * @return current work id
 	 */
-	public int getLastWorkId() {
+	public int getCurrentWorkId() {
 		return _workId;
 	}
 
 	/**
-	 * 
+	 * Register a new work
 	 * @param fields
 	 */
 	void registerWork(String[] fields) {
@@ -239,28 +236,28 @@ public class Library implements Serializable {
 	}
 
 	/**
-	 * 
-	 * @param id
-	 * @return
+	 * Get the work with the given id.
+	 * @param id Work's id
+	 * @return Work
 	 */
 	public Work fetchWork(int id) {
 		return _works.get(id);
 	}
 
 	/**
-	 * 
-	 * @param id
-	 * @return
+	 * Get the string of the work with the given id
+	 * @param id Work's id
+	 * @return Work's string
 	 */
 	public String getWorkString(int id) {
 		return _works.get(id).toString();
 	}
 
 	/**
-	 * 
-	 * @param id
-	 * @param term
-	 * @return
+	 * Verify if the work with the given id has the given term 
+	 * @param id Work's id
+	 * @param term Term to search
+	 * @return true, if the work has the term; false, otherwise.
 	 */
 	public boolean workHasTerm(int id, String term) {
 		return _works.get(id).hasTerm(term);
@@ -270,10 +267,10 @@ public class Library implements Serializable {
 	// Requests functions
 
 	/**
-	 * 
-	 * @param userId 
-	 * @param workId
-	 * @return index of the failed rule
+	 * Make a request
+	 * @param userId User's id
+	 * @param workId Work's id
+	 * @return 0 in case the request doesn't fail any rule; index of the failed rule otherwise.
 	 */
 	public int request(int userId, int workId) {
 		int index = 0;
