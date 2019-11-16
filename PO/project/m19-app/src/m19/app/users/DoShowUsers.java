@@ -1,7 +1,12 @@
 package m19.app.users;
 
-import m19.LibraryManager;
+import java.util.List;
+import java.util.Collections;
+
 import pt.tecnico.po.ui.Command;
+import m19.LibraryManager;
+import m19.users.User;
+import m19.users.UserComparator;
 
 /**
  * 4.2.4. Show all users.
@@ -18,7 +23,11 @@ public class DoShowUsers extends Command<LibraryManager> {
 	/** @see pt.tecnico.po.ui.Command#execute() */
 	@Override
 	public final void execute() {
-		_display.addLine(_receiver.showUsers());
+		List<User> list = _receiver.showUsers();
+		Collections.sort(list, new UserComparator());
+		for (User user : list) {
+			_display.addLine(user.toString());
+		}
 		_display.display();
 	}
 	

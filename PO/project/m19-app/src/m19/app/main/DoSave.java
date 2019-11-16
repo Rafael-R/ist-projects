@@ -1,6 +1,7 @@
 package m19.app.main;
 
 import java.io.IOException;
+
 import pt.tecnico.po.ui.Command;
 import pt.tecnico.po.ui.Input;
 import m19.LibraryManager;
@@ -24,17 +25,19 @@ public class DoSave extends Command<LibraryManager> {
 	@Override
 	public final void execute() {
 		try {
-			if (_receiver.getFilename() == null) {
-				filename = _form.addStringInput(Message.newSaveAs());
+			_receiver.save();
+		} catch (MissingFileAssociationException e1) {
+			filename = _form.addStringInput(Message.newSaveAs());
+			try {
 				_form.parse();
-                _receiver.saveAs(filename.value());
-			} else {
-				_receiver.save();
+				_receiver.saveAs(filename.value());
+			} catch (MissingFileAssociationException e2) {
+				e2.printStackTrace();
+			} catch (IOException e2) {
+				e2.printStackTrace();
 			}
-		} catch (MissingFileAssociationException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-            e.printStackTrace();
+		} catch (IOException e1) {
+            e1.printStackTrace();
         }
 	}
 }

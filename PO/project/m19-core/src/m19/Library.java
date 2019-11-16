@@ -187,15 +187,8 @@ public class Library implements Serializable {
 	 * 
 	 * @return
 	 */
-	public String getSortedUsers() {
-		String users = "";
-		List<Map.Entry<Integer, User>> list =
-                new LinkedList<Map.Entry<Integer, User>>(_users.entrySet());
-		Collections.sort(list, new UserComparator());
-		for (Map.Entry<Integer, User> entry : list) {
-            users += entry.getValue().toString() + "\n";
-		}
-		return users;
+	public List<User> getUsers() {
+		return new ArrayList<User>(_users.values());
 	}
 
 	/**
