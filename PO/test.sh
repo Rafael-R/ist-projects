@@ -11,6 +11,7 @@ fi
 testdir="$1"
 RED='\033[0;31m'
 GREEN='\033[1;32m'
+NC='\033[0m'
 
 export CLASSPATH=po-uuilib/po-uuilib.jar:project/m19-core/m19-core.jar:project/m19-app/m19-app.jar
 
@@ -31,9 +32,9 @@ for test in $testdir/*.out; do
     DIFF=$(diff -b $test_out $test_outhyp)
 
     if [ "$DIFF" != "" ]; then
-        echo -e "${RED}The output of test ${test##*/} differs from expected."
+        echo -e "${RED}The output of test ${test##*/} differs from expected.${NC}"
     else
-        echo -e "${GREEN}The output of test [${test##*/}] matches expected."
+        echo -e "${GREEN}The output of test [${test##*/}] matches expected.${NC}"
     fi
 
 done

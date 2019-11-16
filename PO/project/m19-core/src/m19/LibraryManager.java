@@ -8,8 +8,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.List;
 
 import m19.exceptions.*;
+import m19.users.User;
 
 /**
  * The façade class.
@@ -27,13 +29,14 @@ public class LibraryManager {
 	 * @throws IOException
 	 * @throws FileNotFoundException
 	 */
-	public void save() throws MissingFileAssociationException, IOException {
-		if (_filename == null) {
+	public void save() throws MissingFileAssociationException, IOException, FileNotFoundException {
+		try {
+			ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(_filename)));
+			out.writeObject(_library);
+			out.close();
+		} catch (NullPointerException e) {
 			throw new MissingFileAssociationException();
 		}
-		ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(_filename)));
-    	out.writeObject(_library);
-    	out.close();
 	}
 
 	/**
@@ -125,8 +128,8 @@ public class LibraryManager {
 		}
 	}
 
-	public String showUsers() {
-		return _library.getSortedUsers();
+	public List<User> showUsers() {
+		return _library.getUsers();
 	}
 	
 	public void payFine(int id) throws InvalidUserIdException, UserNotSuspendedException {
