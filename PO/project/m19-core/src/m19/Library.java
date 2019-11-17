@@ -43,10 +43,7 @@ public class Library implements Serializable {
 	private List<Rule> _rules = new ArrayList<>();
 
 	/**
-	 * 
-	 * @param filename
-	 * @throws BadEntrySpecificationException
-	 * @throws IOException
+	 * Library constructor 
 	 */
 	public Library() {
 		_rules.add(new DuplicateWorkRequestRule());
