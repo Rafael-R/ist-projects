@@ -2,6 +2,8 @@
 # Shell Script
 # Projeto de Programação com Objetos 2019/2020
 
+classpath="po-uuilib/po-uuilib.jar:project/m19-core/m19-core.jar:project/m19-app/m19-app.jar"
+
 if [ $# != 1 ] ; then
     echo "Usage: $0 <tests_dir>"
     echo "Example: $0 tests"
@@ -13,7 +15,7 @@ RED='\033[0;31m'
 GREEN='\033[1;32m'
 NC='\033[0m'
 
-export CLASSPATH=po-uuilib/po-uuilib.jar:project/m19-core/m19-core.jar:project/m19-app/m19-app.jar
+export CLASSPATH=$classpath
 
 make
 
