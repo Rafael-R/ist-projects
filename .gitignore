@@ -43,6 +43,7 @@ outputs
 tecnicofs-nosync
 tecnicofs-mutex
 tecnicofs-rwlock
+SO/client/client
 
 # ----- PO -----
 
