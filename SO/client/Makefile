@@ -20,7 +20,7 @@ tecnicofs-client-api.o: tecnicofs-client-api.c tecnicofs-client-api.h ../tecnico
 
 main.o: main.c tecnicofs-client-api.h
 
-client: ../tecnicofs-api-common.o main.o
+client: ../tecnicofs-api-common.o tecnicofs-client-api.o main.o
 
 
 %.o:
