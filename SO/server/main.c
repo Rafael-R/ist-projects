@@ -1,17 +1,11 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <pthread.h>
+#include <signal.h>
 #include <sys/time.h>
 #include "../tecnicofs-api-common.h"
 #include "fs.h"
+#include "sync.h"
 
-#define TIMER                           struct timeval
-#define TIMER_READ(time)                if(gettimeofday(&(time), NULL)){perror("gettimeofday failed"); exit(EXIT_FAILURE);}
-#define TIMER_GET_DURATION(start, stop) \
-    (((double)(stop.tv_sec)  + (double)(stop.tv_usec / 1000000.0)) - \
-     ((double)(start.tv_sec) + (double)(start.tv_usec / 1000000.0)))
-
+#define TIME struct timeval
 
 char* socketName;
 char* outputFile;
@@ -21,6 +15,8 @@ tecnicofs* fs;
 char inputCommands[MAX_COMMANDS][MAX_INPUT_SIZE];
 int numberCommands = 0;
 int headQueue = 0;
+
+volatile sig_atomic_t stop = 0;
 
 pthread_mutex_t commandLock;
 pthread_mutex_t insertLock;
@@ -34,14 +30,21 @@ void insertCommand(char* data);
 char* removeCommand();
 void errorParse(int lineNumber);
 FILE* openFile(char* filename, const char* mode);
-void* applyCommands();
+char* applyCommands(char* command);
 void* connection_handler(void* arg);
+void signal_handler(int sig);
+void readTime(TIME time);
+double getDuration(TIME start, TIME stop);
 
 
 int main(int argc, char* argv[]) {
 
+    //signal(SIGINT, signal_handler);
+
     int server_socket, client_socket, status;
-    struct sockaddr_un server_addr;
+    struct sockaddr_un server_addr, client_addr;
+    pthread_t client_thread;
+    TIME start, end;
 
     parseArgs(argc, argv);
 
@@ -64,18 +67,36 @@ int main(int argc, char* argv[]) {
     status = listen(server_socket, MAX_CLIENTS);
     check_status(status, "server: can't listen\n");
 
-    while (1) {
-        client_socket = accept(server_socket, NULL, NULL);  // (struct sockaddr*) &client_addr, (socklen_t*) &c);
+    mutex_init(&commandLock);
+
+    //readTime(start);
+
+    while (!stop) {
+
+        socklen_t clilen = sizeof(client_addr);
+        client_socket = accept(server_socket, (struct sockaddr*) &client_addr, &clilen);
         check_status(client_socket, "server: can't accept socket\n");
 
-        pthread_t client_thread;
-        int *client = malloc(sizeof(int));
+        int *client = (int*) malloc(sizeof(int));
         *client = client_socket;
-
         thread_create(&client_thread, connection_handler, client);
-        thread_join(client_thread);
 
     }
+
+    printf("skr");
+
+    //readTime(end);
+
+    mutex_destroy(&commandLock);
+
+    //printf("TecnicoFS completed in %.4f seconds.\n", getDuration(start, end));
+
+    FILE* output = openFile(outputFile, "w");
+    print_tecnicofs_tree(output, fs);
+    fclose(output);
+
+    free_tecnicofs(fs);
+    exit(EXIT_SUCCESS);
 
     return 0;
 }
@@ -83,7 +104,7 @@ int main(int argc, char* argv[]) {
 
 
 static void displayUsage (const char* appName) {
-    printf("Usage: %s\n", appName);
+    printf("Usage: ./%s <nomesocket> <outputfile> <numbuckets>\n", appName);
     exit(EXIT_FAILURE);
 }
 
@@ -125,7 +146,7 @@ char* removeCommand() {
     return command;
 }
 
-void errorParse(int lineNumber){
+void errorParse(int lineNumber) {
     fprintf(stderr, "Error: line %d invalid\n", lineNumber);
     exit(EXIT_FAILURE);
 }
@@ -140,48 +161,50 @@ FILE* openFile(char* filename, const char* mode) {
     return fptr;
 }
 
-void* applyCommands(){
-    while(1){
-        mutex_lock(&commandLock);
-        const char* command = removeCommand();
+char* applyCommands(char* command) {
+    char* line = malloc(sizeof(char) * MAX_INPUT_SIZE);
+    char token, arg1[MAX_INPUT_SIZE], arg2[MAX_INPUT_SIZE];
 
-        char token;
-        char name[MAX_INPUT_SIZE], newName[MAX_INPUT_SIZE];
-        sscanf(command, "%c %s %s", &token, name, newName);
+    mutex_lock(&commandLock);
 
-        int iNumber;
-        switch (token) {
-            case 'c':
-                iNumber = obtainNewInumber(fs);
-                mutex_unlock(&commandLock);
-                create_file(fs, name, iNumber);
-                break;
-            case 'l':
-                mutex_unlock(&commandLock);
-                int searchResult = lookup_file(fs, name);
-                if(!searchResult)
-                    printf("%s not found\n", name);
-                else
-                    printf("%s found with inumber %d\n", name, searchResult);
-                break;
-            case 'd':
-                mutex_unlock(&commandLock);
-                delete_file(fs, name);
-                break;
-            case 'r':
-                mutex_unlock(&commandLock);
-                rename_file(fs, name, newName);
-                break;
-            case 'q':
-                mutex_unlock(&commandLock);
-                pthread_exit(NULL);
-            default: { /* error */
-                mutex_unlock(&commandLock);
-                fprintf(stderr, "Error: command to apply\n");
-                exit(EXIT_FAILURE);
-            }
+    sscanf(command, "%c %s %s", &token, arg1, arg2);
+    
+    int iNumber;
+    switch (token) {
+        case 'c':
+            iNumber = obtainNewInumber(fs);
+            mutex_unlock(&commandLock);
+            sprintf(line, "Command: %c %s %s", token, arg1, arg2);
+            break;
+        case 'd':
+            mutex_unlock(&commandLock);
+            sprintf(line, "Command: %c %s", token, arg1);
+            break;
+        case 'r':
+            mutex_unlock(&commandLock);
+            sprintf(line, "Command: %c %s %s", token, arg1, arg2);
+            break;
+        case 'o':
+            mutex_unlock(&commandLock);
+            sprintf(line, "Command: %c %s %s", token, arg1, arg2);
+            break;
+        case 'x':
+            mutex_unlock(&commandLock);
+            sprintf(line, "Command: %c %s", token, arg1);
+            break;
+        case 'l':
+            mutex_unlock(&commandLock);
+            sprintf(line, "Command: %c %s %s", token, arg1, arg2);
+            break;
+        case 'w':
+            mutex_unlock(&commandLock);
+            sprintf(line, "Command: %c %s %s", token, arg1, arg2);
+            break;
+        default: {
+            mutex_unlock(&commandLock);
         }
     }
+    return line;
 }
 
 void* connection_handler(void* arg) {
@@ -192,51 +215,29 @@ void* connection_handler(void* arg) {
     while (1) {
         status = recv(client_socket, recvline, MAX_INPUT_SIZE, 0);
         check_status(status, "server: receiving message\n");
-        printf("CLIENT: %s", recvline);
+        printf("CLIENT: %s\n", recvline);
+
+        const char* sendline = applyCommands(recvline);
+        if (sendline != NULL) {
+            status = send(client_socket, sendline, strlen(sendline), 0);
+            check_status(status, "server: sending message\n");
+        }
+
         memset(recvline, 0, MAX_INPUT_SIZE);
     }
-} 
-
-/*
-    pthread_t* threads = (pthread_t*) malloc((numberThreads + 1) * sizeof(pthread_t));
-
-    mutex_init(&commandLock);
-    mutex_init(&insertLock);
-    mutex_init(&removeLock);
-    semaphore_init(&emptyBuffer, MAX_COMMANDS);
-    semaphore_init(&fullBuffer, 0);
-
-    TIMER start, end;
-
-    TIMER_READ(start);
-
-    thread_create(&threads[0], processInput);
-
-    for (int i = 1; i < numberThreads + 1; i++) {
-        thread_create(&threads[i], applyCommands);
-    }
-    for (int i = 0; i < numberThreads + 1; i++) {
-        thread_join(threads[i]);
-    }
-
-    TIMER_READ(end);
-
-    semaphore_destroy(&emptyBuffer);
-    semaphore_destroy(&fullBuffer);
-    mutex_destroy(&removeLock);
-    mutex_destroy(&insertLock);
-    mutex_destroy(&commandLock);
-
-    free(threads);
-
-    printf("TecnicoFS completed in %.4f seconds.\n", TIMER_GET_DURATION(start, end));
-
-    FILE* output = openFile(outputFile, "w");
-    print_tecnicofs_tree(output, fs);
-    fclose(output);
-
-    free_tecnicofs(fs);
-    exit(EXIT_SUCCESS);
 }
 
-*/
+void readTime(TIME time) {
+    int status;
+    status = gettimeofday(&(time), NULL);
+    check_status(status, "gettimeofday failed\n");
+}
+
+double getDuration(TIME start, TIME stop) {
+    return (((double)(stop.tv_sec)  + (double)(stop.tv_usec / 1000000.0)) -
+            ((double)(start.tv_sec) + (double)(start.tv_usec / 1000000.0)));
+}
+
+void signal_handler(int sig) {
+    stop = 1;
+}

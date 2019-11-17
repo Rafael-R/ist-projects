@@ -1,7 +1,6 @@
 #include "../tecnicofs-api-common.h"
 
 
-
 char* socketName;
 
 static void displayUsage (const char* appName);
@@ -13,7 +12,7 @@ int main(int argc, char* argv[]) {
 
     int client_socket, status;
     struct sockaddr_un server_addr;
-    char sendline[MAX_INPUT_SIZE];
+    char sendline[MAX_INPUT_SIZE], recvline[MAX_INPUT_SIZE];
 
     parseArgs(argc, argv);
 
@@ -32,8 +31,14 @@ int main(int argc, char* argv[]) {
     while (1) {
         printf("Enter command: "); 
         fgets(sendline, MAX_INPUT_SIZE, stdin);
+        sendline[strlen(sendline) - 1] = '\0';
         status = send(client_socket, sendline, strlen(sendline), 0);
         check_status(status, "client: sending message\n");
+
+        status = recv(client_socket, recvline, MAX_INPUT_SIZE, 0);
+        check_status(status, "client: receiving message\n");
+        printf("SERVER: %s\n", recvline);
+        memset(recvline, 0, MAX_INPUT_SIZE);
     }
 
     /* Fecha o socket e termina */
@@ -45,7 +50,7 @@ int main(int argc, char* argv[]) {
 
 
 static void displayUsage (const char* appName) {
-    printf("Usage: %s\n", appName);
+    printf("Usage: ./%s <nomesocket>\n", appName);
     exit(EXIT_FAILURE);
 }
 
