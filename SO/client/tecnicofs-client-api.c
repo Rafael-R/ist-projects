@@ -43,7 +43,6 @@ int tfsUnmount() {
 int tfsCreate(char *filename, permission ownerPermissions, permission othersPermissions) {
     char command[MAX_INPUT_SIZE], recvline[MAX_INPUT_SIZE];
     int status;
-    char* permissions = malloc(sizeof(char)*3);
     if (session == FALSE) {
         return TECNICOFS_ERROR_NO_OPEN_SESSION;
     }
