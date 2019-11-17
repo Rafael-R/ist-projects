@@ -3,11 +3,11 @@
 
 SOURCE = tecnicofs-api-common.c
 OBJ = $(SOURCE:%.c=%.o)
-CC   = gcc
-LD   = gcc
-CFLAGS =-Wall -std=gnu99 -I../ -g
-LDFLAGS=-lm -pthread
-TARGETS= client server
+CC = gcc
+LD = gcc
+CFLAGS = -Wall -std=gnu99 -I../ -g
+LDFLAGS = -lm -pthread
+TARGETS = client server
 
 .PHONY: all clean
 

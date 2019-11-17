@@ -3,9 +3,9 @@
 
 SOURCES = main.c tecnicofs-client-api.c
 OBJS = $(SOURCES:%.c=%.o)
-CC   = gcc
-LD   = gcc
-CFLAGS =-Wall -std=gnu99 -I../ -g
+CC = gcc
+LD = gcc
+CFLAGS = -Wall -std=gnu99 -I../ -g
 TARGET = client
 
 .PHONY: all clean

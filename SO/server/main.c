@@ -83,6 +83,8 @@ int main(int argc, char* argv[]) {
 
     }
 
+    puts("SERVER CLOSED\n");
+
     readTime(&end);
 
     mutex_destroy(&commandLock);
