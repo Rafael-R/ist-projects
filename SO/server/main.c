@@ -33,7 +33,7 @@ FILE* openFile(char* filename, const char* mode);
 char* applyCommands(char* command);
 void* connection_handler(void* arg);
 void signal_handler(int sig);
-void readTime(TIME time);
+void readTime(TIME* time);
 double getDuration(TIME start, TIME stop);
 
 
@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
 
     mutex_init(&commandLock);
 
-    //readTime(start);
+    readTime(&start);
 
     while (!stop) {
 
@@ -83,13 +83,11 @@ int main(int argc, char* argv[]) {
 
     }
 
-    printf("skr");
-
-    //readTime(end);
+    readTime(&end);
 
     mutex_destroy(&commandLock);
 
-    //printf("TecnicoFS completed in %.4f seconds.\n", getDuration(start, end));
+    printf("TecnicoFS completed in %.4f seconds.\n", getDuration(start, end));
 
     FILE* output = openFile(outputFile, "w");
     print_tecnicofs_tree(output, fs);
@@ -227,9 +225,9 @@ void* connection_handler(void* arg) {
     }
 }
 
-void readTime(TIME time) {
+void readTime(TIME* time) {
     int status;
-    status = gettimeofday(&(time), NULL);
+    status = gettimeofday(&(*time), NULL);
     check_status(status, "gettimeofday failed\n");
 }
 
