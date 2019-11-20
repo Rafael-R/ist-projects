@@ -32,9 +32,9 @@ void errorParse(int lineNumber);
 FILE* openFile(char* filename, const char* mode);
 char* applyCommands(char* command);
 void* connection_handler(void* arg);
-void signal_handler(int sig);
 void readTime(TIME* time);
 double getDuration(TIME start, TIME stop);
+void signal_handler(int sig);
 
 
 int main(int argc, char* argv[]) {
@@ -168,7 +168,7 @@ char* applyCommands(char* command) {
     mutex_lock(&commandLock);
 
     sscanf(command, "%c %s %s", &token, arg1, arg2);
-    
+
     int iNumber;
     switch (token) {
         case 'c':
