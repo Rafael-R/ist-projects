@@ -48,6 +48,7 @@ SO/client/client
 # ----- PO -----
 
 daily_tests
+eval_tests
 PO/works
 
 # --------------------
