@@ -1,38 +1,113 @@
-#include "tecnicofs-client-api.h"
-#include "../tecnicofs-api-constants.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
+#include "../tecnicofs-api-common.h"
 
 
-int main(int argc, char** argv) {
-    if (argc != 2) {
-        printf("Usage: %s sock_path\n", argv[0]);
-        exit(0);
+char* socketName;
+
+static void displayUsage (const char* appName);
+static void parseArgs (long argc, char* const argv[]);
+void* processInput();
+
+
+int main(int argc, char* argv[]) {
+
+    int client_socket, status;
+    struct sockaddr_un server_addr;
+    char sendline[MAX_INPUT_SIZE], recvline[MAX_INPUT_SIZE];
+
+    parseArgs(argc, argv);
+
+    // Cria socket stream
+    client_socket = socket(AF_UNIX, SOCK_STREAM, 0);
+    check_status(client_socket, "client: can't open stream socket\n");
+
+    bzero((char *)&server_addr, sizeof(server_addr));
+    server_addr.sun_family = AF_UNIX;
+    strcpy(server_addr.sun_path, socketName);
+
+    status = connect(client_socket, (struct sockaddr *) &server_addr, sizeof(server_addr));
+    check_status(status, "client: can't connect to server\n");
+
+
+    while (1) {
+        printf("Enter command: ");
+        fgets(sendline, MAX_INPUT_SIZE, stdin);
+        sendline[strlen(sendline) - 1] = '\0';
+        status = send(client_socket, sendline, strlen(sendline), 0);
+        check_status(status, "client: sending message\n");
+
+        status = recv(client_socket, recvline, MAX_INPUT_SIZE, 0);
+        check_status(status, "client: receiving message\n");
+        printf("SERVER: %s\n", recvline);
+        memset(recvline, 0, MAX_INPUT_SIZE);
     }
-    
-    char readBuffer[4] = {0};
 
-    assert(tfsMount(argv[1]) == 0);
-
-    assert(tfsCreate("abc", RW, READ) == 0 );
-
-    assert(tfsRename("abc", "bcd") == 0);
-
-    int fd = -1;
-    assert((fd = tfsOpen("bcd", RW)) == 0);
-
-    assert(tfsWrite(fd, "hmm", 3) == 0);
-
-    assert(tfsRead(fd, readBuffer, 4) == 0);
-
-    puts(readBuffer);
-
-    assert(tfsClose(fd) == 0);
-
-    assert(tfsDelete("bcd") == 0);
-
-    assert(tfsUnmount() == 0);
+    /* Fecha o socket e termina */
+    close(client_socket);
 
     return 0;
 }
+
+
+
+static void displayUsage (const char* appName) {
+    printf("Usage: ./%s <nomesocket>\n", appName);
+    exit(EXIT_FAILURE);
+}
+
+static void parseArgs (long argc, char* const argv[]) {
+    if (argc != 2) {
+        fprintf(stderr, "Invalid format:\n");
+        displayUsage(argv[0]);
+    }
+    socketName = argv[1];
+}
+
+/*
+void* processInput() {
+    FILE* input = openFile(inputFile, "r");
+    char line[MAX_INPUT_SIZE];
+    int lineNumber = 0;
+
+    while(fgets(line, sizeof(line)/sizeof(char), input)) {
+        lineNumber++;
+
+        char token;
+        char name[MAX_INPUT_SIZE], newName[MAX_INPUT_SIZE];
+
+        int numTokens = sscanf(line, "%c %s %s", &token, name, newName);
+
+        // perform minimal validation
+        if (numTokens < 1) {
+            continue;
+        }
+        switch (token) {
+            case 'c':
+            case 'l':
+            case 'd':
+                if(numTokens != 2) {
+                    errorParse(lineNumber);
+                } else {
+                    insertCommand(line);
+                    break;
+                }
+            case 'r':
+                if(numTokens != 3) {
+                    errorParse(lineNumber);
+                } else {
+                    insertCommand(line);
+                    break;
+                }
+            case '#':
+                break;
+            default: { // error
+                errorParse(lineNumber);
+            }
+        }
+    }
+    fclose(input);
+    for (int i = 0; i < numberThreads; i++) {
+        insertCommand(EXIT_COMMAND);
+    }
+    pthread_exit(NULL);
+}
+*/
