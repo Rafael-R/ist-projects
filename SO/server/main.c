@@ -39,8 +39,6 @@ void signal_handler(int sig);
 
 int main(int argc, char* argv[]) {
 
-    //signal(SIGINT, signal_handler);
-
     int server_socket, client_socket, status;
     struct sockaddr_un server_addr, client_addr;
     pthread_t client_thread;
@@ -50,11 +48,9 @@ int main(int argc, char* argv[]) {
 
     fs = new_tecnicofs(numberBuckets);
 
-    // Cria socket stream
     server_socket = socket(AF_UNIX, SOCK_STREAM, 0);
     check_status(server_socket, "server: can't open stream socket\n");
 
-    // Elimina o nome, para o caso de já existir.
     unlink(socketName);
 
     bzero((char *)&server_addr, sizeof(server_addr));
@@ -66,6 +62,8 @@ int main(int argc, char* argv[]) {
 
     status = listen(server_socket, MAX_CLIENTS);
     check_status(status, "server: can't listen\n");
+
+    //signal(SIGINT, signal_handler);
 
     mutex_init(&commandLock);
 
