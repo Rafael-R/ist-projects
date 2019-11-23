@@ -10,14 +10,10 @@
 #include <sys/un.h>
 
 #define MAX_CLIENTS 10
-#define MAX_COMMANDS 10
+#define MAX_COMMANDS 50
 #define MAX_INPUT_SIZE 100
-#define EXIT_COMMAND "q"
-
-#define UNIXSTR_PATH "/tmp/s.unixstr"
-#define UNIXDG_PATH "/tmp/s.unixdgx"
-#define UNIXDG_TMP "/tmp/dgXXXXXXX"
 
 void check_status(int status, char* message);
+FILE* openFile(char* filename, const char* mode);
 
 #endif /* TECNICOFS_API_COMMON_H */

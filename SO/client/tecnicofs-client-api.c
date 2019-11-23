@@ -1,4 +1,5 @@
 #include "tecnicofs-client-api.h"
+#include "../tecnicofs-api-common.h"
 
 typedef enum {FALSE, TRUE} boolean;
 

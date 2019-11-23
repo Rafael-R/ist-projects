@@ -7,34 +7,28 @@
 
 #define TIME struct timeval
 
+typedef struct {
+    struct sockaddr_un address;
+    int socket;
+    uid_t uid;
+} client_t;
+
+
 char* socketName;
 char* outputFile;
 int numberBuckets;
 
 tecnicofs* fs;
-char inputCommands[MAX_COMMANDS][MAX_INPUT_SIZE];
-int numberCommands = 0;
-int headQueue = 0;
 
 volatile sig_atomic_t stop = 0;
 
-pthread_mutex_t commandLock;
-pthread_mutex_t insertLock;
-pthread_mutex_t removeLock;
-sem_t fullBuffer;
-sem_t emptyBuffer;
-
-static void displayUsage (const char* appName);
 static void parseArgs (long argc, char* const argv[]);
-void insertCommand(char* data);
-char* removeCommand();
-void errorParse(int lineNumber);
-FILE* openFile(char* filename, const char* mode);
-char* applyCommands(char* command);
+static void displayUsage (const char* appName);
+void signal_handler(int sig);
 void* connection_handler(void* arg);
+char* applyCommands(uid_t client, char* command);
 void readTime(TIME* time);
 double getDuration(TIME start, TIME stop);
-void signal_handler(int sig);
 
 
 int main(int argc, char* argv[]) {
@@ -42,6 +36,7 @@ int main(int argc, char* argv[]) {
     int server_socket, client_socket, status;
     struct sockaddr_un server_addr, client_addr;
     pthread_t client_thread;
+    static uid_t uid = 0;
     TIME start, end;
 
     parseArgs(argc, argv);
@@ -65,8 +60,6 @@ int main(int argc, char* argv[]) {
 
     //signal(SIGINT, signal_handler);
 
-    mutex_init(&commandLock);
-
     readTime(&start);
 
     while (!stop) {
@@ -75,8 +68,11 @@ int main(int argc, char* argv[]) {
         client_socket = accept(server_socket, (struct sockaddr*) &client_addr, &clilen);
         check_status(client_socket, "server: can't accept socket\n");
 
-        int *client = (int*) malloc(sizeof(int));
-        *client = client_socket;
+        client_t* client = (client_t*) malloc(sizeof(client_t));
+        client->address = client_addr;
+        client->socket = client_socket;
+        client->uid = uid++;
+        
         thread_create(&client_thread, connection_handler, client);
 
     }
@@ -84,8 +80,6 @@ int main(int argc, char* argv[]) {
     puts("SERVER CLOSED\n");
 
     readTime(&end);
-
-    mutex_destroy(&commandLock);
 
     printf("TecnicoFS completed in %.4f seconds.\n", getDuration(start, end));
 
@@ -99,12 +93,6 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-
-
-static void displayUsage (const char* appName) {
-    printf("Usage: ./%s <nomesocket> <outputfile> <numbuckets>\n", appName);
-    exit(EXIT_FAILURE);
-}
 
 static void parseArgs (long argc, char* const argv[]) {
     if (argc != 4) {
@@ -121,108 +109,74 @@ static void parseArgs (long argc, char* const argv[]) {
     }
 }
 
-void insertCommand(char* data) {
-    semaphore_wait(&emptyBuffer);
-    mutex_lock(&insertLock);
-
-    strcpy(inputCommands[numberCommands], data);
-    numberCommands = (numberCommands + 1) % MAX_COMMANDS;
-
-    mutex_unlock(&insertLock);
-    semaphore_post(&fullBuffer);
-}
-
-char* removeCommand() {
-    semaphore_wait(&fullBuffer);
-    mutex_lock(&removeLock);
-
-    char* command = inputCommands[headQueue];
-    headQueue = (headQueue + 1) % MAX_COMMANDS;
-
-    mutex_unlock(&removeLock);
-    semaphore_post(&emptyBuffer);
-    return command;
-}
-
-void errorParse(int lineNumber) {
-    fprintf(stderr, "Error: line %d invalid\n", lineNumber);
+static void displayUsage (const char* appName) {
+    printf("Usage: ./%s <nomesocket> <outputfile> <numbuckets>\n", appName);
     exit(EXIT_FAILURE);
 }
 
-FILE* openFile(char* filename, const char* mode) {
-    FILE* fptr;
-    fptr = fopen(filename, mode);
-    if(!fptr){
-        fprintf(stderr, "Error: Opening file: %s\n", filename);
-        exit(EXIT_FAILURE);
-    }
-    return fptr;
+void signal_handler(int sig) {
+    stop = 1;
 }
 
-char* applyCommands(char* command) {
+void* connection_handler(void* arg) {
+    client_t* client = (client_t*) arg;
+    int status;
+    char recvline[MAX_INPUT_SIZE];
+
+    while (1) {
+        status = recv(client->socket, recvline, MAX_INPUT_SIZE, 0);
+        check_status(status, "server: receiving message\n");
+        printf("CLIENT: %s\n", recvline);
+
+        const char* sendline = applyCommands(client->uid, recvline);
+        if (sendline != NULL) {
+            status = send(client->socket, sendline, strlen(sendline), 0);
+            check_status(status, "server: sending message\n");
+        }
+
+        memset(recvline, 0, MAX_INPUT_SIZE);
+    }
+}
+
+char* applyCommands(uid_t client, char* command) {
     char* line = malloc(sizeof(char) * MAX_INPUT_SIZE);
     char token, arg1[MAX_INPUT_SIZE], arg2[MAX_INPUT_SIZE];
-
-    mutex_lock(&commandLock);
+    int status;
 
     sscanf(command, "%c %s %s", &token, arg1, arg2);
 
     int iNumber;
     switch (token) {
         case 'c':
-            iNumber = obtainNewInumber(fs);
-            mutex_unlock(&commandLock);
-            sprintf(line, "Command: %c %s %s", token, arg1, arg2);
+            iNumber = obtainNewINumber(fs);
+            status = create_file(fs, client, arg1, iNumber, atoi(arg2));
+            sprintf(line, "%d", status);
             break;
         case 'd':
-            mutex_unlock(&commandLock);
-            sprintf(line, "Command: %c %s", token, arg1);
+            status = delete_file(fs, client, arg1);
+            sprintf(line, "%d", status);
             break;
         case 'r':
-            mutex_unlock(&commandLock);
-            sprintf(line, "Command: %c %s %s", token, arg1, arg2);
+            status = rename_file(fs, client, arg1, arg2);
+            sprintf(line, "%d", status);
             break;
         case 'o':
-            mutex_unlock(&commandLock);
             sprintf(line, "Command: %c %s %s", token, arg1, arg2);
             break;
         case 'x':
-            mutex_unlock(&commandLock);
             sprintf(line, "Command: %c %s", token, arg1);
             break;
         case 'l':
-            mutex_unlock(&commandLock);
             sprintf(line, "Command: %c %s %s", token, arg1, arg2);
             break;
         case 'w':
-            mutex_unlock(&commandLock);
             sprintf(line, "Command: %c %s %s", token, arg1, arg2);
             break;
         default: {
-            mutex_unlock(&commandLock);
+            break;
         }
     }
     return line;
-}
-
-void* connection_handler(void* arg) {
-    int client_socket = *((int*) arg);
-    int status;
-    char recvline[MAX_INPUT_SIZE];
-
-    while (1) {
-        status = recv(client_socket, recvline, MAX_INPUT_SIZE, 0);
-        check_status(status, "server: receiving message\n");
-        printf("CLIENT: %s\n", recvline);
-
-        const char* sendline = applyCommands(recvline);
-        if (sendline != NULL) {
-            status = send(client_socket, sendline, strlen(sendline), 0);
-            check_status(status, "server: sending message\n");
-        }
-
-        memset(recvline, 0, MAX_INPUT_SIZE);
-    }
 }
 
 void readTime(TIME* time) {
@@ -234,8 +188,4 @@ void readTime(TIME* time) {
 double getDuration(TIME start, TIME stop) {
     return (((double)(stop.tv_sec)  + (double)(stop.tv_usec / 1000000.0)) -
             ((double)(start.tv_sec) + (double)(start.tv_usec / 1000000.0)));
-}
-
-void signal_handler(int sig) {
-    stop = 1;
 }

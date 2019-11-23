@@ -1,6 +1,9 @@
 /* tecnicofs-api-constants.h */
 #ifndef TECNICOFS_API_CONSTANTS_H
 #define TECNICOFS_API_CONSTANTS_H
+#include <stdio.h>
+#include <stdlib.h>
+
 
 typedef enum permission { NONE, WRITE, READ, RW } permission;
 
