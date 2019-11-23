@@ -2,10 +2,17 @@
 
 
 char* socketName;
+char* inputFile;
 
-static void displayUsage (const char* appName);
+
+char inputCommands[MAX_COMMANDS][MAX_INPUT_SIZE];
+int numberCommands = 0;
+
 static void parseArgs (long argc, char* const argv[]);
-void* processInput();
+static void displayUsage (const char* appName);
+void processInput();
+void errorParse(int lineNumber);
+int insertCommand(char* data);
 
 
 int main(int argc, char* argv[]) {
@@ -49,11 +56,6 @@ int main(int argc, char* argv[]) {
 
 
 
-static void displayUsage (const char* appName) {
-    printf("Usage: ./%s <nomesocket>\n", appName);
-    exit(EXIT_FAILURE);
-}
-
 static void parseArgs (long argc, char* const argv[]) {
     if (argc != 2) {
         fprintf(stderr, "Invalid format:\n");
@@ -62,17 +64,20 @@ static void parseArgs (long argc, char* const argv[]) {
     socketName = argv[1];
 }
 
-/*
-void* processInput() {
+static void displayUsage (const char* appName) {
+    printf("Usage: ./%s <nomesocket>\n", appName);
+    exit(EXIT_FAILURE);
+}
+
+void processInput() {
     FILE* input = openFile(inputFile, "r");
     char line[MAX_INPUT_SIZE];
     int lineNumber = 0;
 
     while(fgets(line, sizeof(line)/sizeof(char), input)) {
-        lineNumber++;
-
         char token;
         char name[MAX_INPUT_SIZE], newName[MAX_INPUT_SIZE];
+        lineNumber++;
 
         int numTokens = sscanf(line, "%c %s %s", &token, name, newName);
 
@@ -84,19 +89,17 @@ void* processInput() {
             case 'c':
             case 'l':
             case 'd':
-                if(numTokens != 2) {
+                if(numTokens != 2)
                     errorParse(lineNumber);
-                } else {
-                    insertCommand(line);
+                if(insertCommand(line))
                     break;
-                }
+                return;
             case 'r':
-                if(numTokens != 3) {
+                if(numTokens != 3)
                     errorParse(lineNumber);
-                } else {
-                    insertCommand(line);
+                if(insertCommand(line))
                     break;
-                }
+                return;
             case '#':
                 break;
             default: { // error
@@ -105,9 +108,18 @@ void* processInput() {
         }
     }
     fclose(input);
-    for (int i = 0; i < numberThreads; i++) {
-        insertCommand(EXIT_COMMAND);
-    }
-    pthread_exit(NULL);
 }
-*/
+
+void errorParse(int lineNumber) {
+    fprintf(stderr, "Error: line %d invalid\n", lineNumber);
+    exit(EXIT_FAILURE);
+}
+
+int insertCommand(char* data) {
+    if(numberCommands != MAX_COMMANDS) {
+        strcpy(inputCommands[numberCommands++], data);
+        return 1;
+    }
+    return 0;
+}
+

@@ -4,97 +4,100 @@
 #include <string.h>
 
 
-int obtainNewInumber(tecnicofs* fs) {
-	int newInumber = ++(fs->nextINumber);
-	return newInumber;
+int obtainNewINumber(tecnicofs* fs) {
+	int newINumber = ++(fs->nextINumber);
+	return newINumber;
 }
 
-tecnicofs* new_tecnicofs(int numberBuckets){
+tecnicofs* new_tecnicofs(){
 	tecnicofs* fs = malloc(sizeof(tecnicofs));
 	if (!fs) {
 		perror("failed to allocate tecnicofs");
 		exit(EXIT_FAILURE);
 	}
-	fs->buckets = numberBuckets;
-	fs->bstRoots = (node**) malloc(sizeof(node*) * numberBuckets);
-	fs->bstLocks = (LOCK_TYPE*) malloc(sizeof(LOCK_TYPE) * numberBuckets);
-	for (int i = 0; i < numberBuckets; i++) {
-		fs->bstRoots[i] = NULL;
-		sync_init(&(fs->bstLocks[i]));
-	}
+	fs->bstRoot = NULL;
+	sync_init(&(fs->bstLock));
+	inode_table_init();
 	fs->nextINumber = 0;
  	return fs;
 }
 
 void free_tecnicofs(tecnicofs* fs){
-	for (int i = 0; i < fs->buckets; i++) 	{
-		free_tree(fs->bstRoots[i]);
-		sync_destroy(&(fs->bstLocks[i]));
-	}
-	free(fs->bstRoots);
-	free(fs->bstLocks);
+	free_tree(fs->bstRoot);
+	sync_destroy(&(fs->bstLock));
+	inode_table_destroy();
 	free(fs);
 }
 
-void create_file(tecnicofs* fs, char *name, int inumber){
-	int index = hash(name, fs->buckets);
-	sync_wrlock(&(fs->bstLocks[index]));
-	fs->bstRoots[index] = insert(fs->bstRoots[index], name, inumber);
-	sync_unlock(&(fs->bstLocks[index]));
-}
-
-void delete_file(tecnicofs* fs, char *name){
-	int index = hash(name, fs->buckets);
-	sync_wrlock(&(fs->bstLocks[index]));
-	fs->bstRoots[index] = remove_item(fs->bstRoots[index], name);
-	sync_unlock(&(fs->bstLocks[index]));
-}
-
 int lookup_file(tecnicofs* fs, char *name){
-	int index = hash(name, fs->buckets);
-	sync_rdlock(&(fs->bstLocks[index]));
+	sync_rdlock(&(fs->bstLock));
 	int inumber = 0;
-	node* searchNode = search(fs->bstRoots[index], name);
-	if (searchNode) {
+	node* searchNode = search(fs->bstRoot, name);
+	if ( searchNode ) {
 		inumber = searchNode->inumber;
 	}
-	sync_unlock(&(fs->bstLocks[index]));
+	sync_unlock(&(fs->bstLock));
 	return inumber;
 }
 
-void rename_file(tecnicofs* fs, char *oldName, char *newName) {
-	int oldIndex = hash(oldName, fs->buckets);
-	int newIndex = hash(newName, fs->buckets);
-	int oldInumber = 0, newInumber = 1;		// Por default assumem-se os casos de erro
-
-	if (oldIndex < newIndex) {
-		oldInumber = lookup_file(fs, oldName);
-		if (oldInumber) {
-			newInumber = lookup_file(fs, newName);
-		}
+int create_file(tecnicofs* fs, uid_t client, char *name, int inumber, int permissions) {
+	int status = lookup_file(fs, name);
+	if (status != 0) {
+		return TECNICOFS_ERROR_FILE_ALREADY_EXISTS;
 	} else {
-		newInumber = lookup_file(fs, newName);
-		if (!newInumber) {
-			oldInumber = lookup_file(fs, oldName);
+		sync_wrlock(&(fs->bstLock));
+		permission owner = permissions % 10;
+		permission others = permissions / 10;
+		fs->bstRoot = insert(fs->bstRoot, name, inumber);
+		inode_create(client, owner, others);
+		sync_unlock(&(fs->bstLock));
+		return 0;
+	}
+}
+
+int delete_file(tecnicofs* fs, uid_t client, char *name) {
+	int iNumber = lookup_file(fs, name);
+	if (iNumber != 0) {
+		return TECNICOFS_ERROR_FILE_NOT_FOUND;
+	} else {
+		uid_t owner;
+		inode_get(iNumber, &owner, NULL, NULL, NULL, 0);
+		if (owner != client) {
+			return TECNICOFS_ERROR_PERMISSION_DENIED;
+		} else {
+			sync_wrlock(&(fs->bstLock));
+			fs->bstRoot = remove_item(fs->bstRoot, name);
+			inode_delete(iNumber);
+			sync_unlock(&(fs->bstLock));
+			return 0;
 		}
 	}
+}
 
-	if (oldInumber && !newInumber) {
-		if (oldIndex != newIndex) {
-			sync_wrlock(&(fs->bstLocks[oldIndex]));
-		}
-		sync_wrlock(&(fs->bstLocks[newIndex]));
-		fs->bstRoots[oldIndex] = remove_item(fs->bstRoots[oldIndex], oldName);
-		fs->bstRoots[newIndex] = insert(fs->bstRoots[newIndex], newName, oldInumber);
-		sync_unlock(&(fs->bstLocks[newIndex]));
-		if (oldIndex != newIndex) {
-			sync_unlock(&(fs->bstLocks[oldIndex]));
+int rename_file(tecnicofs* fs, uid_t client, char *oldName, char *newName) {
+	int oldINumber = lookup_file(fs, oldName);
+	if (oldINumber == 0) {
+		return TECNICOFS_ERROR_FILE_NOT_FOUND;
+	} else {
+		uid_t owner;
+		inode_get(oldINumber, &owner, NULL, NULL, NULL, 0);
+		if (owner != client) {
+			return TECNICOFS_ERROR_PERMISSION_DENIED;
+		} else {
+			int newINumber = lookup_file(fs, newName);
+			if (newINumber != 0) {
+				return TECNICOFS_ERROR_FILE_ALREADY_EXISTS;
+			} else {
+				sync_wrlock(&(fs->bstLock));
+				fs->bstRoot = remove_item(fs->bstRoot, oldName);
+				fs->bstRoot = insert(fs->bstRoot, newName, oldINumber);
+				sync_unlock(&(fs->bstLock));
+				return 0;
+			}
 		}
 	}
 }
 
 void print_tecnicofs_tree(FILE * fp, tecnicofs *fs){
-	for (size_t i = 0; i < fs->buckets; i++) 	{
-		print_tree(fp, fs->bstRoots[i]);
-	}
+	print_tree(fp, fs->bstRoot);
 }

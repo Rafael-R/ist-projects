@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "inodes.h"
-#include "../../tecnicofs-api-constants.h"
 
 inode_t inode_table[INODE_TABLE_SIZE];
 pthread_mutex_t inode_table_lock;
@@ -46,7 +45,7 @@ void inode_table_destroy(){
         if(inode_table[i].owner!=FREE_INODE && inode_table[i].fileContent)
             free(inode_table[i].fileContent);
     }
-
+    
     if(pthread_mutex_destroy(&inode_table_lock) != 0){
         perror("Failed to destroy inode table mutex.\n");
         exit(EXIT_FAILURE);
@@ -141,9 +140,7 @@ int inode_get(int inumber,uid_t *owner, permission *ownerPerm, permission *other
         *othersPerm = inode_table[inumber].othersPermissions;
 
     if(fileContents && len > 0 && inode_table[inumber].fileContent){
-        if(len > ((int) strlen(inode_table[inumber].fileContent)))
-            len = ((int) strlen(inode_table[inumber].fileContent) + 1);
-        strncpy(fileContents, inode_table[inumber].fileContent, len-1);
+        strncpy(fileContents, inode_table[inumber].fileContent, len);
         fileContents[len] = '\0';
         unlock_inode_table();
         return strlen(fileContents);
@@ -178,7 +175,7 @@ int inode_set(int inumber, char *fileContents, int len){
         unlock_inode_table();
         return -1;
     }
-
+    
     if(inode_table[inumber].fileContent)
         free(inode_table[inumber].fileContent);
 

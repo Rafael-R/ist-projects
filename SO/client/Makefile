@@ -12,15 +12,15 @@ TARGETS = client test
 
 all: $(TARGETS)
 
-$(TARGET):
+$(TARGETS):
 	$(LD) $(CFLAGS) $^ -o $@
 
 
 tecnicofs-client-api.o: tecnicofs-client-api.c tecnicofs-client-api.h ../tecnicofs-api-common.h
 
-main.o: main.c tecnicofs-client-api.h
+main.o: main.c ../tecnicofs-api-common.h
 
-test.o: test.c tecnicofs-client-api.h
+test.o: test.c tecnicofs-client-api.o
 
 client: ../tecnicofs-api-common.o tecnicofs-client-api.o main.o
 
