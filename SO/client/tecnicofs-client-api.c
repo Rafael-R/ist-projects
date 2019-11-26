@@ -58,9 +58,8 @@ int tfsCreate(char *filename, permission ownerPermissions, permission othersPerm
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
 
-    printf("SERVER: %s\n", recvline);
-
-    return 0;
+    sscanf(recvline, "%d", &status);
+    return status;
 }
 
 int tfsDelete(char *filename) {
@@ -81,9 +80,8 @@ int tfsDelete(char *filename) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
 
-    printf("SERVER: %s\n", recvline);
-
-    return 0;
+    sscanf(recvline, "%d", &status);
+    return status;
 }
 
 int tfsRename(char *filenameOld, char *filenameNew) {
@@ -104,9 +102,8 @@ int tfsRename(char *filenameOld, char *filenameNew) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
 
-    printf("SERVER: %s\n", recvline);
-
-    return 0;
+    sscanf(recvline, "%d", &status);
+    return status;
 }
 
 int tfsOpen(char *filename, permission mode) {
@@ -127,9 +124,8 @@ int tfsOpen(char *filename, permission mode) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
 
-    printf("SERVER: %s\n", recvline);
-
-    return 0;
+    sscanf(recvline, "%d", &status);
+    return status;
 }
 
 int tfsClose(int fd) {
@@ -150,9 +146,8 @@ int tfsClose(int fd) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
 
-    printf("SERVER: %s\n", recvline);
-
-    return 0;
+    sscanf(recvline, "%d", &status);
+    return status;
 }
 
 int tfsRead(int fd, char *buffer, int len) {
@@ -173,9 +168,8 @@ int tfsRead(int fd, char *buffer, int len) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
 
-    printf("SERVER: %s\n", recvline);
-
-    return 0;
+    sscanf(recvline, "%d %s", &status, buffer);
+    return status;
 }
 
 int tfsWrite(int fd, char *buffer, int len) {
@@ -196,7 +190,6 @@ int tfsWrite(int fd, char *buffer, int len) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
 
-    printf("SERVER: %s\n", recvline);
-
-    return 0;
+    sscanf(recvline, "%d", &status);
+    return status;
 }
