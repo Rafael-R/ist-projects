@@ -10,7 +10,6 @@ typedef struct {
     struct sockaddr_un address;
     int socket;
     uid_t uid;
-    temp_file_t files[MAX_OPEN_FILES];
 } client_t;
 
 char* socketName;
@@ -24,8 +23,8 @@ volatile sig_atomic_t stop = 0;
 static void parseArgs (long argc, char* const argv[]);
 static void displayUsage (const char* appName);
 void signal_handler(int sig);
-void* connection_handler(void* arg);
-char* applyCommands(client_t* client, char* command);
+void* session_handler(void* arg);
+char* applyCommands(char* command, uid_t client, tempfile_t* files);
 void readTime(TIME* time);
 double getDuration(TIME start, TIME end);
 
@@ -80,7 +79,7 @@ int main(int argc, char* argv[]) {
         client->socket = client_socket;
         client->uid = uid++;
         
-        thread_create(&client_thread, connection_handler, client);
+        thread_create(&client_thread, session_handler, client);
     }
 
     puts("SERVER CLOSED\n");
@@ -125,17 +124,23 @@ void signal_handler(int sig) {
     stop = 1;
 }
 
-void* connection_handler(void* arg) {
+void* session_handler(void* arg) {
     client_t* client = (client_t*) arg;
-    int status;
+    tempfile_t files[MAX_OPEN_FILES];
     char recvline[MAX_INPUT_SIZE];
+    int status;
+
+    for (int i = 0; i < MAX_OPEN_FILES; i++) {
+        files[i].iNumber = 0;
+        files[i].mode = NONE;
+    }
 
     while (1) {
         status = recv(client->socket, recvline, MAX_INPUT_SIZE, 0);
         check_status(status, "server: receiving message\n");
         printf("CLIENT[%d]: %s\n", client->uid, recvline);
 
-        const char* sendline = applyCommands(&client, recvline);
+        const char* sendline = applyCommands(recvline, client->uid, files);
         memset(recvline, 0, MAX_INPUT_SIZE);
 
         if (sendline != NULL) {
@@ -145,7 +150,7 @@ void* connection_handler(void* arg) {
     }
 }
 
-char* applyCommands(client_t* client, char* command) {
+char* applyCommands(char* command, uid_t client, tempfile_t files[]) {
     char* line = malloc(sizeof(char) * MAX_INPUT_SIZE);
     char token, arg1[MAX_INPUT_SIZE], arg2[MAX_INPUT_SIZE];
     int status;
@@ -153,61 +158,39 @@ char* applyCommands(client_t* client, char* command) {
     sscanf(command, "%c %s %s", &token, arg1, arg2);
 
     int iNumber;
+    char temp[MAX_INPUT_SIZE];
     switch (token) {
         case 'c':
             iNumber = obtainNewINumber(fs);
-            status = create_file(fs, client->uid, arg1, iNumber, atoi(arg2));
+            status = create_file(fs, client, arg1, iNumber, atoi(arg2));
             sprintf(line, "%d", status);
             break;
         case 'd':
-            status = delete_file(fs, client->uid, arg1);
+            status = delete_file(fs, client, arg1);
             sprintf(line, "%d", status);
             break;
         case 'r':
-            status = rename_file(fs, client->uid, arg1, arg2);
+            status = rename_file(fs, client, arg1, arg2);
             sprintf(line, "%d", status);
             break;
         case 'o':
-            for (int i = 0; i <= MAX_OPEN_FILES; i++) {
-                if (i == MAX_OPEN_FILES) {
-                    sprintf(line, "%d", TECNICOFS_ERROR_MAXED_OPEN_FILES);
-                } else if (!client->files[i]) {
-                    temp_file_t temp;
-                    status = open_file(fs, client->uid, arg1, arg2, &temp);
-                    if (status == 0) {
-                        sprintf(line, "%d", i);
-                    } else {
-                        sprintf(line, "%d", status);
-                    }
-                }
-            }
+            status = open_file(fs, client, arg1, atoi(arg2), files);
+            sprintf(line, "%d", status);
             break;
         case 'x':
-            if (client->files[atoi(arg1)]) {
-                client->files[atoi(arg1)] = NULL;
-                sprintf(line, "%d", 0);
-            } else {
-                sprintf(line, "%d", TECNICOFS_ERROR_FILE_NOT_OPEN);
-            }
+            status = close_file(files, atoi(arg1));
+            sprintf(line, "%d", status);
             break;
         case 'l':
-            if (client->files[atoi(arg1)]) {
-                if (client->files[atoi(arg1)].mode == WRITE) {
-                    sprintf(line, "%d", TECNICOFS_ERROR_INVALID_MODE);
-                } else {
-                    char* temp;
-                    strncpy(temp, client->files[atoi(arg1)].fileContent, len);
-                    fileContents[len] = '\0';
-                    sprintf(line, "%d %s", 0, temp);
-                }
-            } else {
-                sprintf(line, "%d", TECNICOFS_ERROR_FILE_NOT_OPEN);
-            }
+            status = read_file(files, atoi(arg1), temp, atoi(arg2));
+            sprintf(line, "%d %s", status, temp);
             break;
         case 'w':
-            sprintf(line, "Command: %c %s %s", token, arg1, arg2);
+            status = write_file(files, atoi(arg1), arg2);
+            sprintf(line, "%d", status);
             break;
         default: {
+            sprintf(line, "%d", TECNICOFS_ERROR_OTHER);
             break;
         }
     }

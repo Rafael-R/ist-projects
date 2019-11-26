@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
 
     assert(tfsWrite(fd, "hmm", 3) == 0);
 
-    assert(tfsRead(fd, readBuffer, 4) == 0);
+    assert(tfsRead(fd, readBuffer, 4) == 3);
 
     puts(readBuffer);
 
