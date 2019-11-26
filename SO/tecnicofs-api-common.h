@@ -9,9 +9,12 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
+#define MAX_OPEN_FILES 5
 #define MAX_CLIENTS 10
 #define MAX_COMMANDS 50
 #define MAX_INPUT_SIZE 100
+
+typedef enum {FALSE, TRUE} boolean;
 
 void check_status(int status, char* message);
 FILE* openFile(char* filename, const char* mode);

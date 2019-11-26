@@ -98,6 +98,23 @@ int rename_file(tecnicofs* fs, uid_t client, char *oldName, char *newName) {
 	}
 }
 
+int open_file(tecnicofs* fs, uid_t client, char *name, int mode, temp_file_t* temp) {
+	int iNumber = lookup_file(fs, name);
+	if (iNumber != 0) {
+		return TECNICOFS_ERROR_FILE_NOT_FOUND;
+	} else {
+		uid_t owner;
+		permission ownerPerm, othersPerm;
+		inode_get(iNumber, &owner, &ownerPerm, &othersPerm, &(temp->fileContent), 100);
+		if ((owner == client && mode != ownerPerm) || (mode != othersPerm)) {
+			return TECNICOFS_ERROR_PERMISSION_DENIED;
+		} else {
+			temp->mode = mode;
+			return 0;
+		}
+	}
+}
+
 void print_tecnicofs_tree(FILE * fp, tecnicofs *fs){
 	print_tree(fp, fs->bstRoot);
 }
