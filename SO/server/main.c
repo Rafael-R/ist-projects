@@ -1,4 +1,3 @@
-#include <pthread.h>
 #include <signal.h>
 #include <sys/time.h>
 #include "../tecnicofs-api-common.h"
@@ -11,8 +10,8 @@ typedef struct {
     struct sockaddr_un address;
     int socket;
     uid_t uid;
+    temp_file_t files[MAX_OPEN_FILES];
 } client_t;
-
 
 char* socketName;
 char* outputFile;
@@ -26,22 +25,32 @@ static void parseArgs (long argc, char* const argv[]);
 static void displayUsage (const char* appName);
 void signal_handler(int sig);
 void* connection_handler(void* arg);
-char* applyCommands(uid_t client, char* command);
+char* applyCommands(client_t* client, char* command);
 void readTime(TIME* time);
-double getDuration(TIME start, TIME stop);
+double getDuration(TIME start, TIME end);
 
 
 int main(int argc, char* argv[]) {
 
     int server_socket, client_socket, status;
     struct sockaddr_un server_addr, client_addr;
+    //sigset_t signal_mask;
     pthread_t client_thread;
-    static uid_t uid = 0;
+    static uid_t uid = 10;
     TIME start, end;
 
     parseArgs(argc, argv);
 
     fs = new_tecnicofs(numberBuckets);
+/*
+    sigemptyset (&signal_mask);
+    sigaddset (&signal_mask, SIGINT);
+    status = pthread_sigmask(SIG_BLOCK, &signal_mask, NULL);
+    if (status != 0) {
+        fprintf(stderr, "Error sigmask");
+        exit(EXIT_FAILURE);
+    }*/
+    //signal(SIGINT, signal_handler);
 
     server_socket = socket(AF_UNIX, SOCK_STREAM, 0);
     check_status(server_socket, "server: can't open stream socket\n");
@@ -57,14 +66,12 @@ int main(int argc, char* argv[]) {
 
     status = listen(server_socket, MAX_CLIENTS);
     check_status(status, "server: can't listen\n");
-
-    //signal(SIGINT, signal_handler);
+    
+    socklen_t clilen = sizeof(client_addr);
 
     readTime(&start);
 
     while (!stop) {
-
-        socklen_t clilen = sizeof(client_addr);
         client_socket = accept(server_socket, (struct sockaddr*) &client_addr, &clilen);
         check_status(client_socket, "server: can't accept socket\n");
 
@@ -74,7 +81,6 @@ int main(int argc, char* argv[]) {
         client->uid = uid++;
         
         thread_create(&client_thread, connection_handler, client);
-
     }
 
     puts("SERVER CLOSED\n");
@@ -115,6 +121,7 @@ static void displayUsage (const char* appName) {
 }
 
 void signal_handler(int sig) {
+    printf("Caught signal %d.\n", sig);
     stop = 1;
 }
 
@@ -126,19 +133,19 @@ void* connection_handler(void* arg) {
     while (1) {
         status = recv(client->socket, recvline, MAX_INPUT_SIZE, 0);
         check_status(status, "server: receiving message\n");
-        printf("CLIENT: %s\n", recvline);
+        printf("CLIENT[%d]: %s\n", client->uid, recvline);
 
-        const char* sendline = applyCommands(client->uid, recvline);
+        const char* sendline = applyCommands(&client, recvline);
+        memset(recvline, 0, MAX_INPUT_SIZE);
+
         if (sendline != NULL) {
             status = send(client->socket, sendline, strlen(sendline), 0);
             check_status(status, "server: sending message\n");
         }
-
-        memset(recvline, 0, MAX_INPUT_SIZE);
     }
 }
 
-char* applyCommands(uid_t client, char* command) {
+char* applyCommands(client_t* client, char* command) {
     char* line = malloc(sizeof(char) * MAX_INPUT_SIZE);
     char token, arg1[MAX_INPUT_SIZE], arg2[MAX_INPUT_SIZE];
     int status;
@@ -149,25 +156,53 @@ char* applyCommands(uid_t client, char* command) {
     switch (token) {
         case 'c':
             iNumber = obtainNewINumber(fs);
-            status = create_file(fs, client, arg1, iNumber, atoi(arg2));
+            status = create_file(fs, client->uid, arg1, iNumber, atoi(arg2));
             sprintf(line, "%d", status);
             break;
         case 'd':
-            status = delete_file(fs, client, arg1);
+            status = delete_file(fs, client->uid, arg1);
             sprintf(line, "%d", status);
             break;
         case 'r':
-            status = rename_file(fs, client, arg1, arg2);
+            status = rename_file(fs, client->uid, arg1, arg2);
             sprintf(line, "%d", status);
             break;
         case 'o':
-            sprintf(line, "Command: %c %s %s", token, arg1, arg2);
+            for (int i = 0; i <= MAX_OPEN_FILES; i++) {
+                if (i == MAX_OPEN_FILES) {
+                    sprintf(line, "%d", TECNICOFS_ERROR_MAXED_OPEN_FILES);
+                } else if (!client->files[i]) {
+                    temp_file_t temp;
+                    status = open_file(fs, client->uid, arg1, arg2, &temp);
+                    if (status == 0) {
+                        sprintf(line, "%d", i);
+                    } else {
+                        sprintf(line, "%d", status);
+                    }
+                }
+            }
             break;
         case 'x':
-            sprintf(line, "Command: %c %s", token, arg1);
+            if (client->files[atoi(arg1)]) {
+                client->files[atoi(arg1)] = NULL;
+                sprintf(line, "%d", 0);
+            } else {
+                sprintf(line, "%d", TECNICOFS_ERROR_FILE_NOT_OPEN);
+            }
             break;
         case 'l':
-            sprintf(line, "Command: %c %s %s", token, arg1, arg2);
+            if (client->files[atoi(arg1)]) {
+                if (client->files[atoi(arg1)].mode == WRITE) {
+                    sprintf(line, "%d", TECNICOFS_ERROR_INVALID_MODE);
+                } else {
+                    char* temp;
+                    strncpy(temp, client->files[atoi(arg1)].fileContent, len);
+                    fileContents[len] = '\0';
+                    sprintf(line, "%d %s", 0, temp);
+                }
+            } else {
+                sprintf(line, "%d", TECNICOFS_ERROR_FILE_NOT_OPEN);
+            }
             break;
         case 'w':
             sprintf(line, "Command: %c %s %s", token, arg1, arg2);
@@ -185,7 +220,7 @@ void readTime(TIME* time) {
     check_status(status, "gettimeofday failed\n");
 }
 
-double getDuration(TIME start, TIME stop) {
-    return (((double)(stop.tv_sec)  + (double)(stop.tv_usec / 1000000.0)) -
+double getDuration(TIME start, TIME end) {
+    return (((double)(end.tv_sec)  + (double)(end.tv_usec / 1000000.0)) -
             ((double)(start.tv_sec) + (double)(start.tv_usec / 1000000.0)));
 }
