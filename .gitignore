@@ -44,7 +44,10 @@ tecnicofs-nosync
 tecnicofs-mutex
 tecnicofs-rwlock
 SO/*/client
-SO/*/test
+SO/*/create
+SO/*/delete
+SO/*/read
+SO/*/success
 
 # ----- PO -----
 
