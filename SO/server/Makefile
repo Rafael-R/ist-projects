@@ -31,9 +31,9 @@ fs.o: CFLAGS+=-DRWLOCK
 fs.o: fs.c fs.h lib/bst.h lib/inodes.h sync.h
 
 main.o: CFLAGS+=-DRWLOCK
-main.o: main.c ../tecnicofs-api-common.h fs.h sync.h
+main.o: main.c fs.h sync.h
 
-tecnicofs-rwlock: lib/bst.o lib/inodes.o sync.o fs.o ../tecnicofs-api-common.o main.o
+tecnicofs-rwlock: lib/bst.o lib/inodes.o sync.o fs.o main.o
 
 
 %.o:

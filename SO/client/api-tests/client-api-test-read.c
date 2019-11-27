@@ -41,6 +41,7 @@ int main(int argc, char** argv) {
     assert((fd = tfsOpen("abc", WRITE)) == 0);
     assert(tfsRead(fd, readBuffer, 6) == TECNICOFS_ERROR_INVALID_MODE);
 
+    assert(tfsClose(fd) == 0);
 
     assert(tfsDelete("abc") == 0);
     assert(tfsUnmount() == 0);

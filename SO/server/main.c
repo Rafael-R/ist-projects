@@ -1,9 +1,11 @@
+#define _GNU_SOURCE
 #include <signal.h>
+#include <errno.h>
 #include <sys/time.h>
-#include "../tecnicofs-api-common.h"
 #include "fs.h"
 #include "sync.h"
 
+#define MAX_CLIENT_THREADS 100
 #define TIME struct timeval
 
 typedef struct {
@@ -18,41 +20,45 @@ int numberBuckets;
 
 tecnicofs* fs;
 
-volatile sig_atomic_t stop = 0;
+volatile sig_atomic_t run = TRUE;
 
 static void parseArgs (long argc, char* const argv[]);
 static void displayUsage (const char* appName);
-void signalHandler(int sig);
+void checkStatus(int status, char* message);
+static void signalHandler();
 void* sessionHandler(void* arg);
-char* applyCommands(char* command, uid_t client, tempfile_t* files);
+void applyCommands(char* command, uid_t client, tempfile_t* files, char* output);
 void readTime(TIME* time);
 double getDuration(TIME start, TIME end);
 
 
 int main(int argc, char* argv[]) {
 
-    int server_socket, client_socket, status;
+    int server_socket, client_socket, status, clients = 0;
     struct sockaddr_un server_addr, client_addr;
-    //sigset_t signal_mask;
-    pthread_t client_thread;
+    struct ucred client_data;
+    socklen_t len;
+    struct sigaction action;
+    sigset_t signal_mask;
     TIME start, end;
 
     parseArgs(argc, argv);
 
     fs = newTecnicoFS(numberBuckets);
-/*
+
     sigemptyset (&signal_mask);
-    sigaddset (&signal_mask, SIGINT);
     status = pthread_sigmask(SIG_BLOCK, &signal_mask, NULL);
     if (status != 0) {
         fprintf(stderr, "Error sigmask");
         exit(EXIT_FAILURE);
-    }*/
-    //signal(SIGINT, signalHandler);
-    //sigaction
+    }
+    action.sa_handler = signalHandler;
+    sigemptyset(&action.sa_mask);
+    action.sa_flags = 0; 
+    sigaction(SIGINT, &action, NULL);
 
     server_socket = socket(AF_UNIX, SOCK_STREAM, 0);
-    check_status(server_socket, "server: can't open stream socket\n");
+    checkStatus(server_socket, "server: can't open stream socket\n");
 
     unlink(socketName);
 
@@ -61,33 +67,42 @@ int main(int argc, char* argv[]) {
     strcpy(server_addr.sun_path, socketName);
 
     status = bind(server_socket, (struct sockaddr*) &server_addr, sizeof(server_addr));
-    check_status(status, "server: can't bind local address\n");
+    checkStatus(status, "server: can't bind local address\n");
 
-    status = listen(server_socket, MAX_CLIENTS);
-    check_status(status, "server: can't listen\n");
+    status = listen(server_socket, 10);
+    checkStatus(status, "server: can't listen\n");
 
-    socklen_t clilen = sizeof(client_addr);
+    pthread_t* threads = (pthread_t*) malloc(sizeof(pthread_t) * MAX_CLIENT_THREADS);
 
     readTime(&start);
 
-    while (!stop) {
-        client_socket = accept(server_socket, (struct sockaddr*) &client_addr, &clilen);
-        check_status(client_socket, "server: can't accept socket\n");
+    while (run) {
+        len = sizeof(client_addr);
+        client_socket = accept(server_socket, (struct sockaddr*) &client_addr, &len);
+        if (client_socket < 0) {
+            if(errno == EINTR) {
+                continue;
+            } else {
+                fprintf(stderr, "server: can't accept socket\n");
+                exit(EXIT_FAILURE);
+            }
+        }
 
-        struct ucred client_data;
-        socklen_t data_len;
-        status = getsockopt(client_socket, SOL_SOCKET, SO_PEERCRED, &client_data, &data_len);
-        check_status(status, "server: reading client data\n");
+        len = sizeof(client_data);
+        status = getsockopt(client_socket, SOL_SOCKET, SO_PEERCRED, &client_data, &len);
+        checkStatus(status, "server: reading client data\n");
 
         client_t* client = (client_t*) malloc(sizeof(client_t));
         client->address = client_addr;
         client->socket = client_socket;
-        client->uid = client_data->uid;
+        client->uid = client_data.uid;
 
-        thread_create(&client_thread, sessionHandler, client);
+        thread_create(&threads[clients++], sessionHandler, client);
     }
 
-    puts("SERVER CLOSED\n");
+    for (int i = 0; i < clients; i++) {
+        thread_join(threads[i]);
+    }
 
     readTime(&end);
 
@@ -102,6 +117,7 @@ int main(int argc, char* argv[]) {
     fclose(output);
 
     freeTecnicoFS(fs);
+    free(threads);
     exit(EXIT_SUCCESS);
 
     return 0;
@@ -128,15 +144,22 @@ static void displayUsage (const char* appName) {
     exit(EXIT_FAILURE);
 }
 
-void signalHandler(int sig) {
-    printf("Caught signal %d.\n", sig);
-    stop = 1;
+void checkStatus(int status, char* message) {
+    if(status < 0){
+        fprintf(stderr, "%s", message);
+        exit(EXIT_FAILURE);
+    }
+}
+
+static void signalHandler() {
+    printf("LOSING SERVER.\n");
+    run = FALSE;
 }
 
 void* sessionHandler(void* arg) {
     client_t* client = (client_t*) arg;
     tempfile_t files[MAX_OPEN_FILES];
-    char recvline[MAX_INPUT_SIZE];
+    char recvline[INPUT_SIZE], sendline[INPUT_SIZE];
     int status;
 
     for (int i = 0; i < MAX_OPEN_FILES; i++) {
@@ -145,69 +168,76 @@ void* sessionHandler(void* arg) {
     }
 
     while (1) {
-        status = recv(client->socket, recvline, MAX_INPUT_SIZE, 0);
-        check_status(status, "server: receiving message\n");
+        status = recv(client->socket, recvline, INPUT_SIZE, 0);
+        if (status < 0) {
+            fprintf(stderr, "server: receiving message\n");
+            exit(EXIT_FAILURE);
+        } else if (status == 0) {
+            break;
+        }
         printf("CLIENT[%d]: %s\n", client->uid, recvline);
 
-        const char* sendline = applyCommands(recvline, client->uid, files);
-        memset(recvline, 0, MAX_INPUT_SIZE);
+        applyCommands(recvline, client->uid, files, sendline);
+        memset(recvline, 0, INPUT_SIZE);
 
-        if (sendline != NULL) {
-            status = send(client->socket, sendline, strlen(sendline), 0);
-            check_status(status, "server: sending message\n");
-        }
+        printf("SERVER: %s\n", sendline); // TESTE
+
+        status = send(client->socket, sendline, strlen(sendline), 0);
+        checkStatus(status, "server: sending message\n");
     }
+
+    close(client->socket);
+    free(client);
+    return NULL;
 }
 
-char* applyCommands(char* command, uid_t client, tempfile_t files[]) {
-    char* line = malloc(sizeof(char) * MAX_INPUT_SIZE);
-    char token, arg1[MAX_INPUT_SIZE], arg2[MAX_INPUT_SIZE];
+void applyCommands(char* command, uid_t client, tempfile_t files[], char* output) {
+    char token, arg1[INPUT_SIZE], arg2[INPUT_SIZE], temp[INPUT_SIZE];
     int status;
 
     sscanf(command, "%c %s %s", &token, arg1, arg2);
 
-    char temp[MAX_INPUT_SIZE];
     switch (token) {
         case 'c':
             status = createFile(fs, client, arg1, atoi(arg2));
-            sprintf(line, "%d", status);
+            sprintf(output, "%d", status);
             break;
         case 'd':
             status = deleteFile(fs, client, arg1);
-            sprintf(line, "%d", status);
+            sprintf(output, "%d", status);
             break;
         case 'r':
             status = renameFile(fs, client, arg1, arg2);
-            sprintf(line, "%d", status);
+            sprintf(output, "%d", status);
             break;
         case 'o':
-            status = openFile(fs, client, arg1, atoi(arg2), files);
-            sprintf(line, "%d", status);
+            status = openFile(fs, files, client, arg1, atoi(arg2));
+            sprintf(output, "%d", status);
             break;
         case 'x':
-            status = closeFile(files, atoi(arg1));
-            sprintf(line, "%d", status);
+            status = closeFile(fs, files, atoi(arg1));
+            sprintf(output, "%d", status);
             break;
         case 'l':
             status = readFile(files, atoi(arg1), temp, atoi(arg2));
-            sprintf(line, "%d %s", status, temp);
+            sprintf(output, "%d %s", status, temp);
+            memset(temp, 0, INPUT_SIZE);
             break;
         case 'w':
             status = writeFile(files, atoi(arg1), arg2);
-            sprintf(line, "%d", status);
+            sprintf(output, "%d", status);
             break;
         default: {
-            sprintf(line, "%d", TECNICOFS_ERROR_OTHER);
+            sprintf(output, "%d", TECNICOFS_ERROR_OTHER);
             break;
         }
     }
-    return line;
 }
 
 void readTime(TIME* time) {
     int status;
     status = gettimeofday(&(*time), NULL);
-    check_status(status, "gettimeofday failed\n");
+    checkStatus(status, "gettimeofday failed\n");
 }
 
 double getDuration(TIME start, TIME end) {
