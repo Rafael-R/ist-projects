@@ -6,13 +6,14 @@ OBJS = $(SOURCES:%.c=%.o)
 CC = gcc
 LD = gcc
 CFLAGS = -Wall -std=gnu99 -I../ -g
-TARGETS = client test
+TARGET = client
+TESTS = create delete read success
 
 .PHONY: all clean
 
-all: $(TARGETS)
+all: $(TARGET) $(TESTS)
 
-$(TARGETS):
+$(TARGET):
 	$(LD) $(CFLAGS) $^ -o $@
 
 
@@ -20,15 +21,23 @@ tecnicofs-client-api.o: tecnicofs-client-api.c tecnicofs-client-api.h
 
 main.o: main.c
 
-test.o: test.c tecnicofs-client-api.o
-
 client: tecnicofs-client-api.o main.o
 
-test: tecnicofs-client-api.o test.o
+create:
+	$(CC) $(CFLAGS) tecnicofs-client-api.c api-tests/client-api-test-create.c -o $@
+
+delete:
+	$(CC) $(CFLAGS) tecnicofs-client-api.c api-tests/client-api-test-delete.c -o $@
+
+read:
+	$(CC) $(CFLAGS) tecnicofs-client-api.c api-tests/client-api-test-read.c -o $@
+
+success:
+	$(CC) $(CFLAGS) tecnicofs-client-api.c api-tests/client-api-test-success.c -o $@
 
 
 %.o:
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm -f $(OBJS) $(TARGETS)
+	rm -f $(OBJS) $(TARGET) $(TESTS)
