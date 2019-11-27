@@ -9,7 +9,7 @@ int obtainNewINumber(tecnicofs* fs) {
 	return newINumber;
 }
 
-tecnicofs* new_tecnicofs(){
+tecnicofs* newTecnicoFS(){
 	tecnicofs* fs = malloc(sizeof(tecnicofs));
 	if (!fs) {
 		perror("failed to allocate tecnicofs");
@@ -22,14 +22,14 @@ tecnicofs* new_tecnicofs(){
  	return fs;
 }
 
-void free_tecnicofs(tecnicofs* fs){
+void freeTecnicoFS(tecnicofs* fs){
 	free_tree(fs->bstRoot);
 	sync_destroy(&(fs->bstLock));
 	inode_table_destroy();
 	free(fs);
 }
 
-int lookup_file(tecnicofs* fs, char *name){
+int lookupFile(tecnicofs* fs, char *name){
 	sync_rdlock(&(fs->bstLock));
 	int iNumber = -1;
 	node* searchNode = search(fs->bstRoot, name);
@@ -40,29 +40,29 @@ int lookup_file(tecnicofs* fs, char *name){
 	return iNumber;
 }
 
-int create_file(tecnicofs* fs, uid_t client, char *name, int iNumber, int permissions) {
-	int status = lookup_file(fs, name);
+int createFile(tecnicofs* fs, uid_t client, char *name, int permissions) {
+	int status = lookupFile(fs, name);
 	if (status != -1) {
 		return TECNICOFS_ERROR_FILE_ALREADY_EXISTS;
 	} else {
 		sync_wrlock(&(fs->bstLock));
 		permission ownerPerm = permissions / 10;
 		permission othersPerm = permissions % 10;
-		fs->bstRoot = insert(fs->bstRoot, name, iNumber);
+		fs->bstRoot = insert(fs->bstRoot, name, obtainNewINumber(fs));
 		inode_create(client, ownerPerm, othersPerm);
 		sync_unlock(&(fs->bstLock));
 		return 0;
 	}
 }
 
-int delete_file(tecnicofs* fs, uid_t client, char *name) {
-	int iNumber = lookup_file(fs, name);
+int deleteFile(tecnicofs* fs, uid_t client, char *name) {
+	int iNumber = lookupFile(fs, name);
 	if (iNumber == -1) {
 		return TECNICOFS_ERROR_FILE_NOT_FOUND;
 	} else {
 		uid_t owner;
 		inode_get(iNumber, &owner, NULL, NULL, NULL, 0); //TODO ?
-		if (owner != client) {
+		if (client != owner) {
 			return TECNICOFS_ERROR_PERMISSION_DENIED;
 		} else {
 			sync_wrlock(&(fs->bstLock));
@@ -74,8 +74,8 @@ int delete_file(tecnicofs* fs, uid_t client, char *name) {
 	}
 }
 
-int rename_file(tecnicofs* fs, uid_t client, char *oldName, char *newName) {
-	int oldINumber = lookup_file(fs, oldName);
+int renameFile(tecnicofs* fs, uid_t client, char *oldName, char *newName) {
+	int oldINumber = lookupFile(fs, oldName);
 	if (oldINumber == -1) {
 		return TECNICOFS_ERROR_FILE_NOT_FOUND;
 	} else {
@@ -84,7 +84,7 @@ int rename_file(tecnicofs* fs, uid_t client, char *oldName, char *newName) {
 		if (owner != client) {
 			return TECNICOFS_ERROR_PERMISSION_DENIED;
 		} else {
-			int newINumber = lookup_file(fs, newName);
+			int newINumber = lookupFile(fs, newName);
 			if (newINumber != -1) {
 				return TECNICOFS_ERROR_FILE_ALREADY_EXISTS;
 			} else {
@@ -98,8 +98,8 @@ int rename_file(tecnicofs* fs, uid_t client, char *oldName, char *newName) {
 	}
 }
 
-int open_file(tecnicofs* fs, uid_t client, char *name, int mode, tempfile_t files[]) {
-	int iNumber = lookup_file(fs, name);
+int openFile(tecnicofs* fs, uid_t client, char *name, int mode, tempfile_t files[]) {
+	int iNumber = lookupFile(fs, name);
 	if (iNumber == -1) {
 		return TECNICOFS_ERROR_FILE_NOT_FOUND;
 	} else {
@@ -127,7 +127,7 @@ int open_file(tecnicofs* fs, uid_t client, char *name, int mode, tempfile_t file
 	}
 }
 
-int close_file(tempfile_t files[], int fd) {
+int closeFile(tempfile_t files[], int fd) {
 	if (files[fd].iNumber != -1) {
 		files[fd].iNumber = -1;
 		files[fd].mode = NONE;
@@ -137,7 +137,7 @@ int close_file(tempfile_t files[], int fd) {
 	}
 }
 
-int read_file(tempfile_t files[], int fd, char* buffer, int len) {
+int readFile(tempfile_t files[], int fd, char* buffer, int len) {
 	if (files[fd].iNumber) {
 		return TECNICOFS_ERROR_FILE_NOT_OPEN;
 	} else if (files[fd].mode != READ && files[fd].mode != RW) {
@@ -152,7 +152,7 @@ int read_file(tempfile_t files[], int fd, char* buffer, int len) {
 	}
 }
 
-int write_file(tempfile_t files[], int fd, char* buffer) {
+int writeFile(tempfile_t files[], int fd, char* buffer) {
 	if (files[fd].iNumber) {
 		return TECNICOFS_ERROR_FILE_NOT_OPEN;
 	} else if (files[fd].mode != WRITE && files[fd].mode != RW) {
@@ -167,6 +167,6 @@ int write_file(tempfile_t files[], int fd, char* buffer) {
 	}
 }
 
-void print_tecnicofs_tree(FILE * fp, tecnicofs *fs){
+void printTecnicoFS(FILE * fp, tecnicofs *fs){
 	print_tree(fp, fs->bstRoot);
 }
