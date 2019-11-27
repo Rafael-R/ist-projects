@@ -17,6 +17,7 @@ tecnicofs* newTecnicoFS(){
 	}
 	fs->bstRoot = NULL;
 	sync_init(&(fs->bstLock));
+	sync_init(&(fs->openFilesLock));
 	inode_table_init();
 	fs->nextINumber = -1;
  	return fs;
@@ -25,6 +26,7 @@ tecnicofs* newTecnicoFS(){
 void freeTecnicoFS(tecnicofs* fs){
 	free_tree(fs->bstRoot);
 	sync_destroy(&(fs->bstLock));
+	sync_destroy(&(fs->openFilesLock));
 	inode_table_destroy();
 	free(fs);
 }
@@ -42,9 +44,7 @@ int lookupFile(tecnicofs* fs, char *name){
 
 int createFile(tecnicofs* fs, uid_t client, char *name, int permissions) {
 	int iNumber = lookupFile(fs, name);
-	if (iNumber != -1) {
-		return TECNICOFS_ERROR_FILE_ALREADY_EXISTS;
-	} else {
+	if (iNumber == -1) {
 		sync_wrlock(&(fs->bstLock));
 		permission ownerPerm = permissions / 10;
 		permission othersPerm = permissions % 10;
@@ -52,74 +52,66 @@ int createFile(tecnicofs* fs, uid_t client, char *name, int permissions) {
 		inode_create(client, ownerPerm, othersPerm);
 		sync_unlock(&(fs->bstLock));
 		return 0;
-	}
+	} else { return TECNICOFS_ERROR_FILE_ALREADY_EXISTS; }
 }
 
 int deleteFile(tecnicofs* fs, uid_t client, char *name) {
 	int iNumber = lookupFile(fs, name);
-	if (iNumber == -1) {
-		return TECNICOFS_ERROR_FILE_NOT_FOUND;
-	} else {
-		if (fs->openFiles[iNumber] != 0) {
-			return TECNICOFS_ERROR_FILE_IS_OPEN;
-		} else {
+	if (iNumber != -1) {
+		sync_rdlock(&(fs->openFilesLock));
+		if (fs->openFiles[iNumber] == 0) {
+			sync_unlock(&(fs->openFilesLock));
 			uid_t owner;
 			inode_get(iNumber, &owner, NULL, NULL, NULL, 0); //TODO ?
-			if (client != owner) {
-				return TECNICOFS_ERROR_PERMISSION_DENIED;
-			} else {
+			if (client == owner) {
 				sync_wrlock(&(fs->bstLock));
 				fs->bstRoot = remove_item(fs->bstRoot, name);
 				inode_delete(iNumber);
 				sync_unlock(&(fs->bstLock));
 				return 0;
-			}
+			} else { return TECNICOFS_ERROR_PERMISSION_DENIED; }
+		} else {
+			sync_unlock(&(fs->openFilesLock));
+			return TECNICOFS_ERROR_FILE_IS_OPEN;
 		}
-	}
+	} else { return TECNICOFS_ERROR_FILE_NOT_FOUND; }
 }
 
 int renameFile(tecnicofs* fs, uid_t client, char *oldName, char *newName) {
 	int oldINumber = lookupFile(fs, oldName);
-	if (oldINumber == -1) {
-		return TECNICOFS_ERROR_FILE_NOT_FOUND;
-	} else {
-		if (fs->openFiles[oldINumber] != 0) {
-			return TECNICOFS_ERROR_FILE_IS_OPEN;
-		} else {
+	if (oldINumber != -1) {
+		sync_rdlock(&(fs->openFilesLock));
+		if (fs->openFiles[oldINumber] == 0) {
+			sync_unlock(&(fs->openFilesLock));
 			uid_t owner;
 			inode_get(oldINumber, &owner, NULL, NULL, NULL, 0);
-			if (owner != client) {
-				return TECNICOFS_ERROR_PERMISSION_DENIED;
-			} else {
+			if (client == owner) {
 				int newINumber = lookupFile(fs, newName);
-				if (newINumber != -1) {
-					return TECNICOFS_ERROR_FILE_ALREADY_EXISTS;
-				} else {
+				if (newINumber == -1) {
 					sync_wrlock(&(fs->bstLock));
 					fs->bstRoot = remove_item(fs->bstRoot, oldName);
 					fs->bstRoot = insert(fs->bstRoot, newName, oldINumber);
 					sync_unlock(&(fs->bstLock));
 					return 0;
-				}
-			}
+				} else { return TECNICOFS_ERROR_FILE_ALREADY_EXISTS; }
+			} else { return TECNICOFS_ERROR_PERMISSION_DENIED; }
+		} else {
+			sync_unlock(&(fs->openFilesLock));
+			return TECNICOFS_ERROR_FILE_IS_OPEN;
 		}
-	}
+	} else { return TECNICOFS_ERROR_FILE_NOT_FOUND; }
 }
 
 int openFile(tecnicofs* fs, tempfile_t files[], uid_t client, char *name, int mode) {
 	int iNumber = lookupFile(fs, name);
-	if (iNumber == -1) {
-		return TECNICOFS_ERROR_FILE_NOT_FOUND;
-	} else {
+	if (iNumber != -1) {
 		int fd = -1;
 		for (int i = MAX_OPEN_FILES; i > -1; --i) {
 			if (files[i].iNumber == -1) {
 				fd = i;
 			}
 		}
-		if (fd == -1) {
-			return TECNICOFS_ERROR_MAXED_OPEN_FILES;
-		} else {
+		if (fd != -1) {
 			uid_t owner;
 			permission ownerPerm, othersPerm;
 			inode_get(iNumber, &owner, &ownerPerm, &othersPerm, NULL, 0);
@@ -129,30 +121,30 @@ int openFile(tecnicofs* fs, tempfile_t files[], uid_t client, char *name, int mo
 				(client != owner && othersPerm == mode)) {
 				files[fd].iNumber = iNumber;
 				files[fd].mode = mode;
+				sync_wrlock(&(fs->openFilesLock));
 				fs->openFiles[iNumber]++;
+				sync_unlock(&(fs->openFilesLock));
 				return fd;
-			} else {
-				return TECNICOFS_ERROR_PERMISSION_DENIED;
-			}
-		}
-	}
+			} else { return TECNICOFS_ERROR_PERMISSION_DENIED; }
+		} else { return TECNICOFS_ERROR_MAXED_OPEN_FILES; }
+	} else { return TECNICOFS_ERROR_FILE_NOT_FOUND; }
 }
 
 int closeFile(tecnicofs* fs, tempfile_t files[], int fd) {
 	if (files[fd].iNumber != -1) {
+		sync_wrlock(&(fs->openFilesLock));
 		fs->openFiles[files[fd].iNumber]--;
+		sync_unlock(&(fs->openFilesLock));
 		files[fd].iNumber = -1;
 		files[fd].mode = NONE;
 		return 0;
-	} else {
-		return TECNICOFS_ERROR_FILE_NOT_OPEN;
-	}
+	} else { return TECNICOFS_ERROR_FILE_NOT_OPEN; }
 }
 
 int readFile(tempfile_t files[], int fd, char* buffer, int len) {
-	if (files[fd].iNumber) {
+	if (files[fd].iNumber == -1) {
 		return TECNICOFS_ERROR_FILE_NOT_OPEN;
-	} else if (files[fd].mode != READ && files[fd].mode != RW) {
+	} else if (files[fd].mode != RW && files[fd].mode != READ) {
 		return TECNICOFS_ERROR_INVALID_MODE;
 	} else {
 		int status = inode_get(files[fd].iNumber, NULL, NULL, NULL, buffer, len);
@@ -165,9 +157,9 @@ int readFile(tempfile_t files[], int fd, char* buffer, int len) {
 }
 
 int writeFile(tempfile_t files[], int fd, char* buffer) {
-	if (files[fd].iNumber) {
+	if (files[fd].iNumber == -1) {
 		return TECNICOFS_ERROR_FILE_NOT_OPEN;
-	} else if (files[fd].mode != WRITE && files[fd].mode != RW) {
+	} else if (files[fd].mode != RW && files[fd].mode != WRITE) {
 		return TECNICOFS_ERROR_INVALID_MODE;
 	} else {
 		int status = inode_set(files[fd].iNumber, buffer, strlen(buffer));
