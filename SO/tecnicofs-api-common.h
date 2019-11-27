@@ -16,6 +16,5 @@
 typedef enum {FALSE, TRUE} boolean;
 
 void check_status(int status, char* message);
-FILE* openFile(char* filename, const char* mode);
 
 #endif /* TECNICOFS_API_COMMON_H */

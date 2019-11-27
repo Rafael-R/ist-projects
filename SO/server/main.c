@@ -22,8 +22,8 @@ volatile sig_atomic_t stop = 0;
 
 static void parseArgs (long argc, char* const argv[]);
 static void displayUsage (const char* appName);
-void signal_handler(int sig);
-void* session_handler(void* arg);
+void signalHandler(int sig);
+void* sessionHandler(void* arg);
 char* applyCommands(char* command, uid_t client, tempfile_t* files);
 void readTime(TIME* time);
 double getDuration(TIME start, TIME end);
@@ -35,12 +35,11 @@ int main(int argc, char* argv[]) {
     struct sockaddr_un server_addr, client_addr;
     //sigset_t signal_mask;
     pthread_t client_thread;
-    static uid_t uid = 10;
     TIME start, end;
 
     parseArgs(argc, argv);
 
-    fs = new_tecnicofs(numberBuckets);
+    fs = newTecnicoFS(numberBuckets);
 /*
     sigemptyset (&signal_mask);
     sigaddset (&signal_mask, SIGINT);
@@ -49,7 +48,8 @@ int main(int argc, char* argv[]) {
         fprintf(stderr, "Error sigmask");
         exit(EXIT_FAILURE);
     }*/
-    //signal(SIGINT, signal_handler);
+    //signal(SIGINT, signalHandler);
+    //sigaction
 
     server_socket = socket(AF_UNIX, SOCK_STREAM, 0);
     check_status(server_socket, "server: can't open stream socket\n");
@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
 
     status = listen(server_socket, MAX_CLIENTS);
     check_status(status, "server: can't listen\n");
-    
+
     socklen_t clilen = sizeof(client_addr);
 
     readTime(&start);
@@ -74,12 +74,17 @@ int main(int argc, char* argv[]) {
         client_socket = accept(server_socket, (struct sockaddr*) &client_addr, &clilen);
         check_status(client_socket, "server: can't accept socket\n");
 
+        struct ucred client_data;
+        socklen_t data_len;
+        status = getsockopt(client_socket, SOL_SOCKET, SO_PEERCRED, &client_data, &data_len);
+        check_status(status, "server: reading client data\n");
+
         client_t* client = (client_t*) malloc(sizeof(client_t));
         client->address = client_addr;
         client->socket = client_socket;
-        client->uid = uid++;
-        
-        thread_create(&client_thread, session_handler, client);
+        client->uid = client_data->uid;
+
+        thread_create(&client_thread, sessionHandler, client);
     }
 
     puts("SERVER CLOSED\n");
@@ -88,11 +93,15 @@ int main(int argc, char* argv[]) {
 
     printf("TecnicoFS completed in %.4f seconds.\n", getDuration(start, end));
 
-    FILE* output = openFile(outputFile, "w");
-    print_tecnicofs_tree(output, fs);
+    FILE* output = fopen(outputFile, "w");
+    if(!output){
+        fprintf(stderr, "Error: Opening file: %s\n", outputFile);
+        exit(EXIT_FAILURE);
+    }
+    printTecnicoFS(output, fs);
     fclose(output);
 
-    free_tecnicofs(fs);
+    freeTecnicoFS(fs);
     exit(EXIT_SUCCESS);
 
     return 0;
@@ -119,12 +128,12 @@ static void displayUsage (const char* appName) {
     exit(EXIT_FAILURE);
 }
 
-void signal_handler(int sig) {
+void signalHandler(int sig) {
     printf("Caught signal %d.\n", sig);
     stop = 1;
 }
 
-void* session_handler(void* arg) {
+void* sessionHandler(void* arg) {
     client_t* client = (client_t*) arg;
     tempfile_t files[MAX_OPEN_FILES];
     char recvline[MAX_INPUT_SIZE];
@@ -157,36 +166,34 @@ char* applyCommands(char* command, uid_t client, tempfile_t files[]) {
 
     sscanf(command, "%c %s %s", &token, arg1, arg2);
 
-    int iNumber;
     char temp[MAX_INPUT_SIZE];
     switch (token) {
         case 'c':
-            iNumber = obtainNewINumber(fs);
-            status = create_file(fs, client, arg1, iNumber, atoi(arg2));
+            status = createFile(fs, client, arg1, atoi(arg2));
             sprintf(line, "%d", status);
             break;
         case 'd':
-            status = delete_file(fs, client, arg1);
+            status = deleteFile(fs, client, arg1);
             sprintf(line, "%d", status);
             break;
         case 'r':
-            status = rename_file(fs, client, arg1, arg2);
+            status = renameFile(fs, client, arg1, arg2);
             sprintf(line, "%d", status);
             break;
         case 'o':
-            status = open_file(fs, client, arg1, atoi(arg2), files);
+            status = openFile(fs, client, arg1, atoi(arg2), files);
             sprintf(line, "%d", status);
             break;
         case 'x':
-            status = close_file(files, atoi(arg1));
+            status = closeFile(files, atoi(arg1));
             sprintf(line, "%d", status);
             break;
         case 'l':
-            status = read_file(files, atoi(arg1), temp, atoi(arg2));
+            status = readFile(files, atoi(arg1), temp, atoi(arg2));
             sprintf(line, "%d %s", status, temp);
             break;
         case 'w':
-            status = write_file(files, atoi(arg1), arg2);
+            status = writeFile(files, atoi(arg1), arg2);
             sprintf(line, "%d", status);
             break;
         default: {

@@ -19,16 +19,16 @@ typedef struct {
 } tempfile_t;
 
 int obtainNewINumber(tecnicofs* fs);
-tecnicofs* new_tecnicofs();
-void free_tecnicofs(tecnicofs* fs);
-int lookup_file(tecnicofs* fs, char *name);
-int create_file(tecnicofs* fs, uid_t client, char *name, int inumber, int permissions);
-int delete_file(tecnicofs* fs, uid_t client, char *name);
-int rename_file(tecnicofs* fs, uid_t client, char *oldName, char *newName) ;
-int open_file(tecnicofs* fs, uid_t client, char *name, int mode, tempfile_t files[]);
-int close_file(tempfile_t files[], int fd);
-int read_file(tempfile_t files[], int fd, char* buffer, int len);
-int write_file(tempfile_t files[], int fd, char* buffer);
-void print_tecnicofs_tree(FILE * fp, tecnicofs *fs);
+tecnicofs* newTecnicoFS();
+void freeTecnicoFS(tecnicofs* fs);
+int lookupFile(tecnicofs* fs, char *name);
+int createFile(tecnicofs* fs, uid_t client, char *name, int permissions);
+int deleteFile(tecnicofs* fs, uid_t client, char *name);
+int renameFile(tecnicofs* fs, uid_t client, char *oldName, char *newName) ;
+int openFile(tecnicofs* fs, uid_t client, char *name, int mode, tempfile_t files[]);
+int closeFile(tempfile_t files[], int fd);
+int readFile(tempfile_t files[], int fd, char* buffer, int len);
+int writeFile(tempfile_t files[], int fd, char* buffer);
+void printTecnicoFS(FILE * fp, tecnicofs *fs);
 
 #endif /* FS_H */

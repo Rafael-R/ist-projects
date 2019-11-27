@@ -2,38 +2,17 @@
 
 
 char* socketName;
-char* inputFile;
-
-
-char inputCommands[MAX_COMMANDS][MAX_INPUT_SIZE];
-int numberCommands = 0;
 
 static void parseArgs (long argc, char* const argv[]);
 static void displayUsage (const char* appName);
-void processInput();
-void errorParse(int lineNumber);
-int insertCommand(char* data);
-
 
 int main(int argc, char* argv[]) {
 
-    int client_socket, status;
-    struct sockaddr_un server_addr;
     char sendline[MAX_INPUT_SIZE], recvline[MAX_INPUT_SIZE];
 
     parseArgs(argc, argv);
 
-    // Cria socket stream
-    client_socket = socket(AF_UNIX, SOCK_STREAM, 0);
-    check_status(client_socket, "client: can't open stream socket\n");
-
-    bzero((char *)&server_addr, sizeof(server_addr));
-    server_addr.sun_family = AF_UNIX;
-    strcpy(server_addr.sun_path, socketName);
-
-    status = connect(client_socket, (struct sockaddr *) &server_addr, sizeof(server_addr));
-    check_status(status, "client: can't connect to server\n");
-
+    tfsMount(socketName);
 
     while (1) {
         printf("Enter command: ");
@@ -48,8 +27,7 @@ int main(int argc, char* argv[]) {
         memset(recvline, 0, MAX_INPUT_SIZE);
     }
 
-    /* Fecha o socket e termina */
-    close(client_socket);
+    tfsUnmount();
 
     return 0;
 }
@@ -68,58 +46,3 @@ static void displayUsage (const char* appName) {
     printf("Usage: ./%s <nomesocket>\n", appName);
     exit(EXIT_FAILURE);
 }
-
-void processInput() {
-    FILE* input = openFile(inputFile, "r");
-    char line[MAX_INPUT_SIZE];
-    int lineNumber = 0;
-
-    while(fgets(line, sizeof(line)/sizeof(char), input)) {
-        char token;
-        char name[MAX_INPUT_SIZE], newName[MAX_INPUT_SIZE];
-        lineNumber++;
-
-        int numTokens = sscanf(line, "%c %s %s", &token, name, newName);
-
-        // perform minimal validation
-        if (numTokens < 1) {
-            continue;
-        }
-        switch (token) {
-            case 'c':
-            case 'l':
-            case 'd':
-                if(numTokens != 2)
-                    errorParse(lineNumber);
-                if(insertCommand(line))
-                    break;
-                return;
-            case 'r':
-                if(numTokens != 3)
-                    errorParse(lineNumber);
-                if(insertCommand(line))
-                    break;
-                return;
-            case '#':
-                break;
-            default: { // error
-                errorParse(lineNumber);
-            }
-        }
-    }
-    fclose(input);
-}
-
-void errorParse(int lineNumber) {
-    fprintf(stderr, "Error: line %d invalid\n", lineNumber);
-    exit(EXIT_FAILURE);
-}
-
-int insertCommand(char* data) {
-    if(numberCommands != MAX_COMMANDS) {
-        strcpy(inputCommands[numberCommands++], data);
-        return 1;
-    }
-    return 0;
-}
-
