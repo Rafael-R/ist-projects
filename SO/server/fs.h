@@ -12,6 +12,7 @@ typedef struct tecnicofs {
     LOCK_TYPE bstLock;
     int nextINumber;
     int openFiles[INODE_TABLE_SIZE];
+    LOCK_TYPE openFilesLock;
 } tecnicofs;
 
 typedef struct {
