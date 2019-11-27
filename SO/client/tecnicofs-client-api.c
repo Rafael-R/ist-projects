@@ -178,7 +178,7 @@ int tfsWrite(int fd, char *buffer, int len) {
     if (session == FALSE) {
         return TECNICOFS_ERROR_NO_OPEN_SESSION;
     }
-    snprintf(command, len, "w %d %s", fd, buffer);
+    snprintf(command, 5+len, "w %d %s", fd, buffer);
 
     status = send(client_socket, command, strlen(command), 0);
     if (status < 0) {

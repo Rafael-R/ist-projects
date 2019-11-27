@@ -104,8 +104,8 @@ int open_file(tecnicofs* fs, uid_t client, char *name, int mode, tempfile_t file
 		return TECNICOFS_ERROR_FILE_NOT_FOUND;
 	} else {
 		int fd = -1;
-		for (int i = 0; i < MAX_OPEN_FILES; i++) {
-			if (files[i].iNumber == 0) {
+		for (int i = MAX_OPEN_FILES; i > -1; --i) {
+			if (files[i].iNumber == -1) {
 				fd = i;
 			}
 		}
@@ -128,7 +128,7 @@ int open_file(tecnicofs* fs, uid_t client, char *name, int mode, tempfile_t file
 }
 
 int close_file(tempfile_t files[], int fd) {
-	if (files[fd].iNumber) {
+	if (files[fd].iNumber != -1) {
 		files[fd].iNumber = -1;
 		files[fd].mode = NONE;
 		return 0;

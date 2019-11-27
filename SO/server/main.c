@@ -131,7 +131,7 @@ void* session_handler(void* arg) {
     int status;
 
     for (int i = 0; i < MAX_OPEN_FILES; i++) {
-        files[i].iNumber = 0;
+        files[i].iNumber = -1;
         files[i].mode = NONE;
     }
 
