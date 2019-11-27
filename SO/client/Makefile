@@ -16,15 +16,15 @@ $(TARGETS):
 	$(LD) $(CFLAGS) $^ -o $@
 
 
-tecnicofs-client-api.o: tecnicofs-client-api.c tecnicofs-client-api.h ../tecnicofs-api-common.h
+tecnicofs-client-api.o: tecnicofs-client-api.c tecnicofs-client-api.h
 
-main.o: main.c ../tecnicofs-api-common.h
+main.o: main.c
 
 test.o: test.c tecnicofs-client-api.o
 
-client: ../tecnicofs-api-common.o tecnicofs-client-api.o main.o
+client: tecnicofs-client-api.o main.o
 
-test: ../tecnicofs-api-common.o tecnicofs-client-api.o test.o
+test: tecnicofs-client-api.o test.o
 
 
 %.o:

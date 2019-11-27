@@ -1,17 +1,23 @@
 #include "tecnicofs-client-api.h"
-#include "../tecnicofs-api-common.h"
 
 
 int client_socket;
 boolean session = FALSE;
 
+
 int tfsMount(char * address) {
     int status;
     struct sockaddr_un server_addr;
 
-    // Cria socket stream
+    if (session == TRUE) {
+        return TECNICOFS_ERROR_OPEN_SESSION;
+    }
+
     client_socket = socket(AF_UNIX, SOCK_STREAM, 0);
-    check_status(client_socket, "client: can't open stream socket\n");
+    if (client_socket < 0) {
+        fprintf(stderr, "Error: creating stream socket.\n");
+        return TECNICOFS_ERROR_OTHER;
+    }
 
     bzero((char *)&server_addr, sizeof(server_addr));
     server_addr.sun_family = AF_UNIX;
@@ -19,30 +25,36 @@ int tfsMount(char * address) {
 
     status = connect(client_socket, (struct sockaddr *) &server_addr, sizeof(server_addr));
     if (status < 0) {
-        return TECNICOFS_ERROR_OPEN_SESSION;
+        fprintf(stderr, "Error: connecting to server.\n");
+        return TECNICOFS_ERROR_OTHER;
     } else {
         session = TRUE;
         return 0;
     }
 }
 
+
 int tfsUnmount() {
     int status;
+
     if (session == FALSE) {
         return TECNICOFS_ERROR_NO_OPEN_SESSION;
     }
     status = close(client_socket);
     if (status < 0) {
-        return TECNICOFS_ERROR_NO_OPEN_SESSION;
+        fprintf(stderr, "Error: closing connection.\n");
+        return TECNICOFS_ERROR_OTHER;
     } else {
         session = FALSE;
         return 0;
     }
 }
 
+
 int tfsCreate(char *filename, permission ownerPermissions, permission othersPermissions) {
-    char command[MAX_INPUT_SIZE], recvline[MAX_INPUT_SIZE];
+    char command[INPUT_SIZE], recvline[INPUT_SIZE];
     int status;
+
     if (session == FALSE) {
         return TECNICOFS_ERROR_NO_OPEN_SESSION;
     }
@@ -53,7 +65,7 @@ int tfsCreate(char *filename, permission ownerPermissions, permission othersPerm
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
 
-    status = recv(client_socket, recvline, MAX_INPUT_SIZE, 0);
+    status = recv(client_socket, recvline, INPUT_SIZE, 0);
     if (status < 0) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
@@ -62,9 +74,11 @@ int tfsCreate(char *filename, permission ownerPermissions, permission othersPerm
     return status;
 }
 
+
 int tfsDelete(char *filename) {
-    char command[MAX_INPUT_SIZE], recvline[MAX_INPUT_SIZE];
+    char command[INPUT_SIZE], recvline[INPUT_SIZE];
     int status;
+
     if (session == FALSE) {
         return TECNICOFS_ERROR_NO_OPEN_SESSION;
     }
@@ -75,7 +89,7 @@ int tfsDelete(char *filename) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
 
-    status = recv(client_socket, recvline, MAX_INPUT_SIZE, 0);
+    status = recv(client_socket, recvline, INPUT_SIZE, 0);
     if (status < 0) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
@@ -84,9 +98,11 @@ int tfsDelete(char *filename) {
     return status;
 }
 
+
 int tfsRename(char *filenameOld, char *filenameNew) {
-    char command[MAX_INPUT_SIZE], recvline[MAX_INPUT_SIZE];
+    char command[INPUT_SIZE], recvline[INPUT_SIZE];
     int status;
+
     if (session == FALSE) {
         return TECNICOFS_ERROR_NO_OPEN_SESSION;
     }
@@ -97,7 +113,7 @@ int tfsRename(char *filenameOld, char *filenameNew) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
 
-    status = recv(client_socket, recvline, MAX_INPUT_SIZE, 0);
+    status = recv(client_socket, recvline, INPUT_SIZE, 0);
     if (status < 0) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
@@ -106,9 +122,11 @@ int tfsRename(char *filenameOld, char *filenameNew) {
     return status;
 }
 
+
 int tfsOpen(char *filename, permission mode) {
-    char command[MAX_INPUT_SIZE], recvline[MAX_INPUT_SIZE];
+    char command[INPUT_SIZE], recvline[INPUT_SIZE];
     int status;
+
     if (session == FALSE) {
         return TECNICOFS_ERROR_NO_OPEN_SESSION;
     }
@@ -119,7 +137,7 @@ int tfsOpen(char *filename, permission mode) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
 
-    status = recv(client_socket, recvline, MAX_INPUT_SIZE, 0);
+    status = recv(client_socket, recvline, INPUT_SIZE, 0);
     if (status < 0) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
@@ -128,9 +146,11 @@ int tfsOpen(char *filename, permission mode) {
     return status;
 }
 
+
 int tfsClose(int fd) {
-    char command[MAX_INPUT_SIZE], recvline[MAX_INPUT_SIZE];
+    char command[INPUT_SIZE], recvline[INPUT_SIZE];
     int status;
+
     if (session == FALSE) {
         return TECNICOFS_ERROR_NO_OPEN_SESSION;
     }
@@ -141,7 +161,7 @@ int tfsClose(int fd) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
 
-    status = recv(client_socket, recvline, MAX_INPUT_SIZE, 0);
+    status = recv(client_socket, recvline, INPUT_SIZE, 0);
     if (status < 0) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
@@ -150,20 +170,22 @@ int tfsClose(int fd) {
     return status;
 }
 
+
 int tfsRead(int fd, char *buffer, int len) {
-    char command[MAX_INPUT_SIZE], recvline[MAX_INPUT_SIZE];
+    char command[INPUT_SIZE], recvline[INPUT_SIZE];
     int status;
+
     if (session == FALSE) {
         return TECNICOFS_ERROR_NO_OPEN_SESSION;
     }
-    sprintf(command, "l %d %d", fd, len);
+    sprintf(command, "l %d %d", fd, len-1);
 
     status = send(client_socket, command, strlen(command), 0);
     if (status < 0) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
 
-    status = recv(client_socket, recvline, MAX_INPUT_SIZE, 0);
+    status = recv(client_socket, recvline, INPUT_SIZE, 0);
     if (status < 0) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
@@ -172,9 +194,11 @@ int tfsRead(int fd, char *buffer, int len) {
     return status;
 }
 
+
 int tfsWrite(int fd, char *buffer, int len) {
-    char command[MAX_INPUT_SIZE], recvline[MAX_INPUT_SIZE];
+    char command[INPUT_SIZE], recvline[INPUT_SIZE];
     int status;
+
     if (session == FALSE) {
         return TECNICOFS_ERROR_NO_OPEN_SESSION;
     }
@@ -185,7 +209,7 @@ int tfsWrite(int fd, char *buffer, int len) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
 
-    status = recv(client_socket, recvline, MAX_INPUT_SIZE, 0);
+    status = recv(client_socket, recvline, INPUT_SIZE, 0);
     if (status < 0) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
