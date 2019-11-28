@@ -5,15 +5,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/un.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/un.h>
 
 #define INPUT_SIZE 100
 
-typedef enum permission { NONE, WRITE, READ, RW } permission;
+typedef enum permission {NONE, WRITE, READ, RW} permission;
 
-typedef enum {FALSE, TRUE} boolean;
+typedef enum boolean {FALSE, TRUE} boolean;
 
 /* Client already has an open session with a TecnicoFS server */
 #define TECNICOFS_ERROR_OPEN_SESSION -1

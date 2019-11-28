@@ -48,8 +48,8 @@ int createFile(tecnicofs* fs, uid_t client, char *name, int permissions) {
 		sync_wrlock(&(fs->bstLock));
 		permission ownerPerm = permissions / 10;
 		permission othersPerm = permissions % 10;
-		fs->bstRoot = insert(fs->bstRoot, name, obtainNewINumber(fs));
-		inode_create(client, ownerPerm, othersPerm);
+		iNumber = inode_create(client, ownerPerm, othersPerm);
+		fs->bstRoot = insert(fs->bstRoot, name, iNumber);
 		sync_unlock(&(fs->bstLock));
 		return 0;
 	} else { return TECNICOFS_ERROR_FILE_ALREADY_EXISTS; }

@@ -33,7 +33,6 @@ double getDuration(TIME start, TIME end);
 
 
 int main(int argc, char* argv[]) {
-
     int server_socket, client_socket, status, clients = 0;
     struct sockaddr_un server_addr, client_addr;
     struct ucred client_data;
@@ -44,12 +43,12 @@ int main(int argc, char* argv[]) {
 
     parseArgs(argc, argv);
 
-    fs = newTecnicoFS(numberBuckets);
+    fs = newTecnicoFS(numberBuckets);   // numberBuckets e ignorado
 
     sigemptyset (&signal_mask);
     status = pthread_sigmask(SIG_BLOCK, &signal_mask, NULL);
     if (status != 0) {
-        fprintf(stderr, "Error sigmask");
+        fprintf(stderr, "Error: sigmask");
         exit(EXIT_FAILURE);
     }
     action.sa_handler = signalHandler;
@@ -58,7 +57,7 @@ int main(int argc, char* argv[]) {
     sigaction(SIGINT, &action, NULL);
 
     server_socket = socket(AF_UNIX, SOCK_STREAM, 0);
-    checkStatus(server_socket, "server: can't open stream socket\n");
+    checkStatus(server_socket, "Error: can't open stream socket\n");
 
     unlink(socketName);
 
@@ -67,30 +66,31 @@ int main(int argc, char* argv[]) {
     strcpy(server_addr.sun_path, socketName);
 
     status = bind(server_socket, (struct sockaddr*) &server_addr, sizeof(server_addr));
-    checkStatus(status, "server: can't bind local address\n");
+    checkStatus(status, "Error: binding local address\n");
 
     status = listen(server_socket, 10);
-    checkStatus(status, "server: can't listen\n");
+    checkStatus(status, "Error: listening\n");
 
     pthread_t* threads = (pthread_t*) malloc(sizeof(pthread_t) * MAX_CLIENT_THREADS);
+
+    len = sizeof(client_addr);
 
     readTime(&start);
 
     while (run) {
-        len = sizeof(client_addr);
         client_socket = accept(server_socket, (struct sockaddr*) &client_addr, &len);
         if (client_socket < 0) {
             if(errno == EINTR) {
                 continue;
             } else {
-                fprintf(stderr, "server: can't accept socket\n");
+                fprintf(stderr, "Error: can't accept socket\n");
                 exit(EXIT_FAILURE);
             }
         }
 
         len = sizeof(client_data);
         status = getsockopt(client_socket, SOL_SOCKET, SO_PEERCRED, &client_data, &len);
-        checkStatus(status, "server: reading client data\n");
+        checkStatus(status, "Error: reading client data\n");
 
         client_t* client = (client_t*) malloc(sizeof(client_t));
         client->address = client_addr;
@@ -110,7 +110,7 @@ int main(int argc, char* argv[]) {
 
     FILE* output = fopen(outputFile, "w");
     if(!output){
-        fprintf(stderr, "Error: Opening file: %s\n", outputFile);
+        fprintf(stderr, "Error: opening file (%s)\n", outputFile);
         exit(EXIT_FAILURE);
     }
     printTecnicoFS(output, fs);
@@ -170,7 +170,7 @@ void* sessionHandler(void* arg) {
     while (1) {
         status = recv(client->socket, recvline, INPUT_SIZE, 0);
         if (status < 0) {
-            fprintf(stderr, "server: receiving message\n");
+            fprintf(stderr, "Error: receiving message\n");
             exit(EXIT_FAILURE);
         } else if (status == 0) {
             break;
@@ -183,7 +183,7 @@ void* sessionHandler(void* arg) {
         printf("SERVER: %s\n", sendline); // TESTE
 
         status = send(client->socket, sendline, strlen(sendline), 0);
-        checkStatus(status, "server: sending message\n");
+        checkStatus(status, "Error: sending message\n");
     }
 
     close(client->socket);
