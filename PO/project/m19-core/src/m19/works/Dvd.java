@@ -23,10 +23,12 @@ public class Dvd extends Work {
                _director.toLowerCase().contains(term.toLowerCase());
     }
 
-    @Override
-    public String toString() {
-        return _id + " - " + _availableCopies + " de " + _copies + " - DVD - " +
-        _title + " - " + _price + " - " + _category + " - " + _director + " - " + _igac;
+    public String typeString() {
+        return " - DVD - ";
+    }
+
+    public String infoString() {
+        return _director + " - " + _igac;
     }
     
 }

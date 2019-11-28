@@ -17,7 +17,7 @@ NC='\033[0m'
 
 export CLASSPATH=$classpath
 
-make
+# make
 
 for test in $testdir/*.out; do
 
@@ -43,7 +43,7 @@ for test in $testdir/*.out; do
 
 done
 
-make clean
+# make clean
 
 rm works
 
