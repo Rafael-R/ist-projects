@@ -45,6 +45,6 @@ done
 
 # make clean
 
-rm works
+ rm works user 0
 
 unset CLASSPATH
