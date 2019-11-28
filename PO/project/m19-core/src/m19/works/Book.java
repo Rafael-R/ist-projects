@@ -22,11 +22,13 @@ public class Book extends Work {
         return super.hasTerm(term) ||
                _author.toLowerCase().contains(term.toLowerCase());
     }
+    
+    public String typeString() {
+        return " - Livro - ";
+    }
 
-    @Override
-    public String toString() {
-        return _id + " - " + _availableCopies + " de " + _copies + " - Livro - " +
-        _title + " - " + _price + " - " + _category + " - " + _author + " - " + _isbn;
+    public String infoString() {
+        return _author + " - " + _isbn;
     }
 
 }

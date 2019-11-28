@@ -4,16 +4,20 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import m19.users.Observer;
 
-public class Work implements Serializable, Observable {
+public abstract class Work implements Serializable, Observable {
+
+    enum Category { 
+        FICTION, SCITECH, REFERENCE; 
+    } 
 
     private static final long serialVersionUID = 201911092305L;
     
-    protected int _id;
-    protected int _copies;
-    protected int _availableCopies;
-    protected String _title;
-    protected int _price;
-    protected Category _category;
+    private int _id;
+    private int _copies;
+    private int _availableCopies;
+    private String _title;
+    private int _price;
+    private Category _category;
     private ArrayList<Observer> observers = new ArrayList<Observer>();
 
     public Work(int id, String title, int price, String category, int copies) {
@@ -22,13 +26,13 @@ public class Work implements Serializable, Observable {
         _price = price;
         switch (category) {
             case "FICTION":
-                _category = new FictionWork();
+                _category = Category.FICTION;
                 break;
             case "SCITECH":
-                _category = new ScitechWork();
+                _category = Category.SCITECH;
                 break;
             case "REFERENCE":
-                _category = new ReferenceWork();
+                _category = Category.REFERENCE;
                 break;
             default:
                 break;
@@ -81,6 +85,29 @@ public class Work implements Serializable, Observable {
             observer.notify(message + ": " + this.toString());
             removeObserver(observer);
         }
+    }
+
+    public String categoryString() {
+        switch (_category) {
+            case FICTION:
+                return "Ficção";
+            case SCITECH:
+                return "Técnica e Científica";
+            case REFERENCE:
+                return "Referência";
+            default:
+                return "ERROR";
+        }
+    }
+
+    public abstract String typeString();
+
+    public abstract String infoString();
+
+    @Override
+    public String toString() {
+        return _id + " - " + _availableCopies + " de " + _copies + typeString() +
+        _title + " - " + _price + " - " + categoryString() + " - " + infoString();
     }
 
 }
