@@ -1,8 +1,12 @@
 package m19.users;
 
+import java.io.Serializable;
+
 import m19.works.*;
 
-public class Normal implements Classification {
+public class Normal implements Classification, Serializable {
+
+    private static final long serialVersionUID = 201911281653L;
 
     private static final int MAX_RETURN_DAYS = 5;
     private static final int MAX_REQUESTS = 3;
