@@ -11,9 +11,11 @@
 
 #define INPUT_SIZE 100
 
+
 typedef enum permission {NONE, WRITE, READ, RW} permission;
 
 typedef enum boolean {FALSE, TRUE} boolean;
+
 
 /* Client already has an open session with a TecnicoFS server */
 #define TECNICOFS_ERROR_OPEN_SESSION -1

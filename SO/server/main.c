@@ -5,7 +5,7 @@
 #include "fs.h"
 #include "sync.h"
 
-#define MAX_CLIENT_THREADS 100
+#define MAX_CLIENTS 100
 #define TIME struct timeval
 
 typedef struct {
@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
 
     parseArgs(argc, argv);
 
-    fs = newTecnicoFS(numberBuckets);   // numberBuckets e ignorado
+    fs = newTecnicoFS(numberBuckets);   // numberBuckets e' ignorado
 
     sigemptyset (&signal_mask);
     status = pthread_sigmask(SIG_BLOCK, &signal_mask, NULL);
@@ -71,13 +71,13 @@ int main(int argc, char* argv[]) {
     status = listen(server_socket, 10);
     checkStatus(status, "Error: listening\n");
 
-    pthread_t* threads = (pthread_t*) malloc(sizeof(pthread_t) * MAX_CLIENT_THREADS);
+    pthread_t* threads = (pthread_t*) malloc(sizeof(pthread_t) * MAX_CLIENTS);
 
     len = sizeof(client_addr);
 
     readTime(&start);
 
-    while (run) {
+    while (run && clients < MAX_CLIENTS) {
         client_socket = accept(server_socket, (struct sockaddr*) &client_addr, &len);
         if (client_socket < 0) {
             if(errno == EINTR) {

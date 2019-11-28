@@ -4,11 +4,6 @@
 #include <string.h>
 
 
-int obtainNewINumber(tecnicofs* fs) {
-	int newINumber = ++(fs->nextINumber);
-	return newINumber;
-}
-
 tecnicofs* newTecnicoFS(){
 	tecnicofs* fs = malloc(sizeof(tecnicofs));
 	if (!fs) {
@@ -62,7 +57,7 @@ int deleteFile(tecnicofs* fs, uid_t client, char *name) {
 		if (fs->openFiles[iNumber] == 0) {
 			sync_unlock(&(fs->openFilesLock));
 			uid_t owner;
-			inode_get(iNumber, &owner, NULL, NULL, NULL, 0); //TODO ?
+			inode_get(iNumber, &owner, NULL, NULL, NULL, 0);
 			if (client == owner) {
 				sync_wrlock(&(fs->bstLock));
 				fs->bstRoot = remove_item(fs->bstRoot, name);

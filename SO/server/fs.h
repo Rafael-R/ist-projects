@@ -7,6 +7,7 @@
 
 #define MAX_OPEN_FILES 5
 
+
 typedef struct tecnicofs {
     node* bstRoot;
     LOCK_TYPE bstLock;
@@ -20,7 +21,7 @@ typedef struct {
     permission mode;
 } tempfile_t;
 
-int obtainNewINumber(tecnicofs* fs);
+
 tecnicofs* newTecnicoFS();
 void freeTecnicoFS(tecnicofs* fs);
 int lookupFile(tecnicofs* fs, char *name);
