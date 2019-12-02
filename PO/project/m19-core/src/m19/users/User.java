@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.ArrayList;
 
 import m19.requests.Request;
+import m19.works.Observable;
+import m19.works.Work;
 
 
 public class User implements Serializable, Comparable<User>, Observer {
@@ -18,6 +20,7 @@ public class User implements Serializable, Comparable<User>, Observer {
     private Classification _classification = new Normal();
     private int _fine = 0;
     private List<Request> _requests = new ArrayList<Request>();
+    private ArrayList<Observable> _observables = new ArrayList<Observable>();
     private List<Notification> _notifications = new ArrayList<Notification>();
 
 
@@ -37,6 +40,10 @@ public class User implements Serializable, Comparable<User>, Observer {
 
     public String getClassification() {
         return _classification.toString();
+    }
+
+    public int getReturnDays(Work work) {
+        return _classification.maxReturnDays(work);
     }
 
     public int getFine() {
@@ -65,10 +72,6 @@ public class User implements Serializable, Comparable<User>, Observer {
         return string;
     }
 
-    public void addNotification(String message) {
-        _notifications.add(new Notification(message));
-    }
-
     @Override
     public int compareTo(User other) {
         if (this._name == other._name) {
@@ -79,8 +82,22 @@ public class User implements Serializable, Comparable<User>, Observer {
     }
 
     @Override
-    public void notify(String message) {
-        addNotification(message);
+    public void subscribe(Observable observable) {
+        _observables.add(observable);
+        observable.addObserver(this);
+    }
+
+    @Override
+    public void unsubscribeAll() {
+        for (Observable observable : _observables) {
+            observable.removeObserver(this);
+        }
+        _observables.clear();
+    }
+
+    @Override
+    public void notify(Notification notification) {
+        _notifications.add(notification);
     }
 
     @Override

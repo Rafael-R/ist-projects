@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import m19.users.*;
 import m19.works.*;
 import m19.exceptions.BadEntrySpecificationException;
+import m19.exceptions.RuleVerificationException;
 import m19.exceptions.UnknownDataException;
 import m19.rules.*;
 
@@ -115,7 +116,9 @@ public class Library implements Serializable {
 	 * @param daysToAdvance
 	 */
 	public void advanceDate(int daysToAdvance) {
-		_date += daysToAdvance;
+		if(daysToAdvance > 0) {
+			_date += daysToAdvance;
+		}
 	}
 
 
@@ -165,6 +168,7 @@ public class Library implements Serializable {
 	 * @return User's notifications
 	 */
 	public String getUserNotifications(int id) {
+		_users.get(id).unsubscribeAll();
 		return _users.get(id).getNotifications();
 	}
 
@@ -261,24 +265,30 @@ public class Library implements Serializable {
 
 	// Requests functions
 
+	public void observe(int userId, int workId) {
+		User user = fetchUser(userId);
+		Work work = fetchWork(workId);
+		user.subscribe(work);
+	}
+
 	/**
 	 * Make a request
 	 * @param userId User's id
 	 * @param workId Work's id
 	 * @return 0 in case the request doesn't fail any rule; index of the failed rule otherwise.
 	 */
-	public int request(int userId, int workId) {
+	public int requestWork(int userId, int workId) throws RuleVerificationException {
 		int index = 0;
 		User user = fetchUser(userId);
 		Work work = fetchWork(workId);
 		for (Rule rule : _rules) {
 			index++;
 			if (!rule.verify(work, user)) {
-				return index;
+				throw new RuleVerificationException(userId, workId, index);
 			}
 		}
-		//TODO: implement method
-		return index;
+		// TODO: implement method
+		return 0;
 	}
 
 }

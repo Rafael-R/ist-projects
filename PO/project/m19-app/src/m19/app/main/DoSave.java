@@ -28,8 +28,8 @@ public class DoSave extends Command<LibraryManager> {
 			_receiver.save();
 		} catch (MissingFileAssociationException e1) {
 			filename = _form.addStringInput(Message.newSaveAs());
+			_form.parse();
 			try {
-				_form.parse();
 				_receiver.saveAs(filename.value());
 			} catch (MissingFileAssociationException e2) {
 				e2.printStackTrace();

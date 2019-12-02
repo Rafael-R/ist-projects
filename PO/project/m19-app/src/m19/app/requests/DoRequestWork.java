@@ -44,8 +44,9 @@ public class DoRequestWork extends Command<LibraryManager> {
 		} catch (RuleVerificationException e) {
 			if (e.getRuleIndex() == 3) {
 				option = _form.addStringInput(Message.requestReturnNotificationPreference());
+				_form.parse();
 				if (option.equals("s")) {
-					_receiver.addObserver(workId.value(), userId.value());
+					_receiver.observe(userId.value(), workId.value());
 				}
 			} else {
 				throw new RuleFailedException(e.getUser(), e.getWork(), e.getRuleIndex());
