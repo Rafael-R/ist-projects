@@ -43,6 +43,10 @@ public abstract class Work implements Serializable, Observable {
         _availableCopies = copies;
     }
 
+    public int getId() {
+        return _id;
+    }
+
     public int getPrice() {
         return _price;
     }
@@ -119,5 +123,4 @@ public abstract class Work implements Serializable, Observable {
         return _id + " - " + _availableCopies + " de " + _copies + typeString() +
         _title + " - " + _price + " - " + categoryString() + " - " + infoString();
     }
-
 }

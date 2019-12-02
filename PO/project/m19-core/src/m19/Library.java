@@ -16,6 +16,8 @@ import m19.exceptions.BadEntrySpecificationException;
 import m19.exceptions.RuleVerificationException;
 import m19.exceptions.UnknownDataException;
 import m19.rules.*;
+import m19.requests.*;
+import m19.exceptions.WorkNotRequestedByUserException;
 
 /**
  * Class that represents the library as a whole.
@@ -76,6 +78,8 @@ public class Library implements Serializable {
 				registerFromFields(fields);
 			} catch (UnknownDataException e) {
 				throw new BadEntrySpecificationException(e.getData());
+			} finally {
+				reader.close();
 			}
 		}
 		reader.close();
@@ -201,10 +205,10 @@ public class Library implements Serializable {
 	 * Pay the fine of the user with the given id.
 	 * @param id User's id
 	 */
-	public void userPayFine(int id) {
-		User user = _users.get(id);
-		user.payFine();
-		user.update();
+	public void userPayFine(int userId, int workId) {
+		User user = _users.get(userId);
+		user.payFine(workId);
+		user.update(_date);
 	}
 
 
@@ -287,8 +291,23 @@ public class Library implements Serializable {
 				throw new RuleVerificationException(userId, workId, index);
 			}
 		}
-		// TODO: implement method
-		return 0;
+		int returnDay = _date + user.getReturnDays(work);
+		Request request = new Request(workId, returnDay);
+		user.addRequest(request);
+		work.requestCopie();
+		return returnDay;
+	}
+
+	public int returnWork(int userId, int workId) throws WorkNotRequestedByUserException {
+		Work work = fetchWork(workId);
+		User user = fetchUser(userId);
+		int fine = user.hasRequested(workId);
+		if (fine == -1) {
+			throw new WorkNotRequestedByUserException(workId, userId);
+		}
+		// TODO
+		work.returnCopie();
+		return fine;
 	}
 
 }

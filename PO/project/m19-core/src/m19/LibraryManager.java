@@ -132,13 +132,13 @@ public class LibraryManager {
 		return _library.getUsers();
 	}
 	
-	public void payFine(int id) throws InvalidUserIdException, UserNotSuspendedException {
-		if (_library.fetchUser(id) == null) {
-			throw new InvalidUserIdException(id);
-		} else if (_library.getUserState(id) == true) {
-			throw new UserNotSuspendedException(id);
+	public void payFine(int userId, int workId) throws InvalidUserIdException, UserNotSuspendedException {
+		if (_library.fetchUser(userId) == null) {
+			throw new InvalidUserIdException(userId);
+		} else if (_library.getUserState(userId) == true) {
+			throw new UserNotSuspendedException(userId);
 		} else {
-			_library.userPayFine(id);
+			_library.userPayFine(userId, workId);
 		}
 	}
 
@@ -187,16 +187,13 @@ public class LibraryManager {
 		return _library.requestWork(userId, workId);
 	}
 
-	public void returnWork(int userId, int workId) throws InvalidUserIdException, InvalidWorkIdException, WorkNotRequestedByUserException {
+	public int returnWork(int userId, int workId) throws InvalidUserIdException, InvalidWorkIdException, WorkNotRequestedByUserException {
 		if (_library.fetchUser(userId) == null) {
 			throw new InvalidUserIdException(userId);
 		} else if (_library.fetchWork(workId) == null) {
 			throw new InvalidWorkIdException(workId);
 		}
-		//TODO: implement method
-		if (userId == workId) {
-			throw new WorkNotRequestedByUserException(workId, userId);
-		}
+		return _library.returnWork(userId, workId);
 	}
 
 }

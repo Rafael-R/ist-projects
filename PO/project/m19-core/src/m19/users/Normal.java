@@ -8,11 +8,17 @@ public class Normal implements Classification, Serializable {
 
     private static final long serialVersionUID = 201911281653L;
 
-    private static final int MAX_RETURN_DAYS = 5;
     private static final int MAX_REQUESTS = 3;
 
     public int maxReturnDays(Work work) {
-        return MAX_RETURN_DAYS;
+        int copies = work.getCopies();
+        if (copies == 1) {
+            return 3;
+        } else if (copies > 1 && copies <= 5) {
+            return 8;
+        } else {
+            return 5;
+        }
     }
 
     public int maxRequests() {
