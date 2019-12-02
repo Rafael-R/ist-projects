@@ -6,8 +6,8 @@ boolean session = FALSE;
 
 
 int tfsMount(char * address) {
-    int status;
     struct sockaddr_un server_addr;
+    int status;
 
     if (session == TRUE) {
         return TECNICOFS_ERROR_OPEN_SESSION;
@@ -33,7 +33,6 @@ int tfsMount(char * address) {
     }
 }
 
-
 int tfsUnmount() {
     int status;
 
@@ -50,170 +49,177 @@ int tfsUnmount() {
     }
 }
 
-
 int tfsCreate(char *filename, permission ownerPermissions, permission othersPermissions) {
-    char command[INPUT_SIZE], recvline[INPUT_SIZE];
+    char message[INPUT_SIZE];
     int status;
 
     if (session == FALSE) {
         return TECNICOFS_ERROR_NO_OPEN_SESSION;
     }
-    sprintf(command, "c %s %d%d", filename, ownerPermissions, othersPermissions);
+    sprintf(message, "c %s %d%d", filename, ownerPermissions, othersPermissions);
 
-    status = send(client_socket, command, strlen(command), 0);
+    status = send(client_socket, message, strlen(message), 0);
+    if (status < 0) {
+        return TECNICOFS_ERROR_CONNECTION_ERROR;
+    }    
+    memset(message, 0, INPUT_SIZE);
+
+    status = recv(client_socket, message, INPUT_SIZE, 0);
     if (status < 0) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
+    sscanf(message, "%d", &status);
+    memset(message, 0, INPUT_SIZE);
 
-    status = recv(client_socket, recvline, INPUT_SIZE, 0);
-    if (status < 0) {
-        return TECNICOFS_ERROR_CONNECTION_ERROR;
-    }
-
-    sscanf(recvline, "%d", &status);
     return status;
 }
-
 
 int tfsDelete(char *filename) {
-    char command[INPUT_SIZE], recvline[INPUT_SIZE];
+    char message[INPUT_SIZE];
     int status;
 
     if (session == FALSE) {
         return TECNICOFS_ERROR_NO_OPEN_SESSION;
     }
-    sprintf(command, "d %s", filename);
+    sprintf(message, "d %s", filename);
 
-    status = send(client_socket, command, strlen(command), 0);
+    status = send(client_socket, message, strlen(message), 0);
     if (status < 0) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
+    memset(message, 0, INPUT_SIZE);
 
-    status = recv(client_socket, recvline, INPUT_SIZE, 0);
+    status = recv(client_socket, message, INPUT_SIZE, 0);
     if (status < 0) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
+    sscanf(message, "%d", &status);
+    memset(message, 0, INPUT_SIZE);
 
-    sscanf(recvline, "%d", &status);
     return status;
 }
-
 
 int tfsRename(char *filenameOld, char *filenameNew) {
-    char command[INPUT_SIZE], recvline[INPUT_SIZE];
+    char message[INPUT_SIZE];
     int status;
 
     if (session == FALSE) {
         return TECNICOFS_ERROR_NO_OPEN_SESSION;
     }
-    sprintf(command, "r %s %s", filenameOld, filenameNew);
+    sprintf(message, "r %s %s", filenameOld, filenameNew);
 
-    status = send(client_socket, command, strlen(command), 0);
+    status = send(client_socket, message, strlen(message), 0);
     if (status < 0) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
+    memset(message, 0, INPUT_SIZE);
 
-    status = recv(client_socket, recvline, INPUT_SIZE, 0);
+    status = recv(client_socket, message, INPUT_SIZE, 0);
     if (status < 0) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
+    sscanf(message, "%d", &status);
+    memset(message, 0, INPUT_SIZE);
 
-    sscanf(recvline, "%d", &status);
     return status;
 }
-
 
 int tfsOpen(char *filename, permission mode) {
-    char command[INPUT_SIZE], recvline[INPUT_SIZE];
+    char message[INPUT_SIZE];
     int status;
 
     if (session == FALSE) {
         return TECNICOFS_ERROR_NO_OPEN_SESSION;
     }
-    sprintf(command, "o %s %d", filename, mode);
+    sprintf(message, "o %s %d", filename, mode);
 
-    status = send(client_socket, command, strlen(command), 0);
+    status = send(client_socket, message, strlen(message), 0);
     if (status < 0) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
+    memset(message, 0, INPUT_SIZE);
 
-    status = recv(client_socket, recvline, INPUT_SIZE, 0);
+    status = recv(client_socket, message, INPUT_SIZE, 0);
     if (status < 0) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
+    sscanf(message, "%d", &status);
+    memset(message, 0, INPUT_SIZE);
 
-    sscanf(recvline, "%d", &status);
     return status;
 }
-
 
 int tfsClose(int fd) {
-    char command[INPUT_SIZE], recvline[INPUT_SIZE];
+    char message[INPUT_SIZE];
     int status;
 
     if (session == FALSE) {
         return TECNICOFS_ERROR_NO_OPEN_SESSION;
     }
-    sprintf(command, "x %d", fd);
+    sprintf(message, "x %d", fd);
 
-    status = send(client_socket, command, strlen(command), 0);
+    status = send(client_socket, message, strlen(message), 0);
     if (status < 0) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
+    memset(message, 0, INPUT_SIZE);
 
-    status = recv(client_socket, recvline, INPUT_SIZE, 0);
+    status = recv(client_socket, message, INPUT_SIZE, 0);
     if (status < 0) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
+    sscanf(message, "%d", &status);
+    memset(message, 0, INPUT_SIZE);
 
-    sscanf(recvline, "%d", &status);
     return status;
 }
-
 
 int tfsRead(int fd, char *buffer, int len) {
-    char command[INPUT_SIZE], recvline[INPUT_SIZE];
+    char message[INPUT_SIZE];
     int status;
 
     if (session == FALSE) {
         return TECNICOFS_ERROR_NO_OPEN_SESSION;
     }
-    sprintf(command, "l %d %d", fd, len-1);
+    sprintf(message, "l %d %d", fd, len-1);
 
-    status = send(client_socket, command, strlen(command), 0);
+    status = send(client_socket, message, strlen(message), 0);
     if (status < 0) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
+    memset(message, 0, INPUT_SIZE);
 
-    status = recv(client_socket, recvline, INPUT_SIZE, 0);
+    status = recv(client_socket, message, INPUT_SIZE, 0);
     if (status < 0) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
+    sscanf(message, "%d %s", &status, buffer);
+    memset(message, 0, INPUT_SIZE);
 
-    sscanf(recvline, "%d %s", &status, buffer);
     return status;
 }
 
-
 int tfsWrite(int fd, char *buffer, int len) {
-    char command[INPUT_SIZE], recvline[INPUT_SIZE];
+    char message[INPUT_SIZE];
     int status;
 
     if (session == FALSE) {
         return TECNICOFS_ERROR_NO_OPEN_SESSION;
     }
-    snprintf(command, 5+len, "w %d %s", fd, buffer);
+    snprintf(message, 5+len, "w %d %s", fd, buffer);
 
-    status = send(client_socket, command, strlen(command), 0);
+    status = send(client_socket, message, strlen(message), 0);
     if (status < 0) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
+    memset(message, 0, INPUT_SIZE);
 
-    status = recv(client_socket, recvline, INPUT_SIZE, 0);
+    status = recv(client_socket, message, INPUT_SIZE, 0);
     if (status < 0) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
+    sscanf(message, "%d", &status);
+    memset(message, 0, INPUT_SIZE);
 
-    sscanf(recvline, "%d", &status);
     return status;
 }

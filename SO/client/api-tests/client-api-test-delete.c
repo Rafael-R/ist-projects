@@ -1,3 +1,4 @@
+#include "../../tecnicofs-api-constants.h"
 #include "../tecnicofs-client-api.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,7 +10,7 @@ int main(int argc, char** argv) {
         printf("Usage: %s sock_path\n", argv[0]);
         exit(0);
     }
-
+    int fd = -1;
     assert(tfsMount(argv[1]) == 0);
     assert(tfsCreate("a", RW, READ) == 0);
 

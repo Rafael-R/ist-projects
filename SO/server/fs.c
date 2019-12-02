@@ -55,7 +55,6 @@ int deleteFile(tecnicofs* fs, uid_t client, char *name) {
 	if (iNumber != -1) {
 		sync_rdlock(&(fs->openFilesLock));
 		if (fs->openFiles[iNumber] == 0) {
-			sync_unlock(&(fs->openFilesLock));
 			uid_t owner;
 			inode_get(iNumber, &owner, NULL, NULL, NULL, 0);
 			if (client == owner) {
@@ -63,8 +62,11 @@ int deleteFile(tecnicofs* fs, uid_t client, char *name) {
 				fs->bstRoot = remove_item(fs->bstRoot, name);
 				inode_delete(iNumber);
 				sync_unlock(&(fs->bstLock));
+				sync_unlock(&(fs->openFilesLock));
 				return 0;
-			} else { return TECNICOFS_ERROR_PERMISSION_DENIED; }
+			} else {
+				sync_unlock(&(fs->openFilesLock));
+				return TECNICOFS_ERROR_PERMISSION_DENIED; }
 		} else {
 			sync_unlock(&(fs->openFilesLock));
 			return TECNICOFS_ERROR_FILE_IS_OPEN;
@@ -75,25 +77,18 @@ int deleteFile(tecnicofs* fs, uid_t client, char *name) {
 int renameFile(tecnicofs* fs, uid_t client, char *oldName, char *newName) {
 	int oldINumber = lookupFile(fs, oldName);
 	if (oldINumber != -1) {
-		sync_rdlock(&(fs->openFilesLock));
-		if (fs->openFiles[oldINumber] == 0) {
-			sync_unlock(&(fs->openFilesLock));
-			uid_t owner;
-			inode_get(oldINumber, &owner, NULL, NULL, NULL, 0);
-			if (client == owner) {
-				int newINumber = lookupFile(fs, newName);
-				if (newINumber == -1) {
-					sync_wrlock(&(fs->bstLock));
-					fs->bstRoot = remove_item(fs->bstRoot, oldName);
-					fs->bstRoot = insert(fs->bstRoot, newName, oldINumber);
-					sync_unlock(&(fs->bstLock));
-					return 0;
-				} else { return TECNICOFS_ERROR_FILE_ALREADY_EXISTS; }
-			} else { return TECNICOFS_ERROR_PERMISSION_DENIED; }
-		} else {
-			sync_unlock(&(fs->openFilesLock));
-			return TECNICOFS_ERROR_FILE_IS_OPEN;
-		}
+		uid_t owner;
+		inode_get(oldINumber, &owner, NULL, NULL, NULL, 0);
+		if (client == owner) {
+			int newINumber = lookupFile(fs, newName);
+			if (newINumber == -1) {
+				sync_wrlock(&(fs->bstLock));
+				fs->bstRoot = remove_item(fs->bstRoot, oldName);
+				fs->bstRoot = insert(fs->bstRoot, newName, oldINumber);
+				sync_unlock(&(fs->bstLock));
+				return 0;
+			} else { return TECNICOFS_ERROR_FILE_ALREADY_EXISTS; }
+		} else { return TECNICOFS_ERROR_PERMISSION_DENIED; }
 	} else { return TECNICOFS_ERROR_FILE_NOT_FOUND; }
 }
 
