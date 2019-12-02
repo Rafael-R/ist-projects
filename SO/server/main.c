@@ -27,7 +27,7 @@ static void displayUsage (const char* appName);
 void checkStatus(int status, char* message);
 static void signalHandler();
 void* sessionHandler(void* arg);
-void applyCommand(char* command, uid_t client, tempfile_t* files, char* output);
+void applyCommand(uid_t client, tempfile_t* files, char* message);
 void readTime(TIME* time);
 double getDuration(TIME start, TIME end);
 
@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
     sigemptyset (&signal_mask);
     status = pthread_sigmask(SIG_BLOCK, &signal_mask, NULL);
     if (status != 0) {
-        fprintf(stderr, "Error: sigmask");
+        fprintf(stderr, "Error: setting sigmask.");
         exit(EXIT_FAILURE);
     }
     action.sa_handler = signalHandler;
@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
     sigaction(SIGINT, &action, NULL);
 
     server_socket = socket(AF_UNIX, SOCK_STREAM, 0);
-    checkStatus(server_socket, "Error: can't open stream socket\n");
+    checkStatus(server_socket, "Error: can't open stream socket.\n");
 
     unlink(socketName);
 
@@ -66,10 +66,10 @@ int main(int argc, char* argv[]) {
     strcpy(server_addr.sun_path, socketName);
 
     status = bind(server_socket, (struct sockaddr*) &server_addr, sizeof(server_addr));
-    checkStatus(status, "Error: binding local address\n");
+    checkStatus(status, "Error: binding local address.\n");
 
     status = listen(server_socket, 10);
-    checkStatus(status, "Error: listening\n");
+    checkStatus(status, "Error: listening.\n");
 
     pthread_t* threads = (pthread_t*) malloc(sizeof(pthread_t) * MAX_CLIENTS);
 
@@ -83,14 +83,14 @@ int main(int argc, char* argv[]) {
             if(errno == EINTR) {
                 continue;
             } else {
-                fprintf(stderr, "Error: can't accept socket\n");
+                fprintf(stderr, "Error: can't accept socket.\n");
                 exit(EXIT_FAILURE);
             }
         }
 
         len = sizeof(client_data);
         status = getsockopt(client_socket, SOL_SOCKET, SO_PEERCRED, &client_data, &len);
-        checkStatus(status, "Error: reading client data\n");
+        checkStatus(status, "Error: reading client data.\n");
 
         client_t* client = (client_t*) malloc(sizeof(client_t));
         client->address = client_addr;
@@ -110,7 +110,7 @@ int main(int argc, char* argv[]) {
 
     FILE* output = fopen(outputFile, "w");
     if(!output){
-        fprintf(stderr, "Error: opening file (%s)\n", outputFile);
+        fprintf(stderr, "Error: opening file (%s).\n", outputFile);
         exit(EXIT_FAILURE);
     }
     printTecnicoFS(output, fs);
@@ -134,7 +134,7 @@ static void parseArgs (long argc, char* const argv[]) {
     numberBuckets = atoi(argv[3]);
 
     if (numberBuckets < 1) {
-        fprintf(stderr, "Error: invalid number of buckets\n");
+        fprintf(stderr, "Error: invalid number of buckets.\n");
         exit(EXIT_FAILURE);
     }
 }
@@ -152,14 +152,14 @@ void checkStatus(int status, char* message) {
 }
 
 static void signalHandler() {
-    printf("LOSING SERVER.\n");
+    printf("LOSING SERVER, WAITING FOR ALL CLIENTS TO DISCONNECT.\n");
     run = FALSE;
 }
 
 void* sessionHandler(void* arg) {
     client_t* client = (client_t*) arg;
     tempfile_t files[MAX_OPEN_FILES];
-    char recvline[INPUT_SIZE], sendline[INPUT_SIZE];
+    char message[INPUT_SIZE];
     int status;
 
     for (int i = 0; i < MAX_OPEN_FILES; i++) {
@@ -168,22 +168,22 @@ void* sessionHandler(void* arg) {
     }
 
     while (1) {
-        status = recv(client->socket, recvline, INPUT_SIZE, 0);
+        memset(message, 0, INPUT_SIZE);
+
+        status = recv(client->socket, message, INPUT_SIZE, 0);
         if (status < 0) {
-            fprintf(stderr, "Error: receiving message\n");
+            fprintf(stderr, "Error: receiving message.\n");
             exit(EXIT_FAILURE);
         } else if (status == 0) {
             break;
         }
-        printf("CLIENT[%d]: %s\n", client->uid, recvline);
 
-        applyCommand(recvline, client->uid, files, sendline);
-        memset(recvline, 0, INPUT_SIZE);
+        printf("CLIENT[%d]: %s\n", client->uid, message);
+        applyCommand(client->uid, files, message);
+        printf("SERVER->[%d]: %s\n", client->uid, message);
 
-        status = send(client->socket, sendline, strlen(sendline), 0);
-        checkStatus(status, "Error: sending message\n");
-        printf("SERVER: %s\n", sendline); // TESTE
-        memset(sendline, 0, INPUT_SIZE);
+        status = send(client->socket, message, strlen(message), 0);
+        checkStatus(status, "Error: sending message.\n");
     }
 
     close(client->socket);
@@ -191,44 +191,45 @@ void* sessionHandler(void* arg) {
     return NULL;
 }
 
-void applyCommand(char* command, uid_t client, tempfile_t files[], char* output) {
+void applyCommand(uid_t client, tempfile_t files[], char* message) {
     char token, arg1[INPUT_SIZE], arg2[INPUT_SIZE], temp[INPUT_SIZE];
     int status;
 
-    sscanf(command, "%c %s %s", &token, arg1, arg2);
+    sscanf(message, "%c %s %s", &token, arg1, arg2);
+    memset(message, 0, INPUT_SIZE);
 
     switch (token) {
         case 'c':
             status = createFile(fs, client, arg1, atoi(arg2));
-            sprintf(output, "%d", status);
+            sprintf(message, "%d", status);
             break;
         case 'd':
             status = deleteFile(fs, client, arg1);
-            sprintf(output, "%d", status);
+            sprintf(message, "%d", status);
             break;
         case 'r':
             status = renameFile(fs, client, arg1, arg2);
-            sprintf(output, "%d", status);
+            sprintf(message, "%d", status);
             break;
         case 'o':
             status = openFile(fs, files, client, arg1, atoi(arg2));
-            sprintf(output, "%d", status);
+            sprintf(message, "%d", status);
             break;
         case 'x':
             status = closeFile(fs, files, atoi(arg1));
-            sprintf(output, "%d", status);
+            sprintf(message, "%d", status);
             break;
         case 'l':
             status = readFile(files, atoi(arg1), temp, atoi(arg2));
-            sprintf(output, "%d %s", status, temp);
+            sprintf(message, "%d %s", status, temp);
             memset(temp, 0, INPUT_SIZE);
             break;
         case 'w':
             status = writeFile(files, atoi(arg1), arg2);
-            sprintf(output, "%d", status);
+            sprintf(message, "%d", status);
             break;
         default: {
-            sprintf(output, "%d", TECNICOFS_ERROR_OTHER);
+            sprintf(message, "%d", TECNICOFS_ERROR_OTHER);
             break;
         }
     }
@@ -237,7 +238,7 @@ void applyCommand(char* command, uid_t client, tempfile_t files[], char* output)
 void readTime(TIME* time) {
     int status;
     status = gettimeofday(&(*time), NULL);
-    checkStatus(status, "gettimeofday failed\n");
+    checkStatus(status, "Error: reading time.\n");
 }
 
 double getDuration(TIME start, TIME end) {
