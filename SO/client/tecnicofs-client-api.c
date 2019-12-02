@@ -69,7 +69,6 @@ int tfsCreate(char *filename, permission ownerPermissions, permission othersPerm
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
     sscanf(message, "%d", &status);
-    memset(message, 0, INPUT_SIZE);
 
     return status;
 }
@@ -94,7 +93,6 @@ int tfsDelete(char *filename) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
     sscanf(message, "%d", &status);
-    memset(message, 0, INPUT_SIZE);
 
     return status;
 }
@@ -119,7 +117,6 @@ int tfsRename(char *filenameOld, char *filenameNew) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
     sscanf(message, "%d", &status);
-    memset(message, 0, INPUT_SIZE);
 
     return status;
 }
@@ -144,7 +141,6 @@ int tfsOpen(char *filename, permission mode) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
     sscanf(message, "%d", &status);
-    memset(message, 0, INPUT_SIZE);
 
     return status;
 }
@@ -169,7 +165,6 @@ int tfsClose(int fd) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
     sscanf(message, "%d", &status);
-    memset(message, 0, INPUT_SIZE);
 
     return status;
 }
@@ -194,7 +189,6 @@ int tfsRead(int fd, char *buffer, int len) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
     sscanf(message, "%d %s", &status, buffer);
-    memset(message, 0, INPUT_SIZE);
 
     return status;
 }
@@ -219,7 +213,6 @@ int tfsWrite(int fd, char *buffer, int len) {
         return TECNICOFS_ERROR_CONNECTION_ERROR;
     }
     sscanf(message, "%d", &status);
-    memset(message, 0, INPUT_SIZE);
 
     return status;
 }

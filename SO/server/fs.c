@@ -132,33 +132,25 @@ int closeFile(tecnicofs* fs, tempfile_t files[], int fd) {
 }
 
 int readFile(tempfile_t files[], int fd, char* buffer, int len) {
-	if (files[fd].iNumber == -1) {
-		return TECNICOFS_ERROR_FILE_NOT_OPEN;
-	} else if (files[fd].mode != RW && files[fd].mode != READ) {
-		return TECNICOFS_ERROR_INVALID_MODE;
-	} else {
-		int status = inode_get(files[fd].iNumber, NULL, NULL, NULL, buffer, len);
-		if (status == -1) {
-			return TECNICOFS_ERROR_OTHER;
-		} else {
-			return status;
-		}
-	}
+	if (files[fd].iNumber != -1) {
+		if (files[fd].mode == RW || files[fd].mode == READ) {
+			int status = inode_get(files[fd].iNumber, NULL, NULL, NULL, buffer, len);
+			if (status != -1) {
+				return status;
+			} else { return TECNICOFS_ERROR_OTHER; }
+		} else { return TECNICOFS_ERROR_INVALID_MODE; }
+	} else { return TECNICOFS_ERROR_FILE_NOT_OPEN; }
 }
 
 int writeFile(tempfile_t files[], int fd, char* buffer) {
-	if (files[fd].iNumber == -1) {
-		return TECNICOFS_ERROR_FILE_NOT_OPEN;
-	} else if (files[fd].mode != RW && files[fd].mode != WRITE) {
-		return TECNICOFS_ERROR_INVALID_MODE;
-	} else {
-		int status = inode_set(files[fd].iNumber, buffer, strlen(buffer));
-		if (status == -1) {
-			return TECNICOFS_ERROR_OTHER;
-		} else {
-			return status;
-		}
-	}
+	if (files[fd].iNumber != -1) {
+		if (files[fd].mode == RW || files[fd].mode == WRITE) {
+			int status = inode_set(files[fd].iNumber, buffer, strlen(buffer));
+			if (status != -1) {
+				return status;
+			} else { return TECNICOFS_ERROR_OTHER; }
+		} else { return TECNICOFS_ERROR_INVALID_MODE; }
+	} else { return TECNICOFS_ERROR_FILE_NOT_OPEN; }
 }
 
 void printTecnicoFS(FILE * fp, tecnicofs *fs){
