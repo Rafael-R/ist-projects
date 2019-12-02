@@ -8,11 +8,10 @@ public class Faulty implements Classification, Serializable {
 
     private static final long serialVersionUID = 201911281653L;
 
-    private static final int MAX_RETURN_DAYS = 2;
-    private static final int MAX_REQUESTS = 2;
+    private static final int MAX_REQUESTS = 1;
 
     public int maxReturnDays(Work work) {
-        return MAX_RETURN_DAYS;
+        return 2;
     }
 
     public int maxRequests() {

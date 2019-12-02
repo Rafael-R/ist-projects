@@ -21,6 +21,7 @@ public class DoReturnWork extends Command<LibraryManager> {
 	private Input<Integer> userId;
 	private Input<Integer> workId;
 	private Input<String> option;
+	private int fine;
 
 	/**
 	 * @param receiver
@@ -36,11 +37,14 @@ public class DoReturnWork extends Command<LibraryManager> {
 	public final void execute() throws DialogException {
 		_form.parse();
 		try {
-			_receiver.returnWork(userId.value(), workId.value());
-			_display.popup(Message.showFine(userId.value(), _receiver.showUserFine(userId.value())));
-			option = _form.addStringInput(Message.requestFinePaymentChoice());
-			if (option.value().equals("s")) {
-				_receiver.payFine(userId.value());
+			fine = _receiver.returnWork(userId.value(), workId.value());
+			if (fine > 0) {
+				_display.popup(Message.showFine(userId.value(), _receiver.showUserFine(userId.value())));
+				option = _form.addStringInput(Message.requestFinePaymentChoice());
+				_form.parse();
+				if (option.value().equals("s")) {
+					_receiver.payFine(userId.value(), workId.value());
+				}
 			}
 		} catch (InvalidUserIdException e) {
 			throw new NoSuchUserException(e.getId());

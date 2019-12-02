@@ -50,19 +50,6 @@ public class User implements Serializable, Comparable<User>, Observer {
         return _fine;
     }
 
-    public void payFine() {
-        _state = true;
-        _fine = 0;
-    }
-
-    public void update() {
-        //TODO: update user state
-    }
-
-    public void addRequest(Request request) {
-        _requests.add(request);
-    }
-
     public String getNotifications() {
         String string = "";
         for (Notification notification : _notifications) {
@@ -70,6 +57,33 @@ public class User implements Serializable, Comparable<User>, Observer {
         }
         _notifications.clear();
         return string;
+    }
+
+    public void addRequest(Request request) {
+        _requests.add(request);
+    }
+
+    public int hasRequested(int workId){
+        for (Request request : _requests) {
+            if (request.getWorkId() == workId) {
+                return request.getFine();
+            }
+        }
+        return -1;
+    }
+
+    public void payFine(int workId) {
+        _state = true;
+        _fine = 0;
+    }
+
+    public void update(int day) {
+        _fine = 0;
+        for (Request request : _requests) {
+            request.update(day);
+            _fine += request.getFine();
+        }
+        //TODO: update user state
     }
 
     @Override

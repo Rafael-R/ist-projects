@@ -2,16 +2,18 @@ package m19.requests;
 
 public class Request {
 
-    private int _userId;
     private int _workId;
     private int _returnDay;
     private int _fine = 0;
     private boolean _state = false;
 
-    public Request(int userId, int workId, int returnDay) {
-        _userId = userId;
+    public Request(int workId, int returnDay) {
         _workId = workId;
         _returnDay = returnDay;
+    }
+
+    public int getWorkId() {
+        return _workId;
     }
 
     public int getReturnDay() {
@@ -22,11 +24,11 @@ public class Request {
         _returnDay = returnDay;
     }
 
-    public int getFineValue() {
+    public int getFine() {
         return _fine;
     }
 
-    public void setFineValue(int value) {
+    public void setFine(int value) {
         _fine = value;
     }
 
@@ -38,9 +40,9 @@ public class Request {
         _state = !_state;
     }
 
-    public void incrementFine(int date) {
-        if (_state == false && date > _returnDay) {
-            _fine += 5;
+    public void update(int day) {
+        if (day > _returnDay) {
+            _fine = (day - _returnDay) * 5;
         }
     }
 
