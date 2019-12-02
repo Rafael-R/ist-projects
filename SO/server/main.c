@@ -27,7 +27,7 @@ static void displayUsage (const char* appName);
 void checkStatus(int status, char* message);
 static void signalHandler();
 void* sessionHandler(void* arg);
-void applyCommands(char* command, uid_t client, tempfile_t* files, char* output);
+void applyCommand(char* command, uid_t client, tempfile_t* files, char* output);
 void readTime(TIME* time);
 double getDuration(TIME start, TIME end);
 
@@ -177,13 +177,13 @@ void* sessionHandler(void* arg) {
         }
         printf("CLIENT[%d]: %s\n", client->uid, recvline);
 
-        applyCommands(recvline, client->uid, files, sendline);
+        applyCommand(recvline, client->uid, files, sendline);
         memset(recvline, 0, INPUT_SIZE);
-
-        printf("SERVER: %s\n", sendline); // TESTE
 
         status = send(client->socket, sendline, strlen(sendline), 0);
         checkStatus(status, "Error: sending message\n");
+        printf("SERVER: %s\n", sendline); // TESTE
+        memset(sendline, 0, INPUT_SIZE);
     }
 
     close(client->socket);
@@ -191,7 +191,7 @@ void* sessionHandler(void* arg) {
     return NULL;
 }
 
-void applyCommands(char* command, uid_t client, tempfile_t files[], char* output) {
+void applyCommand(char* command, uid_t client, tempfile_t files[], char* output) {
     char token, arg1[INPUT_SIZE], arg2[INPUT_SIZE], temp[INPUT_SIZE];
     int status;
 
