@@ -171,12 +171,12 @@ public class LibraryManager {
 		return string;
 	}
 
-	public void addObserver(int workId, int userId) {
-		//TODO: implement method
-	}
-
 
 	// Requests functions
+
+	public void observe(int userId, int workId) {
+		_library.observe(userId, workId);
+	}
 
 	public int requestWork(int userId, int workId) throws InvalidUserIdException, InvalidWorkIdException, RuleVerificationException {
 		if (_library.fetchUser(userId) == null) {
@@ -184,11 +184,7 @@ public class LibraryManager {
 		} else if (_library.fetchWork(workId) == null) {
 			throw new InvalidWorkIdException(workId);
 		}
-		int index = _library.request(userId, workId);
-		if (index != 0) {
-			throw new RuleVerificationException(userId, workId, 3);
-		}
-		return 1;
+		return _library.requestWork(userId, workId);
 	}
 
 	public void returnWork(int userId, int workId) throws InvalidUserIdException, InvalidWorkIdException, WorkNotRequestedByUserException {

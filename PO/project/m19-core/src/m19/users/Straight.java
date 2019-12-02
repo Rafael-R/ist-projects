@@ -8,11 +8,17 @@ public class Straight implements Classification, Serializable {
 
     private static final long serialVersionUID = 201911281654L;
 
-    private static final int MAX_RETURN_DAYS = 8;
     private static final int MAX_REQUESTS = 5;
 
     public int maxReturnDays(Work work) {
-        return MAX_RETURN_DAYS;
+        int copies = work.getCopies();
+        if (copies == 1) {
+            return 8;
+        } else if (copies > 1 && copies <= 5) {
+            return 15;
+        } else {
+            return 30;
+        }
     }
 
     public int maxRequests() {

@@ -23,9 +23,7 @@ public class DoAdvanceDate extends Command<LibraryManager> {
 	@Override
 	public final void execute() {
 		_form.parse();
-		if (daysToAdvance.value() > 0) {
-			_receiver.advanceDate(daysToAdvance.value());
-		}
+		_receiver.advanceDate(daysToAdvance.value());
 	}
 
 }

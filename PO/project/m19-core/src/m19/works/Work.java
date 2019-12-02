@@ -2,6 +2,8 @@ package m19.works;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+
+import m19.users.Notification;
 import m19.users.Observer;
 
 public abstract class Work implements Serializable, Observable {
@@ -18,7 +20,7 @@ public abstract class Work implements Serializable, Observable {
     private String _title;
     private int _price;
     private Category _category;
-    private ArrayList<Observer> observers = new ArrayList<Observer>();
+    private ArrayList<Observer> _observers = new ArrayList<Observer>();
 
     public Work(int id, String title, int price, String category, int copies) {
         _id = id;
@@ -56,7 +58,13 @@ public abstract class Work implements Serializable, Observable {
 
     public void returnCopie() {
         _availableCopies++;
-        notifyObservers("ENTREGA");
+        if (_availableCopies == 1) {
+            notifyObservers("ENTREGA");
+        }
+    }
+
+    public int getCopies() {
+        return _availableCopies;
     }
 
     public boolean verifyAvailability() {
@@ -71,19 +79,21 @@ public abstract class Work implements Serializable, Observable {
         return _title.toLowerCase().contains(term.toLowerCase());
     }
 
+    @Override
     public void addObserver(Observer observer) {
-        observers.add(observer);
+        _observers.add(observer);
     }
 
+    @Override
     public void removeObserver(Observer observer) {
-        observers.remove(observer);
+        _observers.remove(observer);
     }
 
     @Override
     public void notifyObservers(String message) {
-        for (Observer observer : observers) {
-            observer.notify(message + ": " + this.toString());
-            removeObserver(observer);
+        Notification notification = new Notification(message + ": " + this.toString());
+        for (Observer observer : _observers) {
+            observer.notify(notification);
         }
     }
 
