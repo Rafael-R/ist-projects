@@ -70,19 +70,17 @@ public class Library implements Serializable {
 	 * @throws IOException
 	 */
 	void importFile(String filename) throws BadEntrySpecificationException, IOException {
-		BufferedReader reader = new BufferedReader(new FileReader(filename));
-		String line;
-  		while ((line = reader.readLine()) != null) {
-			String[] fields = line.split(":");
-			try {
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(filename));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				String[] fields = line.split(":");
 				registerFromFields(fields);
-			} catch (UnknownDataException e) {
-				throw new BadEntrySpecificationException(e.getData());
-			} finally {
-				reader.close();
 			}
+			reader.close();
+		} catch (UnknownDataException e) {
+			throw new BadEntrySpecificationException(e.getData());
 		}
-		reader.close();
 	}
 
 	/**
@@ -92,10 +90,8 @@ public class Library implements Serializable {
 	 * @see m19.Library.importFile
 	 */
 	void registerFromFields(String[] fields) throws UnknownDataException {
-
 		Pattern patternUser = Pattern.compile("^(USER)");
 		Pattern patternWork = Pattern.compile("^(DVD|BOOK)");
-
 		if (patternUser.matcher(fields[0]).matches()) {
 			registerUser(fields[1], fields[2]);
 		} else if (patternWork.matcher(fields[0]).matches()) {

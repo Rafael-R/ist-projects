@@ -45,7 +45,7 @@ public class DoRequestWork extends Command<LibraryManager> {
 			if (e.getRuleIndex() == 3) {
 				option = _form.addStringInput(Message.requestReturnNotificationPreference());
 				_form.parse();
-				if (option.equals("s")) {
+				if (option.value().equals("s")) {
 					_receiver.observe(userId.value(), workId.value());
 				}
 			} else {

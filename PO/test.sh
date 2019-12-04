@@ -36,7 +36,7 @@ for test in $testdir/*.out; do
     DIFF=$(diff -b $test_out $test_outhyp)
 
     if [ "$DIFF" != "" ]; then
-        echo -e "${RED}The output of test ${test##*/} differs from expected.${NC}"
+        echo -e "${RED}The output of test [${test##*/}] differs from expected.${NC}"
     else
         echo -e "${GREEN}The output of test [${test##*/}] matches expected.${NC}"
     fi
@@ -45,6 +45,6 @@ done
 
 # make clean
 
- rm works user 0
+ rm works user cumpridor faltoso notificacao requisicao
 
 unset CLASSPATH
