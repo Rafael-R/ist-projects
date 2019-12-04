@@ -17,7 +17,8 @@ NC='\033[0m'
 
 export CLASSPATH=$classpath
 
-# make
+make
+echo "----------------------------------------------------------------------"
 
 for test in $testdir/*.out; do
 
@@ -43,8 +44,9 @@ for test in $testdir/*.out; do
 
 done
 
-# make clean
+rm works user cumpridor faltoso notificacao requisicao
 
- rm works user cumpridor faltoso notificacao requisicao
+echo "----------------------------------------------------------------------"
+make clean
 
 unset CLASSPATH
