@@ -41,9 +41,11 @@ public class Request implements Serializable {
         _returned = !_returned;
     }
 
-    public boolean isPaid() {
-        return _paid == true;
+    public boolean isUnpaid() {
+        return _fine > 0 && _paid == false;
     }
+
+
 
     public void pay() {
         _paid = true;

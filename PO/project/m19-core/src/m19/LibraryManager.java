@@ -142,12 +142,8 @@ public class LibraryManager {
 		}
 	}
 	
-	public void payFine(int userId, int workId) throws InvalidUserIdException {
-		if (_library.fetchUser(userId) == null) {
-			throw new InvalidUserIdException(userId);
-		} else {
-			_library.userPayFine(userId, workId);
-		}
+	public void payFine(int userId, int workId) {
+		_library.userPayFine(userId, workId);
 	}
 
 

@@ -2,11 +2,12 @@ package m19.users;
 
 import java.util.List;
 
-import m19.users.*;
-import m19.works.*;
-import m19.requests.*;
+import m19.works.Work;
+import m19.requests.Request;
 
 public class Faulty extends Classification {
+
+    private static final long serialVersionUID = 201912050023L;
 
     public Faulty(User user) {
         super(user);

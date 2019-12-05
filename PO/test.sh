@@ -17,6 +17,8 @@ testdir=$1
 
 export CLASSPATH=$classpath
 
+echo "Compiling..."
+echo "-----------------------------------------------------------"
 make > /dev/null || exit 1
 
 passed=0
@@ -41,6 +43,7 @@ for test in $testdir/*.out; do
 
     if [ "$DIFF" != "" ]; then
         echo -e "${RED}The output of test [${test##*/}] differs from expected.${NC}"
+        diff -b $test_out $test_outhyp
     else
         ((passed++))
         echo -e "${GREEN}The output of test [${test##*/}] matches expected.${NC}"
@@ -49,7 +52,8 @@ for test in $testdir/*.out; do
 done
 
 echo "- Passed $passed/$total (~$(( passed * 100 / total))%)"
-
+echo "-----------------------------------------------------------"
+echo "Cleaning..."
 make clean > /dev/null
 rm works user cumpridor faltoso notificacao requisicao
 

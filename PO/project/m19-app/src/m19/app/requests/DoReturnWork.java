@@ -48,12 +48,11 @@ public class DoReturnWork extends Command<LibraryManager> {
 			choice = _form.addStringInput(Message.requestFinePaymentChoice());
 			_form.parse();
 			if (choice.value().equals("s")) {
-				try {
-					_receiver.payFine(userId.value(), workId.value());
-				} catch (InvalidUserIdException e2) {
-					throw new NoSuchUserException(e2.getId());
-				}
+				_receiver.payFine(userId.value(), workId.value());
 			}
+			_form.clear();
+			userId = _form.addIntegerInput(Message.requestUserId());
+			workId = _form.addIntegerInput(Message.requestWorkId());
 		}
 	}
 }

@@ -83,17 +83,14 @@ public abstract class Work implements Serializable, Observable {
         return _title.toLowerCase().contains(term.toLowerCase());
     }
 
-    @Override
     public void addObserver(Observer observer) {
         _observers.add(observer);
     }
 
-    @Override
     public void removeObserver(Observer observer) {
         _observers.remove(observer);
     }
 
-    @Override
     public void notifyObservers(String message) {
         Notification notification = new Notification(message + ": " + this.toString());
         for (Observer observer : _observers) {
