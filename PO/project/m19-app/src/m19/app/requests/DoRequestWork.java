@@ -48,6 +48,9 @@ public class DoRequestWork extends Command<LibraryManager> {
 				if (choice.value().equals("s")) {
 					_receiver.observe(e.getUser(), e.getWork());
 				}
+				_form.clear();
+				userId = _form.addIntegerInput(Message.requestUserId());
+				workId = _form.addIntegerInput(Message.requestWorkId());
 			} else {
 				throw new RuleFailedException(e.getUser(), e.getWork(), e.getRuleIndex());
 			}

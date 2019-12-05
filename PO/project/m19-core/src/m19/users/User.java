@@ -111,11 +111,18 @@ public class User implements Serializable, Comparable<User>, Observer {
         }
     }
 
+    public void suspend() {
+        _state = false;
+    }
+
     public void update(int day) {
         _fine = 0;
         for (Request request : _requests) {
             request.update(day);
             _fine += request.getFine();
+            if (request.isUnpaid()) {
+                this.suspend();
+            }
         }
         if (this.getClassification().equals("NORAML") && _requests.size() >= 5) {
             _classification.update();
@@ -137,13 +144,11 @@ public class User implements Serializable, Comparable<User>, Observer {
         }
     }
 
-    @Override
     public void subscribe(Observable observable) {
         _observables.add(observable);
         observable.addObserver(this);
     }
 
-    @Override
     public void unsubscribeAll() {
         for (Observable observable : _observables) {
             observable.removeObserver(this);
@@ -151,7 +156,6 @@ public class User implements Serializable, Comparable<User>, Observer {
         _observables.clear();
     }
 
-    @Override
     public void notify(Notification notification) {
         _notifications.add(notification);
     }
