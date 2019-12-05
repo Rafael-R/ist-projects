@@ -1,6 +1,10 @@
 package m19.users;
 
-public class Notification {
+import java.io.Serializable;
+
+public class Notification implements Serializable {
+
+    private static final long serialVersionUID = 201912042212L;
     
     private String _message;
 

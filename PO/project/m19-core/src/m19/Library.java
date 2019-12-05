@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import m19.users.*;
 import m19.works.*;
 import m19.exceptions.BadEntrySpecificationException;
+import m19.exceptions.FineToPayException;
 import m19.exceptions.RuleVerificationException;
 import m19.exceptions.UnknownDataException;
 import m19.rules.*;
@@ -118,6 +119,14 @@ public class Library implements Serializable {
 	public void advanceDate(int daysToAdvance) {
 		if(daysToAdvance > 0) {
 			_date += daysToAdvance;
+			this.update(_date);
+		}
+	}
+
+
+	public void update(int day) {
+		for (Map.Entry<Integer, User> entry : _users.entrySet()) {
+			entry.getValue().update(day);
 		}
 	}
 
@@ -195,6 +204,16 @@ public class Library implements Serializable {
 	 */
 	public int getUserFine(int id) {
 		return _users.get(id).getFine();
+	}
+
+	/**
+	 * Pay the fine of the user with the given id.
+	 * @param id User's id
+	 */
+	public void userPayFine(int userId) {
+		User user = _users.get(userId);
+		user.payFine();
+		user.update(_date);
 	}
 
 	/**
@@ -294,16 +313,18 @@ public class Library implements Serializable {
 		return returnDay;
 	}
 
-	public int returnWork(int userId, int workId) throws WorkNotRequestedByUserException {
+	public void returnWork(int userId, int workId) throws WorkNotRequestedByUserException, FineToPayException {
 		Work work = fetchWork(workId);
 		User user = fetchUser(userId);
-		int fine = user.hasRequested(workId);
-		if (fine == -1) {
+		Request request = user.hasRequested(workId);
+		if (request == null) {
 			throw new WorkNotRequestedByUserException(workId, userId);
 		}
-		// TODO
+		request.changeState();
 		work.returnCopie();
-		return fine;
+		if (request.getFine() > 0) {
+			throw new FineToPayException(request.getFine());
+		}
 	}
 
 }

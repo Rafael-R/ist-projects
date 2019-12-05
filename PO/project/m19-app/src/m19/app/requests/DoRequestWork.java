@@ -18,8 +18,7 @@ public class DoRequestWork extends Command<LibraryManager> {
 
 	private Input<Integer> userId;
 	private Input<Integer> workId;
-	private Input<String> option;
-	private int returnDay;
+	private Input<String> choice;
 
 	/**
 	 * @param receiver
@@ -35,7 +34,7 @@ public class DoRequestWork extends Command<LibraryManager> {
 	public final void execute() throws DialogException {
 		_form.parse();
 		try {
-			returnDay = _receiver.requestWork(userId.value(), workId.value());
+			int returnDay = _receiver.requestWork(userId.value(), workId.value());
 			_display.popup(Message.workReturnDay(workId.value(), returnDay));
 		} catch (InvalidUserIdException e) {
 			throw new NoSuchUserException(e.getId());
@@ -43,10 +42,11 @@ public class DoRequestWork extends Command<LibraryManager> {
 			throw new NoSuchWorkException(e.getId());
 		} catch (RuleVerificationException e) {
 			if (e.getRuleIndex() == 3) {
-				option = _form.addStringInput(Message.requestReturnNotificationPreference());
+				_form.clear();
+				choice = _form.addStringInput(Message.requestReturnNotificationPreference());
 				_form.parse();
-				if (option.value().equals("s")) {
-					_receiver.observe(userId.value(), workId.value());
+				if (choice.value().equals("s")) {
+					_receiver.observe(e.getUser(), e.getWork());
 				}
 			} else {
 				throw new RuleFailedException(e.getUser(), e.getWork(), e.getRuleIndex());

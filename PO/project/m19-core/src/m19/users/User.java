@@ -17,10 +17,10 @@ public class User implements Serializable, Comparable<User>, Observer {
     private String _name;
     private String _email;
     private boolean _state = true;
-    private Classification _classification = new Normal();
+    private Classification _classification = new Normal(this);
     private int _fine = 0;
     private List<Request> _requests = new ArrayList<Request>();
-    private ArrayList<Observable> _observables = new ArrayList<Observable>();
+    private List<Observable> _observables = new ArrayList<Observable>();
     private List<Notification> _notifications = new ArrayList<Notification>();
 
 
@@ -42,8 +42,16 @@ public class User implements Serializable, Comparable<User>, Observer {
         return _classification.toString();
     }
 
+    public void setClassification(Classification classification) {
+        _classification = classification;
+    }
+
     public int getReturnDays(Work work) {
         return _classification.maxReturnDays(work);
+    }
+
+    public int getMaxRequests() {
+        return _classification.maxRequests();
     }
 
     public int getFine() {
@@ -59,22 +67,48 @@ public class User implements Serializable, Comparable<User>, Observer {
         return string;
     }
 
+    public List<Request> getRequests() {
+        return _requests;
+    }
+
     public void addRequest(Request request) {
         _requests.add(request);
     }
 
-    public int hasRequested(int workId){
+    public Request hasRequested(int workId){
         for (Request request : _requests) {
-            if (request.getWorkId() == workId) {
-                return request.getFine();
+            if (request.getWorkId() == workId && !request.isReturned()) {
+                return request;
             }
         }
-        return -1;
+        return null;
+    }
+
+    public int getActiveRequests() {
+        int count = 0;
+        for (Request request : _requests) {
+            if (request.isReturned() == false) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public void payFine() {
+        for (Request request : _requests) {
+            if (request.isReturned()) {
+                request.pay();
+            }
+        }
+        _state = true;
     }
 
     public void payFine(int workId) {
-        _state = true;
-        _fine = 0;
+        for (Request request : _requests) {
+            if (request.getWorkId() == workId) {
+                request.pay();
+            }
+        }
     }
 
     public void update(int day) {
@@ -83,7 +117,15 @@ public class User implements Serializable, Comparable<User>, Observer {
             request.update(day);
             _fine += request.getFine();
         }
-        //TODO: update user state
+        if (this.getClassification().equals("NORAML") && _requests.size() >= 5) {
+            _classification.update();
+        }
+        if (this.getClassification().equals("CUMPRIDOR") && _requests.size() >= 3) {
+            _classification.update();
+        }
+        if (this.getClassification().equals("FALTOSO") && _requests.size() >= 3) {
+            _classification.update();
+        }
     }
 
     @Override
@@ -122,7 +164,7 @@ public class User implements Serializable, Comparable<User>, Observer {
         if (_state == true) {
             string += "ACTIVO";
         } else {
-            string += "SUSPENSO" + " - EUR " + _fine;
+            string += "SUSPENSO - EUR " + _fine;
         }
         return string;
     }
