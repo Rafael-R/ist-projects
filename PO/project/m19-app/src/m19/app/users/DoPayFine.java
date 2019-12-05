@@ -29,7 +29,7 @@ public class DoPayFine extends Command<LibraryManager> {
 	public final void execute() throws DialogException {
 		_form.parse();
 		try {
-			_receiver.payFine(id.value(), 0);
+			_receiver.payFine(id.value());
 		} catch (InvalidUserIdException e) {
 			throw new NoSuchUserException(e.getId());
 		} catch (UserNotSuspendedException e) {

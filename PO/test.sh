@@ -17,8 +17,10 @@ NC='\033[0m'
 
 export CLASSPATH=$classpath
 
-make
-echo "----------------------------------------------------------------------"
+make > /dev/null || exit 1
+
+passed=0
+total=0
 
 for test in $testdir/*.out; do
 
@@ -34,19 +36,21 @@ for test in $testdir/*.out; do
         java -Din=$test_in -Dout=$test_outhyp m19.app.App
     fi
 
+    ((total++))
     DIFF=$(diff -b $test_out $test_outhyp)
 
     if [ "$DIFF" != "" ]; then
         echo -e "${RED}The output of test [${test##*/}] differs from expected.${NC}"
     else
+        ((passed++))
         echo -e "${GREEN}The output of test [${test##*/}] matches expected.${NC}"
     fi
 
 done
 
-rm works user cumpridor faltoso notificacao requisicao
+echo "- Passed $passed/$total ($(( passed * 100 / total))%)"
 
-echo "----------------------------------------------------------------------"
-make clean
+make clean > /dev/null
+rm works user cumpridor faltoso notificacao requisicao
 
 unset CLASSPATH

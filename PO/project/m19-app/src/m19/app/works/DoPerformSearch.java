@@ -23,8 +23,7 @@ public class DoPerformSearch extends Command<LibraryManager> {
 	@Override
 	public final void execute() {
 		_form.parse();
-		_display.addLine(_receiver.performSearch(term.value()));
-		_display.display();
+		_display.popup(_receiver.performSearch(term.value()));
 	}
   
 }

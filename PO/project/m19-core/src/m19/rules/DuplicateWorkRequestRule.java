@@ -9,7 +9,7 @@ public class DuplicateWorkRequestRule implements Rule {
 
     @Override
     public boolean verify(Work work, User user) {
-        return true;
+        return user.hasRequested(work.getId()) == null;
     }
 
 }

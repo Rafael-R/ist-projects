@@ -7,31 +7,31 @@ public class WorkNotRequestedByUserException extends Exception {
 	static final long serialVersionUID = 200510291601L;
 
 	/** Bad work id. */
-    private int _idWork;
+    private int _workId;
     
 	/** Bad user id. */
-	private int _idUser;
+	private int _userId;
 
 	/**
-	 * @param idWork
-	 * @param idUser
+	 * @param workId
+	 * @param userId
 	 */
-	public WorkNotRequestedByUserException(int idWork, int idUser) {
-		_idWork = idWork;
-		_idUser = idUser;
+	public WorkNotRequestedByUserException(int workId, int userId) {
+		_workId = workId;
+		_userId = userId;
     }
      
     /**
      * @return work id
      */
     public int getWork() {
-        return _idWork;
+        return _workId;
     }
     
     /**
      * @return user id
      */
     public int getUser() {
-        return _idUser;
+        return _userId;
     }
 }

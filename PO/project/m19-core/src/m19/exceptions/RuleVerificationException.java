@@ -7,22 +7,22 @@ public class RuleVerificationException extends Exception {
 	static final long serialVersionUID = 200510291601L;
 
 	/** User id. */
-	int _idUser;
+	int _userId;
 
 	/** Work id. */
-	int _idWork;
+	int _workId;
 
 	/** Index of failed rule. */
 	int _ruleIndex = -1;
 
 	/**
-	 * @param idUser
-	 * @param idWork
+	 * @param userId
+	 * @param workId
 	 * @param ruleIndex
 	 */
-	public RuleVerificationException(int idUser, int idWork, int ruleIndex) {
-		_idUser = idUser;
-		_idWork = idWork;
+	public RuleVerificationException(int userId, int workId, int ruleIndex) {
+		_userId = userId;
+		_workId = workId;
 		_ruleIndex = ruleIndex;
 	}
 
@@ -30,14 +30,14 @@ public class RuleVerificationException extends Exception {
 	 * @return user id
 	 */
 	public int getUser() {
-		return _idUser;
+		return _userId;
 	}
 	
 	/**
 	 * @return work id
 	 */
 	public int getWork() {
-		return _idWork;
+		return _workId;
 	}
 
 	/**

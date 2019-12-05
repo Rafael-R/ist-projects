@@ -9,7 +9,8 @@ public class Request implements Serializable {
     private int _workId;
     private int _returnDay;
     private int _fine = 0;
-    private boolean _state = false;
+    private boolean _returned = false;
+    private boolean _paid = false;
 
     public Request(int workId, int returnDay) {
         _workId = workId;
@@ -32,16 +33,20 @@ public class Request implements Serializable {
         return _fine;
     }
 
-    public void setFine(int value) {
-        _fine = value;
-    }
-
-    public boolean getState() {
-        return _state;
+    public boolean isReturned() {
+        return _returned;
     }
 
     public void changeState() {
-        _state = !_state;
+        _returned = !_returned;
+    }
+
+    public boolean isPaid() {
+        return _paid == true;
+    }
+
+    public void pay() {
+        _paid = true;
     }
 
     public void update(int day) {
@@ -51,7 +56,7 @@ public class Request implements Serializable {
     }
 
     public boolean verifyReturn() {
-        if (_state == true && _fine == 0) {
+        if (_returned == true && _fine == 0) {
             return true;
         } else {
             return false;
