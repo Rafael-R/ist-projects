@@ -18,7 +18,6 @@ public class User implements Serializable, Comparable<User>, Observer {
     private String _email;
     private boolean _active = true;
     private Classification _classification = new Normal(this);
-    private List<Observable> _observables = new ArrayList<Observable>();
     private List<Notification> _notifications = new ArrayList<Notification>();
     private int _fine = 0;
     private List<Request> _requests = new ArrayList<Request>();
@@ -112,16 +111,19 @@ public class User implements Serializable, Comparable<User>, Observer {
     }
 
     public void update(int day) {
-        int counter = 0;
         _fine = 0;
+        _active = true;
         for (Request request : _requests) {
-            counter += request.update(day);
-            _fine += request.getFine();
-        }
-        if (counter > 0) {
-            _active = false;
+            if (!request.status(day)) {
+                _fine += request.getFine();
+                _active = false;
+            }
         }
         _classification.update(_requests);
+    }
+
+    public void update(Notification notification) {
+        _notifications.add(notification);
     }
 
     @Override
@@ -131,22 +133,6 @@ public class User implements Serializable, Comparable<User>, Observer {
         } else {
             return this._name.compareTo(other._name);
         }
-    }
-
-    public void subscribe(Observable observable) {
-        _observables.add(observable);
-        observable.addObserver(this);
-    }
-
-    public void unsubscribeAll() {
-        for (Observable observable : _observables) {
-            observable.removeObserver(this);
-        }
-        _observables.clear();
-    }
-
-    public void notify(Notification notification) {
-        _notifications.add(notification);
     }
 
     @Override

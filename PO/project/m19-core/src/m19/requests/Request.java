@@ -11,6 +11,7 @@ public class Request implements Serializable {
     private int _fine = 0;
     private boolean _returned = false;
     private boolean _paid = false;
+    private boolean _suspended = false;
 
     public Request(int workId, int returnDay) {
         _workId = workId;
@@ -26,19 +27,18 @@ public class Request implements Serializable {
     }
 
     public int getFine() {
-        if (_paid == true) {
-            return 0;
-        } else {
-            return _fine;
-        }
+        return _fine;
     }
 
     public boolean isReturned() {
         return _returned;
     }
 
-    public void setReturned() {
+    public void setReturned(int day) {
         _returned = true;
+        if (day > _returnDay) {
+            _fine = (day - _returnDay) * 5;
+        }
         if (_fine == 0) {
             _paid = true;
         }
@@ -52,18 +52,17 @@ public class Request implements Serializable {
         _paid = true;
     }
 
-    public int update(int day) {
-        if (day > _returnDay) {
-            if (_returned == true && _paid == false) {
-                return 1;
-            } else if (_returned == false) {
-                _fine = (day - _returnDay) * 5;
-                return 1;
-            } else {
-                return 0;
-            }
+    public boolean status(int day) {
+        if ((day > _returnDay && _returned == false) || 
+            (_returned == true && _paid == false)) {
+            _suspended = true;
+            return false;
         } else {
-            return 0;
+            return true;
         }
+    }
+
+    public boolean getStatus() {
+        return _suspended;
     }
 }

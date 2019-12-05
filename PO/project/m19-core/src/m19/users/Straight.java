@@ -33,7 +33,7 @@ public class Straight extends Classification {
             int faults = 0;
             for (int i = requests.size() - 3; i < requests.size(); i++) {
                 Request request = requests.get(i);
-                if (request.getFine() > 0) {
+                if (request.getStatus()) {
                     faults++;
                 }
             }
