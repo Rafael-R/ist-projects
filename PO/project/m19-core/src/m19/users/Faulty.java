@@ -33,7 +33,7 @@ public class Faulty extends Classification {
             int counter = 0;
             for (int i = requests.size() - 3; i < requests.size(); i++) {
                 Request request = requests.get(i);
-                if (request.getFine() == 0 && request.isReturned()) {
+                if (!request.getStatus() && request.isReturned()) {
                     counter++;
                 }
             }

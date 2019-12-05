@@ -57,12 +57,13 @@ public abstract class Work implements Serializable, Observable {
 
     public void requestCopie() {
         _availableCopies--;
-        notifyObservers("REQUISIÇÃO");
+        notify("REQUISIÇÃO");
     }
 
     public void returnCopie() {
         _availableCopies++;
-        notifyObservers("ENTREGA");
+        notify("ENTREGA");
+        _observers.clear();
     }
 
     public int getCopies() {
@@ -89,10 +90,10 @@ public abstract class Work implements Serializable, Observable {
         _observers.remove(observer);
     }
 
-    public void notifyObservers(String message) {
-        Notification notification = new Notification(message + ": " + this.toString());
+    public void notify(String type) {
+        Notification notification = new Notification(type + ": " + this.toString());
         for (Observer observer : _observers) {
-            observer.notify(notification);
+            observer.update(notification);
         }
     }
 

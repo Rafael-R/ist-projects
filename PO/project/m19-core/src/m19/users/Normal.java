@@ -33,10 +33,10 @@ public class Normal extends Classification {
             int counter = 0, faults = 0;
             for (int i = requests.size() - 5; i < requests.size(); i++) {
                 Request request = requests.get(i);
-                if (request.getFine() == 0 && request.isReturned()) {
+                if (!request.getStatus() && request.isReturned()) {
                     counter++;
                 }
-                if (request.getFine() > 0 && i >= requests.size() - 3) {
+                if (request.getStatus() && i >= requests.size() - 3) {
                     faults++;
                 }
             }

@@ -35,7 +35,7 @@ public class Library implements Serializable {
 	private int _workId = 0;
 
 	/** Current date */
-	private int _date = 0;
+	private int _day = 0;
 
 	/** Users registered in the library */
 	private Map<Integer, User> _users = new TreeMap<Integer, User>();
@@ -109,7 +109,7 @@ public class Library implements Serializable {
 	 * @return current date
 	 */
 	public int getDate() {
-		return _date;
+		return _day;
 	}
 
 	/**
@@ -118,7 +118,7 @@ public class Library implements Serializable {
 	 */
 	public void advanceDate(int daysToAdvance) {
 		if(daysToAdvance > 0) {
-			_date += daysToAdvance;
+			_day += daysToAdvance;
 			this.update();
 		}
 	}
@@ -126,7 +126,7 @@ public class Library implements Serializable {
 
 	public void update() {
 		for (Map.Entry<Integer, User> entry : _users.entrySet()) {
-			entry.getValue().update(_date);
+			entry.getValue().update(_day);
 		}
 	}
 
@@ -212,7 +212,7 @@ public class Library implements Serializable {
 	public void userPayFine(int userId) {
 		User user = _users.get(userId);
 		user.payFine();
-		user.update(_date);
+		user.update(_day);
 	}
 
 	/**
@@ -222,7 +222,7 @@ public class Library implements Serializable {
 	public void userPayFine(int userId, int workId) {
 		User user = _users.get(userId);
 		user.payFine(workId);
-		user.update(_date);
+		user.update(_day);
 	}
 
 
@@ -286,7 +286,7 @@ public class Library implements Serializable {
 	public void observe(int userId, int workId) {
 		User user = fetchUser(userId);
 		Work work = fetchWork(workId);
-		user.subscribe(work);
+		work.addObserver(user);
 	}
 
 	/**
@@ -305,7 +305,7 @@ public class Library implements Serializable {
 				throw new RuleVerificationException(userId, workId, index);
 			}
 		}
-		int returnDay = _date + user.getReturnDays(work);
+		int returnDay = _day + user.getReturnDays(work);
 		Request request = new Request(workId, returnDay);
 		work.requestCopie();
 		user.addRequest(request);
@@ -320,8 +320,8 @@ public class Library implements Serializable {
 			throw new WorkNotRequestedByUserException(workId, userId);
 		}
 		work.returnCopie();
-		request.setReturned();
-		user.update(_date);
+		request.setReturned(_day);
+		user.update(_day);
 		if (!request.isPaid()) {
 			throw new FineToPayException(request.getFine());
 		}
