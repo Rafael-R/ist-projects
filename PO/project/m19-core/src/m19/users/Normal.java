@@ -17,7 +17,7 @@ public class Normal extends Classification {
         int copies = work.getCopies();
         if (copies == 1) {
             return 3;
-        } else if (copies > 1 && copies <= 5) {
+        } else if (copies <= 5) {
             return 8;
         } else {
             return 15;
@@ -28,22 +28,23 @@ public class Normal extends Classification {
         return 3;
     }
 
-    public void update() {
-        List<Request> requests = _user.getRequests();
-        int straight_faults = 0, faulty_faults = 0;
-        for (int i = requests.size() - 5; i < requests.size(); i++) {
-            Request request = requests.get(i);
-            if (request.getFine() > 0) {
-                straight_faults++;
+    public void update(List<Request> requests) {
+        if (requests.size() >= 5) {
+            int counter = 0, faults = 0;
+            for (int i = requests.size() - 5; i < requests.size(); i++) {
+                Request request = requests.get(i);
+                if (request.getFine() == 0 && request.isReturned()) {
+                    counter++;
+                }
+                if (request.getFine() > 0 && i >= requests.size() - 3) {
+                    faults++;
+                }
             }
-            if (request.getFine() > 0 && i > requests.size() - 3) {
-                faulty_faults++;
+            if (counter == 5) {
+                _user.setClassification(new Straight(_user));
+            } else if (faults == 3) {
+                _user.setClassification(new Faulty(_user));
             }
-        }
-        if (straight_faults == 0) {
-            _user.setClassification(new Straight(_user));
-        } else if (faulty_faults == 3) {
-            _user.setClassification(new Faulty(_user));
         }
     }
 

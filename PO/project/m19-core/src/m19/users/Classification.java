@@ -1,8 +1,10 @@
 package m19.users;
 
 import java.io.Serializable;
+import java.util.List;
 
 import m19.works.Work;
+import m19.requests.Request;
 
 public abstract class Classification implements Serializable {
 
@@ -18,5 +20,5 @@ public abstract class Classification implements Serializable {
 
     public abstract int maxRequests();
 
-    public abstract void update();
+    public abstract void update(List<Request> requests);
 }

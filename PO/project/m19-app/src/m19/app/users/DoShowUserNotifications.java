@@ -27,7 +27,8 @@ public class DoShowUserNotifications extends Command<LibraryManager> {
 	public final void execute() throws DialogException {
 		_form.parse();
 		try {
-			_display.popup(_receiver.showUserNotifications(id.value()));
+			String notifications = _receiver.showUserNotifications(id.value());
+			_display.popup(notifications);
 		} catch (InvalidUserIdException e) {
 			throw new NoSuchUserException(e.getId());
 		}

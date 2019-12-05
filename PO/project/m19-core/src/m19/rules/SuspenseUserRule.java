@@ -9,7 +9,7 @@ public class SuspenseUserRule implements Rule {
 
     @Override
     public boolean verify(Work work, User user) {
-        return user.getState();
+        return user.isActive();
     }
     
 }

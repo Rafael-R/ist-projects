@@ -25,43 +25,45 @@ public class Request implements Serializable {
         return _returnDay;
     }
 
-    public void setReturnDay(int returnDay) {
-        _returnDay = returnDay;
-    }
-
     public int getFine() {
-        return _fine;
+        if (_paid == true) {
+            return 0;
+        } else {
+            return _fine;
+        }
     }
 
     public boolean isReturned() {
         return _returned;
     }
 
-    public void changeState() {
-        _returned = !_returned;
-    }
-
-    public boolean isUnpaid() {
-        return _fine > 0 && _paid == false;
-    }
-
-
-
-    public void pay() {
-        _paid = true;
-    }
-
-    public void update(int day) {
-        if (day > _returnDay) {
-            _fine = (day - _returnDay) * 5;
+    public void setReturned() {
+        _returned = true;
+        if (_fine == 0) {
+            _paid = true;
         }
     }
 
-    public boolean verifyReturn() {
-        if (_returned == true && _fine == 0) {
-            return true;
+    public boolean isPaid() {
+        return _paid;
+    }
+
+    public void setPaid() {
+        _paid = true;
+    }
+
+    public int update(int day) {
+        if (day > _returnDay) {
+            if (_returned == true && _paid == false) {
+                return 1;
+            } else if (_returned == false) {
+                _fine = (day - _returnDay) * 5;
+                return 1;
+            } else {
+                return 0;
+            }
         } else {
-            return false;
+            return 0;
         }
     }
 }

@@ -119,14 +119,14 @@ public class Library implements Serializable {
 	public void advanceDate(int daysToAdvance) {
 		if(daysToAdvance > 0) {
 			_date += daysToAdvance;
-			this.update(_date);
+			this.update();
 		}
 	}
 
 
-	public void update(int day) {
+	public void update() {
 		for (Map.Entry<Integer, User> entry : _users.entrySet()) {
-			entry.getValue().update(day);
+			entry.getValue().update(_date);
 		}
 	}
 
@@ -177,7 +177,6 @@ public class Library implements Serializable {
 	 * @return User's notifications
 	 */
 	public String getUserNotifications(int id) {
-		_users.get(id).unsubscribeAll();
 		return _users.get(id).getNotifications();
 	}
 
@@ -187,7 +186,7 @@ public class Library implements Serializable {
 	 * @return User's state
 	 */
 	public boolean getUserState(int id) {
-		return _users.get(id).getState();
+		return _users.get(id).isActive();
 	}
 
 	/**
@@ -308,8 +307,8 @@ public class Library implements Serializable {
 		}
 		int returnDay = _date + user.getReturnDays(work);
 		Request request = new Request(workId, returnDay);
-		user.addRequest(request);
 		work.requestCopie();
+		user.addRequest(request);
 		return returnDay;
 	}
 
@@ -320,9 +319,10 @@ public class Library implements Serializable {
 		if (request == null) {
 			throw new WorkNotRequestedByUserException(workId, userId);
 		}
-		request.changeState();
 		work.returnCopie();
-		if (request.getFine() > 0) {
+		request.setReturned();
+		user.update(_date);
+		if (!request.isPaid()) {
 			throw new FineToPayException(request.getFine());
 		}
 	}

@@ -62,13 +62,11 @@ public abstract class Work implements Serializable, Observable {
 
     public void returnCopie() {
         _availableCopies++;
-        if (_availableCopies == 1) {
-            notifyObservers("ENTREGA");
-        }
+        notifyObservers("ENTREGA");
     }
 
     public int getCopies() {
-        return _availableCopies;
+        return _copies;
     }
 
     public boolean verifyAvailability() {

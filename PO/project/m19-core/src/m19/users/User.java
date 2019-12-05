@@ -16,12 +16,12 @@ public class User implements Serializable, Comparable<User>, Observer {
     private int _id;
     private String _name;
     private String _email;
-    private boolean _state = true;
+    private boolean _active = true;
     private Classification _classification = new Normal(this);
-    private int _fine = 0;
-    private List<Request> _requests = new ArrayList<Request>();
     private List<Observable> _observables = new ArrayList<Observable>();
     private List<Notification> _notifications = new ArrayList<Notification>();
+    private int _fine = 0;
+    private List<Request> _requests = new ArrayList<Request>();
 
 
     public User(int id, String name, String email) {
@@ -30,12 +30,16 @@ public class User implements Serializable, Comparable<User>, Observer {
         _email = email;
     }
 
-    public boolean getState() {
-        return _state;
+    public boolean isActive() {
+        return _active;
     }
 
-    public void setState(boolean state) {
-        _state = state;
+    public void setActive() {
+        _active = true;
+    }
+
+    public void suspend() {
+        _active = false;
     }
 
     public String getClassification() {
@@ -54,10 +58,6 @@ public class User implements Serializable, Comparable<User>, Observer {
         return _classification.maxRequests();
     }
 
-    public int getFine() {
-        return _fine;
-    }
-
     public String getNotifications() {
         String string = "";
         for (Notification notification : _notifications) {
@@ -66,9 +66,26 @@ public class User implements Serializable, Comparable<User>, Observer {
         _notifications.clear();
         return string;
     }
+    
+    public int getFine() {
+        return _fine;
+    }
 
-    public List<Request> getRequests() {
-        return _requests;
+    public void payFine() {
+        for (Request request : _requests) {
+            if (request.isReturned()) {
+                request.setPaid();
+            }
+        }
+        _active = true;
+    }
+
+    public void payFine(int workId) {
+        for (Request request : _requests) {
+            if (request.getWorkId() == workId) {
+                request.setPaid();
+            }
+        }
     }
 
     public void addRequest(Request request) {
@@ -94,45 +111,17 @@ public class User implements Serializable, Comparable<User>, Observer {
         return count;
     }
 
-    public void payFine() {
-        for (Request request : _requests) {
-            if (request.isReturned()) {
-                request.pay();
-            }
-        }
-        _state = true;
-    }
-
-    public void payFine(int workId) {
-        for (Request request : _requests) {
-            if (request.getWorkId() == workId) {
-                request.pay();
-            }
-        }
-    }
-
-    public void suspend() {
-        _state = false;
-    }
-
     public void update(int day) {
+        int counter = 0;
         _fine = 0;
         for (Request request : _requests) {
-            request.update(day);
+            counter += request.update(day);
             _fine += request.getFine();
-            if (request.isUnpaid()) {
-                this.suspend();
-            }
         }
-        if (this.getClassification().equals("NORAML") && _requests.size() >= 5) {
-            _classification.update();
+        if (counter > 0) {
+            _active = false;
         }
-        if (this.getClassification().equals("CUMPRIDOR") && _requests.size() >= 3) {
-            _classification.update();
-        }
-        if (this.getClassification().equals("FALTOSO") && _requests.size() >= 3) {
-            _classification.update();
-        }
+        _classification.update(_requests);
     }
 
     @Override
@@ -165,7 +154,7 @@ public class User implements Serializable, Comparable<User>, Observer {
         String string =  _id + " - " + _name + " - " + _email + " - " +
                          _classification + " - ";
 
-        if (_state == true) {
+        if (_active == true) {
             string += "ACTIVO";
         } else {
             string += "SUSPENSO - EUR " + _fine;
