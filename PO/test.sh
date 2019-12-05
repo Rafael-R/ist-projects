@@ -2,6 +2,9 @@
 # Shell Script
 # Projeto de Programação com Objetos 2019/2020
 
+NC='\033[0m'
+RED='\033[0;31m'
+GREEN='\033[1;32m'
 classpath="po-uuilib/po-uuilib.jar:project/m19-core/m19-core.jar:project/m19-app/m19-app.jar"
 
 if [ $# != 1 ] ; then
@@ -10,10 +13,7 @@ if [ $# != 1 ] ; then
     exit 1
 fi
 
-testdir="$1"
-RED='\033[0;31m'
-GREEN='\033[1;32m'
-NC='\033[0m'
+testdir=$1
 
 export CLASSPATH=$classpath
 
@@ -48,7 +48,7 @@ for test in $testdir/*.out; do
 
 done
 
-echo "- Passed $passed/$total ($(( passed * 100 / total))%)"
+echo "- Passed $passed/$total (~$(( passed * 100 / total))%)"
 
 make clean > /dev/null
 rm works user cumpridor faltoso notificacao requisicao
