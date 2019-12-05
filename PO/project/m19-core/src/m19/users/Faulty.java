@@ -14,24 +14,32 @@ public class Faulty extends Classification {
     }
 
     public int maxReturnDays(Work work) {
-        return 2;
+        int copies = work.getCopies();
+        if (copies == 1) {
+            return 2;
+        } else if (copies <= 5) {
+            return 2;
+        } else {
+            return 2;
+        }
     }
 
     public int maxRequests() {
         return 1;
     }
 
-    public void update() {
-        List<Request> requests = _user.getRequests();
-        int faults = 0;
-        for (int i = requests.size() - 3; i < requests.size(); i++) {
-            Request request = requests.get(i);
-            if (request.getFine() > 0) {
-                faults++;
+    public void update(List<Request> requests) {
+        if (requests.size() >= 3) {
+            int counter = 0;
+            for (int i = requests.size() - 3; i < requests.size(); i++) {
+                Request request = requests.get(i);
+                if (request.getFine() == 0 && request.isReturned()) {
+                    counter++;
+                }
             }
-        }
-        if (faults == 0) {
-            _user.setClassification(new Normal(_user));
+            if (counter == 3) {
+                _user.setClassification(new Normal(_user));
+            }
         }
     }
     

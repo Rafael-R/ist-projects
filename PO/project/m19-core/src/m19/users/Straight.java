@@ -17,7 +17,7 @@ public class Straight extends Classification {
         int copies = work.getCopies();
         if (copies == 1) {
             return 8;
-        } else if (copies > 1 && copies <= 5) {
+        } else if (copies <= 5) {
             return 15;
         } else {
             return 30;
@@ -28,17 +28,18 @@ public class Straight extends Classification {
         return 5;
     }
 
-    public void update() {
-        List<Request> requests = _user.getRequests();
-        int faults = 0;
-        for (int i = requests.size() - 3; i < requests.size(); i++) {
-            Request request = requests.get(i);
-            if (request.getFine() > 0) {
-                faults++;
+    public void update(List<Request> requests) {
+        if (requests.size() >= 3) {
+            int faults = 0;
+            for (int i = requests.size() - 3; i < requests.size(); i++) {
+                Request request = requests.get(i);
+                if (request.getFine() > 0) {
+                    faults++;
+                }
             }
-        }
-        if (faults == 3) {
-            _user.setClassification(new Faulty(_user));
+            if (faults == 3) {
+                _user.setClassification(new Faulty(_user));
+            }
         }
     }
 
