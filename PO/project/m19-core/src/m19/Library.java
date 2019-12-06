@@ -315,7 +315,7 @@ public class Library implements Serializable {
 		request.setReturned(_day);
 		user.update(_day);
 		if (!request.isPaid()) {
-			throw new FineToPayException(request.getFine());
+			throw new FineToPayException(user.getFine());
 		}
 	}
 
