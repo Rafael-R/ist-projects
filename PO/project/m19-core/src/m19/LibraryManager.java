@@ -18,11 +18,20 @@ import m19.users.User;
  */
 public class LibraryManager {
 
-	private Library _library = new Library();
+	private Library _library;
 	private String _filename;
+	private boolean saved = false;
+
+	public LibraryManager() {
+		_library = new Library();
+	}
 
 
 	// File management related functions
+	
+	public String getFilename() {
+		return _filename;
+	}
 
 	/**
 	 * @throws MissingFileAssociationException
@@ -31,9 +40,14 @@ public class LibraryManager {
 	 */
 	public void save() throws MissingFileAssociationException, IOException, FileNotFoundException {
 		try {
-			ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(_filename)));
-			out.writeObject(_library);
-			out.close();
+			if (!saved) {
+				ObjectOutputStream out = new ObjectOutputStream(
+									 	 new BufferedOutputStream(
+									 	 new FileOutputStream(_filename)));
+				out.writeObject(_library);
+				out.close();
+				saved = true;
+			}
 		} catch (NullPointerException e) {
 			throw new MissingFileAssociationException();
 		}
@@ -57,17 +71,16 @@ public class LibraryManager {
 	 */
 	public void load(String filename) throws FailedToOpenFileException, IOException, ClassNotFoundException {
 		try {
-			ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(filename)));
+			ObjectInputStream in = new ObjectInputStream(
+								   new BufferedInputStream(
+								   new FileInputStream(filename)));
 			_library = (Library) in.readObject();
 			in.close();
 			_filename = filename;
+			saved = true;
 		} catch (FileNotFoundException e) {
 			throw new FailedToOpenFileException(filename);
 		}
-	}
-
-	public String getFilename() {
-		return _filename;
 	}
 
 	/**
@@ -90,6 +103,7 @@ public class LibraryManager {
 	}
 
 	public void advanceDate(int daysToAdvance) {
+		saved = false;
 		_library.advanceDate(daysToAdvance);
 	}
 
@@ -97,106 +111,72 @@ public class LibraryManager {
 	// Users functions
 
 	public int registerUser(String name, String email) throws InvalidUserDataException {
-		if (name.isEmpty() | email.isEmpty()) {
-			throw new InvalidUserDataException(name, email);
-		} else {
-			return _library.registerUser(name, email);
-		}
+		saved = false;
+		return _library.registerUser(name, email);
 	}
 
-	public String showUser(int id) throws InvalidUserIdException {
-		if (_library.fetchUser(id) == null) {
-			throw new InvalidUserIdException(id);
-		} else {
-			return _library.getUserString(id);
-		}
-	}
-
-	public String showUserNotifications(int id) throws InvalidUserIdException {
-		if (_library.fetchUser(id) == null) {
-			throw new InvalidUserIdException(id);
-		} else {
-			return _library.getUserNotifications(id);
-		}
-	}
-
-	public int showUserFine(int id) throws InvalidUserIdException {
-		if (_library.fetchUser(id) == null) {
-			throw new InvalidUserIdException(id);
-		} else {
-			return _library.getUserFine(id);
-		}
+	public String showUser(int userId) throws InvalidUserIdException {
+		return _library.getUserString(userId);
 	}
 
 	public List<User> showUsers() {
 		return _library.getUsers();
 	}
 
+	public String showUserNotifications(int userId) throws InvalidUserIdException {
+		saved = false;
+		return _library.getUserNotifications(userId);
+	}
+
+	public int showUserFine(int userId) throws InvalidUserIdException {
+		return _library.getUserFine(userId);
+	}
+
 	public void payFine(int userId) throws InvalidUserIdException, UserNotSuspendedException {
-		if (_library.fetchUser(userId) == null) {
-			throw new InvalidUserIdException(userId);
-		} else if (_library.getUserState(userId) == true) {
-			throw new UserNotSuspendedException(userId);
-		} else {
-			_library.userPayFine(userId);
-		}
+		saved = false;
+		_library.payUserFine(userId);
 	}
 	
 	public void payFine(int userId, int workId) {
-		_library.userPayFine(userId, workId);
+		saved = false;
+		_library.payUserFine(userId, workId);
 	}
 
 
 	// Works functions
 
-	public String displayWork(int id) throws InvalidWorkIdException {
-		if (_library.fetchWork(id) == null) {
-			throw new InvalidWorkIdException(id);
-		} else {
-			return _library.getWorkString(id);
-		}
+	public String displayWork(int workId) throws InvalidWorkIdException {
+		return _library.getWorkString(workId);
 	}
 
 	public String displayWorks() {
-		String string = "";
-		for (int i = 0; i < _library.getCurrentWorkId(); i++) {
-			string += _library.getWorkString(i) + "\n";
-		}
-		return string;
+		return _library.getWorksString();
 	}
 
 	public String performSearch(String term) {
-		String string = "";
-		for (int i = 0; i < _library.getCurrentWorkId(); i++) {
-			if (_library.workHasTerm(i, term)) {
-				string += _library.getWorkString(i) + "\n";
-			}
-		}
-		return string;
+		return _library.performSearch(term);
 	}
 
 
 	// Requests functions
 
 	public void observe(int userId, int workId) {
+		saved = false;
 		_library.observe(userId, workId);
 	}
 
-	public int requestWork(int userId, int workId) throws InvalidUserIdException, InvalidWorkIdException, RuleVerificationException {
-		if (_library.fetchUser(userId) == null) {
-			throw new InvalidUserIdException(userId);
-		} else if (_library.fetchWork(workId) == null) {
-			throw new InvalidWorkIdException(workId);
-		}
+	public int requestWork(int userId, int workId) throws InvalidUserIdException, 
+														  InvalidWorkIdException, 
+														  RuleVerificationException {
+		saved = false;
 		return _library.requestWork(userId, workId);
 	}
 
-	public void returnWork(int userId, int workId) throws InvalidUserIdException, InvalidWorkIdException, WorkNotRequestedByUserException, FineToPayException {
-		if (_library.fetchUser(userId) == null) {
-			throw new InvalidUserIdException(userId);
-		} else if (_library.fetchWork(workId) == null) {
-			throw new InvalidWorkIdException(workId);
-		}
+	public void returnWork(int userId, int workId) throws InvalidUserIdException, 
+														  InvalidWorkIdException, 
+														  WorkNotRequestedByUserException, 
+														  FineToPayException {
+		saved = false;
 		_library.returnWork(userId, workId);
 	}
 

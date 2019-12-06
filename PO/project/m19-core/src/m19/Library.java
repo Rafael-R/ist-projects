@@ -68,7 +68,8 @@ public class Library implements Serializable {
 	 */
 	void importFile(String filename) throws BadEntrySpecificationException, IOException {
 		try {
-			BufferedReader reader = new BufferedReader(new FileReader(filename));
+			BufferedReader reader = new BufferedReader(
+									new FileReader(filename));
 			String line;
 			while ((line = reader.readLine()) != null) {
 				String[] fields = line.split(":");
@@ -77,6 +78,8 @@ public class Library implements Serializable {
 			reader.close();
 		} catch (UnknownDataException e) {
 			throw new BadEntrySpecificationException(e.getData());
+		} catch (InvalidUserDataException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -86,7 +89,7 @@ public class Library implements Serializable {
 	 * @throws UnknownDataException
 	 * @see m19.Library.importFile
 	 */
-	void registerFromFields(String[] fields) throws UnknownDataException {
+	void registerFromFields(String[] fields) throws InvalidUserDataException, UnknownDataException {
 		Pattern patternUser = Pattern.compile("^(USER)");
 		Pattern patternWork = Pattern.compile("^(DVD|BOOK)");
 		if (patternUser.matcher(fields[0]).matches()) {
@@ -130,23 +133,20 @@ public class Library implements Serializable {
 	// Users functions
 
 	/**
-	 * @return current user id
-	 */
-	public int getCurrentUserId() {
-		return _userId;
-	}
-
-	/**
 	 * Register a new user
 	 * @param name New user's name
 	 * @param email New user's email
 	 * @return New user's id
 	 */
-	public int registerUser(String name, String email) {
-		int id = _userId++;
-		User user = new User(id, name, email);
-		_users.put(id, user);
-		return id;
+	public int registerUser(String name, String email) throws InvalidUserDataException {
+		if (name.isEmpty() | email.isEmpty()) {
+			throw new InvalidUserDataException(name, email);
+		} else {
+			int id = _userId++;
+			User user = new User(id, name, email);
+			_users.put(id, user);
+			return id;
+		}
 	}
 
 	/**
@@ -154,8 +154,13 @@ public class Library implements Serializable {
 	 * @param id User's id
 	 * @return User
 	 */
-	public User fetchUser(int id) {
-		return _users.get(id);
+	public User fetchUser(int userId) throws InvalidUserIdException {
+		User user = _users.get(userId);
+		if (user == null) {
+			throw new InvalidUserIdException(userId);
+		} else {
+			return user;
+		}
 	}
 
 	/**
@@ -163,26 +168,19 @@ public class Library implements Serializable {
 	 * @param id User's id
 	 * @return User's string
 	 */
-	public String getUserString(int id) {
-		return _users.get(id).toString();
+	public String getUserString(int userId) throws InvalidUserIdException {
+		User user = fetchUser(userId);
+		return user.toString();
 	}
 
 	/**
 	 * Get the notifications of the user with the given id.
-	 * @param id User's id
+	 * @param userId User's id
 	 * @return User's notifications
 	 */
-	public String getUserNotifications(int id) {
-		return _users.get(id).getNotifications();
-	}
-
-	/**
-	 * Get the state of the user with the given id.
-	 * @param id User's id
-	 * @return User's state
-	 */
-	public boolean getUserState(int id) {
-		return _users.get(id).isActive();
+	public String getUserNotifications(int userId) throws InvalidUserIdException {
+		User user = fetchUser(userId);
+		return user.getNotifications();
 	}
 
 	/**
@@ -194,28 +192,33 @@ public class Library implements Serializable {
 
 	/**
 	 * Get the fine of the user with the given id.
-	 * @param id User's id
+	 * @param userId User's id
 	 * @return User's fine
 	 */
-	public int getUserFine(int id) {
-		return _users.get(id).getFine();
+	public int getUserFine(int userId) throws InvalidUserIdException {
+		User user = fetchUser(userId);
+		return user.getFine();
 	}
 
 	/**
 	 * Pay the fine of the user with the given id.
 	 * @param id User's id
 	 */
-	public void userPayFine(int userId) {
-		User user = _users.get(userId);
-		user.payFine();
-		user.update(_day);
+	public void payUserFine(int userId) throws InvalidUserIdException, UserNotSuspendedException {
+		User user = fetchUser(userId);
+		if (user.isActive()) {
+			throw new UserNotSuspendedException(userId);
+		} else {
+			user.payFine();
+			user.update(_day);
+		}
 	}
 
 	/**
 	 * Pay the fine of the user with the given id.
 	 * @param id User's id
 	 */
-	public void userPayFine(int userId, int workId) {
+	public void payUserFine(int userId, int workId) {
 		User user = _users.get(userId);
 		user.payFine(workId);
 		user.update(_day);
@@ -223,13 +226,6 @@ public class Library implements Serializable {
 
 
 	// Works functions
-
-	/**
-	 * @return current work id
-	 */
-	public int getCurrentWorkId() {
-		return _workId;
-	}
 
 	/**
 	 * Register a new work
@@ -250,48 +246,66 @@ public class Library implements Serializable {
 
 	/**
 	 * Get the work with the given id.
-	 * @param id Work's id
+	 * @param workId Work's id
 	 * @return Work
 	 */
-	public Work fetchWork(int id) {
-		return _works.get(id);
+	public Work fetchWork(int workId) throws InvalidWorkIdException {
+		Work work = _works.get(workId);
+		if (work == null) {
+			throw new InvalidWorkIdException(workId);
+		} else {
+			return work;
+		}
 	}
 
 	/**
 	 * Get the string of the work with the given id
-	 * @param id Work's id
+	 * @param workId Work's id
 	 * @return Work's string
 	 */
-	public String getWorkString(int id) {
-		return _works.get(id).toString();
+	public String getWorkString(int workId) throws InvalidWorkIdException {
+		Work work = fetchWork(workId);
+		return work.toString();
+	}
+
+	public String getWorksString() {
+		String string = "";
+		for (Map.Entry<Integer, Work> entry : _works.entrySet()) {
+			Work work = entry.getValue();
+			string += work.toString() + "\n";
+		}
+		return string;
 	}
 
 	/**
-	 * Verify if the work with the given id has the given term 
+	 * Verify if any work has the given term 
 	 * @param id Work's id
 	 * @param term Term to search
-	 * @return true, if the work has the term; false, otherwise.
+	 * @return a string with the works that contain the term 
 	 */
-	public boolean workHasTerm(int id, String term) {
-		return _works.get(id).hasTerm(term);
+	public String performSearch(String term) {
+		String string = "";
+		for (Map.Entry<Integer, Work> entry : _works.entrySet()) {
+			Work work = entry.getValue();
+			if (work.hasTerm(term)) {
+				string += work + "\n";
+			}
+		}
+		return string;
 	}
 
 
 	// Requests functions
 
 	public void observe(int userId, int workId) {
-		User user = fetchUser(userId);
-		Work work = fetchWork(workId);
+		User user = _users.get(userId);
+		Work work = _works.get(workId);
 		work.addObserver(user);
 	}
 
-	/**
-	 * Make a request
-	 * @param userId User's id
-	 * @param workId Work's id
-	 * @return 0 in case the request doesn't fail any rule; index of the failed rule otherwise.
-	 */
-	public int requestWork(int userId, int workId) throws RuleVerificationException {
+	public int requestWork(int userId, int workId) throws InvalidUserIdException, 
+														  InvalidWorkIdException, 
+														  RuleVerificationException {
 		User user = fetchUser(userId);
 		Work work = fetchWork(workId);
 		for (Rule rule : _rules) {
@@ -304,7 +318,10 @@ public class Library implements Serializable {
 		return returnDay;
 	}
 
-	public void returnWork(int userId, int workId) throws WorkNotRequestedByUserException, FineToPayException {
+	public void returnWork(int userId, int workId) throws InvalidUserIdException, 
+														  InvalidWorkIdException, 
+														  WorkNotRequestedByUserException, 
+														  FineToPayException {
 		Work work = fetchWork(workId);
 		User user = fetchUser(userId);
 		Request request = user.hasRequested(workId);
@@ -314,7 +331,7 @@ public class Library implements Serializable {
 		work.returnCopie();
 		request.setReturned(_day);
 		user.update(_day);
-		if (!request.isPaid()) {
+		if (user.hasFine()) {
 			throw new FineToPayException(user.getFine());
 		}
 	}
