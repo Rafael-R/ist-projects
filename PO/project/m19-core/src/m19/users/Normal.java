@@ -29,19 +29,26 @@ public class Normal extends Classification {
     }
 
     public void update(List<Request> requests) {
-        if (requests.size() >= 5) {
+        if (requests.size() >= 3) {
             int counter = 0, faults = 0;
-            for (int i = requests.size() - 5; i < requests.size(); i++) {
+            for (int i = requests.size() - 3; i < requests.size(); i++) {
                 Request request = requests.get(i);
-                if (!request.getStatus() && request.isReturned()) {
+                if (request.getStatus()) {
+                    faults++;
+                } else if (!request.getStatus()) {
                     counter++;
                 }
-                if (request.getStatus() && i >= requests.size() - 3) {
-                    faults++;
-                }
             }
-            if (counter == 5) {
-                _user.setClassification(new Straight(_user));
+            if (counter == 3 && requests.size() >= 5) {
+                for (int i = requests.size() - 5; i < requests.size() - 3; i++) {
+                    Request request = requests.get(i);
+                    if (!request.getStatus()) {
+                        counter++;
+                    }
+                }
+                if (counter == 5) {
+                    _user.setClassification(new Straight(_user));
+                }
             } else if (faults == 3) {
                 _user.setClassification(new Faulty(_user));
             }
