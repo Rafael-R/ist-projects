@@ -1,7 +1,7 @@
 package m19.rules;
 
-import m19.works.*;
-import m19.users.*;
+import m19.works.Work;
+import m19.users.User;
 
 public class MaxWorkPriceRule implements Rule {
 
