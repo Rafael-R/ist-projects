@@ -12,13 +12,9 @@ import java.util.regex.Pattern;
 
 import m19.users.*;
 import m19.works.*;
-import m19.exceptions.BadEntrySpecificationException;
-import m19.exceptions.FineToPayException;
-import m19.exceptions.RuleVerificationException;
-import m19.exceptions.UnknownDataException;
 import m19.rules.*;
 import m19.requests.*;
-import m19.exceptions.WorkNotRequestedByUserException;
+import m19.exceptions.*;
 
 /**
  * Class that represents the library as a whole.
