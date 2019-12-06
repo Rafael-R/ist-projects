@@ -70,12 +70,8 @@ public abstract class Work implements Serializable, Observable {
         return _copies;
     }
 
-    public boolean verifyAvailability() {
-        if (_availableCopies == 0) {
-            return false;
-        } else {
-            return true;
-        }
+    public boolean isAvailable() {
+        return _availableCopies > 0;
     }
 
     public boolean hasTerm(String term) {

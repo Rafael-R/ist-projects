@@ -1,9 +1,9 @@
 package m19;
 
-import java.io.IOException;
 import java.io.Serializable;
-import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.FileReader;
+import java.io.BufferedReader;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.List;
@@ -292,14 +292,10 @@ public class Library implements Serializable {
 	 * @return 0 in case the request doesn't fail any rule; index of the failed rule otherwise.
 	 */
 	public int requestWork(int userId, int workId) throws RuleVerificationException {
-		int index = 0;
 		User user = fetchUser(userId);
 		Work work = fetchWork(workId);
 		for (Rule rule : _rules) {
-			index++;
-			if (!rule.verify(work, user)) {
-				throw new RuleVerificationException(userId, workId, index);
-			}
+			rule.verify(work, user);
 		}
 		int returnDay = _day + user.getReturnDays(work);
 		Request request = new Request(workId, returnDay);

@@ -29,6 +29,10 @@ public class User implements Serializable, Comparable<User>, Observer {
         _email = email;
     }
 
+    public int getId() {
+        return _id;
+    }
+
     public boolean isActive() {
         return _active;
     }
@@ -91,7 +95,7 @@ public class User implements Serializable, Comparable<User>, Observer {
         _requests.add(request);
     }
 
-    public Request hasRequested(int workId){
+    public Request hasRequested(int workId) {
         for (Request request : _requests) {
             if (request.getWorkId() == workId && !request.isReturned()) {
                 return request;

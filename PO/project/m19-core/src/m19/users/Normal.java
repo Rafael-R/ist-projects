@@ -9,6 +9,8 @@ public class Normal extends Classification {
 
     private static final long serialVersionUID = 201912050023L;
 
+    private static final int MAX_REQUESTS = 3;
+
     public Normal(User user) {
         super(user);
     }
@@ -25,7 +27,7 @@ public class Normal extends Classification {
     }
 
     public int maxRequests() {
-        return 3;
+        return MAX_REQUESTS;
     }
 
     public void update(List<Request> requests) {
