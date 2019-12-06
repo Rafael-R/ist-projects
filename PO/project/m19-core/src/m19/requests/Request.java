@@ -53,6 +53,10 @@ public class Request implements Serializable {
         _paid = true;
     }
 
+    public boolean getStatus() {
+        return _suspended;
+    }
+    
     public boolean status(int day) {
         if ((day > _returnDay && _returned == false) || 
             (_returned == true && _paid == false)) {
@@ -62,7 +66,4 @@ public class Request implements Serializable {
         }
     }
 
-    public boolean getStatus() {
-        return _suspended;
-    }
 }

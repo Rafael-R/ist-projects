@@ -2,22 +2,19 @@ package m19.rules;
 
 import m19.works.Work;
 import m19.users.User;
+import m19.exceptions.RuleVerificationException;
 
 public class MaxWorkPriceRule implements Rule {
 
     private static final long serialVersionUID = 201911161602L;
 
+    private static final int INDEX = 6;
+
     @Override
-    public boolean verify(Work work, User user) {
-        if (work.getPrice() > 25) {
-            if (user.getClassification().equals("CUMPRIDOR")) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return true;
+    public void verify(Work work, User user) throws RuleVerificationException {
+        if (work.getPrice() > 25 && !user.getClassification().equals("CUMPRIDOR")) {
+            throw new RuleVerificationException(user.getId(), work.getId(), INDEX);
         }
-    }   
+    }
 
 }

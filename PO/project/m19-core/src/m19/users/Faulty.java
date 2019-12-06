@@ -9,6 +9,8 @@ public class Faulty extends Classification {
 
     private static final long serialVersionUID = 201912050023L;
 
+    private static final int MAX_REQUESTS = 1;
+
     public Faulty(User user) {
         super(user);
     }
@@ -25,7 +27,7 @@ public class Faulty extends Classification {
     }
 
     public int maxRequests() {
-        return 1;
+        return MAX_REQUESTS;
     }
 
     public void update(List<Request> requests) {
