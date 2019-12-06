@@ -73,6 +73,10 @@ public class User implements Serializable, Comparable<User>, Observer {
         return _fine;
     }
 
+    public boolean hasFine() {
+        return _fine > 0;
+    }
+
     public void payFine() {
         for (Request request : _requests) {
             if (request.isReturned()) {
