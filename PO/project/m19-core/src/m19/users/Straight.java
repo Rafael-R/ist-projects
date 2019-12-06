@@ -30,14 +30,14 @@ public class Straight extends Classification {
 
     public void update(List<Request> requests) {
         if (requests.size() >= 3) {
-            int faults = 0;
+            int counter = 0;
             for (int i = requests.size() - 3; i < requests.size(); i++) {
                 Request request = requests.get(i);
                 if (request.getStatus()) {
-                    faults++;
+                    counter++;
                 }
             }
-            if (faults == 3) {
+            if (counter == 3) {
                 _user.setClassification(new Faulty(_user));
             }
         }

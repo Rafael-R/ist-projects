@@ -38,6 +38,7 @@ public class Request implements Serializable {
         _returned = true;
         if (day > _returnDay) {
             _fine = (day - _returnDay) * 5;
+            _suspended = true;
         }
         if (_fine == 0) {
             _paid = true;
@@ -55,7 +56,6 @@ public class Request implements Serializable {
     public boolean status(int day) {
         if ((day > _returnDay && _returned == false) || 
             (_returned == true && _paid == false)) {
-            _suspended = true;
             return false;
         } else {
             return true;
