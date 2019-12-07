@@ -3,9 +3,6 @@ package m19;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import m19.Observer;
-import m19.Notification;
-
 public abstract class Work implements Serializable, Observable {
 
     enum Category { 

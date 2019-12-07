@@ -2,9 +2,6 @@ package m19;
 
 import java.util.List;
 
-import m19.Work;
-import m19.Request;
-
 public class Normal extends Classification {
 
     private static final long serialVersionUID = 201912050023L;

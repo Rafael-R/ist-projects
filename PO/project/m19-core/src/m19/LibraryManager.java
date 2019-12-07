@@ -37,7 +37,9 @@ public class LibraryManager {
 	 * @throws IOException
 	 * @throws FileNotFoundException
 	 */
-	public void save() throws MissingFileAssociationException, IOException, FileNotFoundException {
+	public void save() throws MissingFileAssociationException,
+							  FileNotFoundException,
+							  IOException {
 		try {
 			if (!saved) {
 				ObjectOutputStream out = new ObjectOutputStream(
@@ -57,7 +59,8 @@ public class LibraryManager {
 	 * @throws MissingFileAssociationException
 	 * @throws IOException
 	 */
-	public void saveAs(String filename) throws MissingFileAssociationException, IOException {
+	public void saveAs(String filename) throws MissingFileAssociationException,
+											   IOException {
 		_filename = filename;
 		save();
 	}
@@ -68,7 +71,9 @@ public class LibraryManager {
 	 * @throws IOException
 	 * @throws ClassNotFoundException
 	 */
-	public void load(String filename) throws FailedToOpenFileException, IOException, ClassNotFoundException {
+	public void load(String filename) throws FailedToOpenFileException,
+											 ClassNotFoundException,
+											 IOException {
 		try {
 			ObjectInputStream in = new ObjectInputStream(
 								   new BufferedInputStream(
@@ -127,7 +132,8 @@ public class LibraryManager {
 		return _library.getUserNotifications(userId);
 	}
 
-	public void payFine(int userId) throws InvalidUserIdException, UserNotSuspendedException {
+	public void payFine(int userId) throws InvalidUserIdException,
+										   UserNotSuspendedException {
 		saved = false;
 		_library.payUserFine(userId);
 	}
@@ -168,8 +174,8 @@ public class LibraryManager {
 	}
 
 	public void returnWork(int userId, int workId) throws InvalidUserIdException, 
-														  InvalidWorkIdException, 
-														  WorkNotRequestedByUserException, 
+														  InvalidWorkIdException,
+														  WorkNotRequestedByUserException,
 														  FineToPayException {
 		saved = false;
 		_library.returnWork(userId, workId);
