@@ -57,12 +57,12 @@ public class Request implements Serializable {
         return _wasSuspended;
     }
     
-    public boolean status(int day) {
+    public boolean getStatus(int day) {
         if ((day > _returnDay && _returned == false) || 
             (_returned == true && _paid == false)) {
-            return false;
-        } else {
             return true;
+        } else {
+            return false;
         }
     }
 

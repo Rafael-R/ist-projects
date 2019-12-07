@@ -38,8 +38,8 @@ public class LibraryManager {
 	 * @throws FileNotFoundException
 	 */
 	public void save() throws MissingFileAssociationException,
-							  FileNotFoundException,
-							  IOException {
+							  IOException,
+							  FileNotFoundException {
 		try {
 			if (!saved) {
 				ObjectOutputStream out = new ObjectOutputStream(
@@ -72,8 +72,8 @@ public class LibraryManager {
 	 * @throws ClassNotFoundException
 	 */
 	public void load(String filename) throws FailedToOpenFileException,
-											 ClassNotFoundException,
-											 IOException {
+											 IOException,
+											 ClassNotFoundException {
 		try {
 			ObjectInputStream in = new ObjectInputStream(
 								   new BufferedInputStream(
@@ -106,6 +106,9 @@ public class LibraryManager {
 		return _library.getDate();
 	}
 
+	/**
+	 * @param daysToAdvance
+	 */
 	public void advanceDate(int daysToAdvance) {
 		saved = false;
 		_library.advanceDate(daysToAdvance);
@@ -114,11 +117,20 @@ public class LibraryManager {
 
 	// Users functions
 
+	/**
+	 * @param name
+	 * @param email
+	 * @throws InvalidUserDataException
+	 */
 	public int registerUser(String name, String email) throws InvalidUserDataException {
 		saved = false;
 		return _library.registerUser(name, email);
 	}
 
+	/**
+	 * @param userId
+	 * @throws InvalidUserIdException
+	 */
 	public String showUser(int userId) throws InvalidUserIdException {
 		return _library.getUserString(userId);
 	}
@@ -127,17 +139,30 @@ public class LibraryManager {
 		return _library.getUsers();
 	}
 
+	/**
+	 * @param userId
+	 * @throws InvalidUserIdException
+	 */
 	public String showUserNotifications(int userId) throws InvalidUserIdException {
 		saved = false;
 		return _library.getUserNotifications(userId);
 	}
 
+	/**
+	 * @param userId
+	 * @throws InvalidUserIdException
+	 * @throws UserNotSuspendedException
+	 */
 	public void payFine(int userId) throws InvalidUserIdException,
 										   UserNotSuspendedException {
 		saved = false;
 		_library.payUserFine(userId);
 	}
-	
+
+	/**
+	 * @param userId
+	 * @param workId
+	 */
 	public void payFine(int userId, int workId) {
 		saved = false;
 		_library.payUserFine(userId, workId);
@@ -146,6 +171,10 @@ public class LibraryManager {
 
 	// Works functions
 
+	/**
+	 * @param workId
+	 * @throws InvalidWorkIdException
+	 */
 	public String displayWork(int workId) throws InvalidWorkIdException {
 		return _library.getWorkString(workId);
 	}
@@ -154,6 +183,9 @@ public class LibraryManager {
 		return _library.getWorksString();
 	}
 
+	/**
+	 * @param term
+	 */
 	public String performSearch(String term) {
 		return _library.performSearch(term);
 	}
@@ -161,11 +193,22 @@ public class LibraryManager {
 
 	// Requests functions
 
+	/**
+	 * @param userId
+	 * @param workId
+	 */
 	public void observe(int userId, int workId) {
 		saved = false;
 		_library.observe(userId, workId);
 	}
 
+	/**
+	 * @param userId
+	 * @param workId
+	 * @throws InvalidUserIdException
+	 * @throws InvalidWorkIdException
+	 * @throws RuleVerificationException
+	 */
 	public int requestWork(int userId, int workId) throws InvalidUserIdException, 
 														  InvalidWorkIdException, 
 														  RuleVerificationException {
@@ -173,6 +216,14 @@ public class LibraryManager {
 		return _library.requestWork(userId, workId);
 	}
 
+	/**
+	 * @param userId
+	 * @param workId
+	 * @throws InvalidUserIdException
+	 * @throws InvalidWorkIdException
+	 * @throws WorkNotRequestedByUserException
+	 * @throws FineToPayException
+	 */
 	public void returnWork(int userId, int workId) throws InvalidUserIdException, 
 														  InvalidWorkIdException,
 														  WorkNotRequestedByUserException,
