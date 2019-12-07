@@ -10,10 +10,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
-import m19.users.*;
-import m19.works.*;
 import m19.rules.*;
-import m19.requests.*;
 import m19.exceptions.*;
 
 /**
@@ -188,16 +185,6 @@ public class Library implements Serializable {
 	 */
 	public List<User> getUsers() {
 		return new ArrayList<User>(_users.values());
-	}
-
-	/**
-	 * Get the fine of the user with the given id.
-	 * @param userId User's id
-	 * @return User's fine
-	 */
-	public int getUserFine(int userId) throws InvalidUserIdException {
-		User user = fetchUser(userId);
-		return user.getFine();
 	}
 
 	/**

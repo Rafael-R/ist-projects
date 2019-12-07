@@ -1,4 +1,4 @@
-package m19.requests;
+package m19;
 
 import java.io.Serializable;
 

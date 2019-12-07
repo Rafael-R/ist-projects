@@ -1,11 +1,11 @@
-package m19.users;
+package m19;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.ArrayList;
 
-import m19.requests.Request;
-import m19.works.Work;
+import m19.Work;
+import m19.Request;
 
 
 public class User implements Serializable, Comparable<User>, Observer {
@@ -30,6 +30,10 @@ public class User implements Serializable, Comparable<User>, Observer {
 
     public int getId() {
         return _id;
+    }
+
+    public String getName() {
+        return _name;
     }
 
     public boolean isActive() {
@@ -135,10 +139,10 @@ public class User implements Serializable, Comparable<User>, Observer {
 
     @Override
     public int compareTo(User other) {
-        if (this._name == other._name) {
-            return Integer.compare(this._id, other._id);
+        if (_name == other.getName()) {
+            return Integer.compare(_id, other.getId());
         } else {
-            return this._name.compareTo(other._name);
+            return _name.compareTo(other.getName());
         }
     }
 

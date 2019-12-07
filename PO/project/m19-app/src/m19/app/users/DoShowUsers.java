@@ -5,8 +5,8 @@ import java.util.Collections;
 
 import pt.tecnico.po.ui.Command;
 import m19.LibraryManager;
-import m19.users.User;
-import m19.users.UserComparator;
+import m19.User;
+import m19.UserComparator;
 
 /**
  * 4.2.4. Show all users.

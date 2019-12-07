@@ -1,10 +1,10 @@
-package m19.works;
+package m19;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import m19.users.Notification;
-import m19.users.Observer;
+import m19.Observer;
+import m19.Notification;
 
 public abstract class Work implements Serializable, Observable {
 
