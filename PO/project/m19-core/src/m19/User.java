@@ -121,7 +121,7 @@ public class User implements Serializable, Comparable<User>, Observer {
         _fine = 0;
         _active = true;
         for (Request request : _requests) {
-            if (!request.status(day)) {
+            if (request.getStatus(day)) {
                 _fine += request.getFine();
                 _active = false;
             }

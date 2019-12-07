@@ -115,14 +115,14 @@ public class Library implements Serializable {
 	public void advanceDate(int daysToAdvance) {
 		if(daysToAdvance > 0) {
 			_day += daysToAdvance;
-			this.update();
+			update();
 		}
 	}
 
-
 	public void update() {
 		for (Map.Entry<Integer, User> entry : _users.entrySet()) {
-			entry.getValue().update(_day);
+			User user = entry.getValue();
+			user.update(_day);
 		}
 	}
 
