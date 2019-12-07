@@ -1,8 +1,6 @@
 package m19;
 
 public class Book extends Work {
-
-    private static final long serialVersionUID = 201911092304L;
     
     private String _author;
     private String _isbn;

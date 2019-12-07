@@ -5,7 +5,7 @@ import java.util.List;
 
 public abstract class Classification implements Serializable {
 
-    private static final long serialVersionUID = 201911281653L;
+    private static final long serialVersionUID = 201912071640L;
 
     protected User _user;
 
