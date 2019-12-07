@@ -1,26 +1,22 @@
 package m19.exceptions;
 
-/**
- * Class encoding file opening failure.
- */
 public class FineToPayException extends Exception {
 
 	/** Serial number for serialization. */
-	static final long serialVersionUID = 201912042057L;
+	static final long serialVersionUID = 201912071610L;
 
-	/** Bad file name. */
+	private int _userId;
 	private int _fine;
 
-	/**
-	 * @param name
-	 */
-	public FineToPayException(int fine) {
+	public FineToPayException(int userId, int fine) {
+		_userId = userId;
 		_fine = fine;
 	}
 
-	/**
-	 * @return the fine
-	 */
+	public int getUserId() {
+		return _userId;
+	}
+
 	public int getFine() {
 		return _fine;
 	}

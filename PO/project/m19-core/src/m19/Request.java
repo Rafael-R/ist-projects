@@ -39,8 +39,7 @@ public class Request implements Serializable {
         if (day > _returnDay) {
             _fine = (day - _returnDay) * 5;
             _wasSuspended = true;
-        }
-        if (_fine == 0) {
+        } else {
             _paid = true;
         }
     }

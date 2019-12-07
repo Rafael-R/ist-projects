@@ -159,15 +159,6 @@ public class LibraryManager {
 		_library.payUserFine(userId);
 	}
 
-	/**
-	 * @param userId
-	 * @param workId
-	 */
-	public void payFine(int userId, int workId) {
-		saved = false;
-		_library.payUserFine(userId, workId);
-	}
-
 
 	// Works functions
 
@@ -196,8 +187,11 @@ public class LibraryManager {
 	/**
 	 * @param userId
 	 * @param workId
+	 * @throws InvalidUserIdException
+	 * @throws InvalidWorkIdException
 	 */
-	public void observe(int userId, int workId) {
+	public void observe(int userId, int workId) throws InvalidUserIdException, 
+													    InvalidWorkIdException {
 		saved = false;
 		_library.observe(userId, workId);
 	}

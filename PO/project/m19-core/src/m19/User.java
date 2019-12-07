@@ -79,19 +79,11 @@ public class User implements Serializable, Comparable<User>, Observer {
 
     public void payFine() {
         for (Request request : _requests) {
-            if (request.isReturned()) {
+            if (request.isReturned() && !request.isPaid()) {
                 request.setPaid();
             }
         }
         _active = true;
-    }
-
-    public void payFine(int workId) {
-        for (Request request : _requests) {
-            if (request.getWorkId() == workId) {
-                request.setPaid();
-            }
-        }
     }
 
     public void addRequest(Request request) {
@@ -110,7 +102,7 @@ public class User implements Serializable, Comparable<User>, Observer {
     public int getActiveRequests() {
         int count = 0;
         for (Request request : _requests) {
-            if (request.isReturned() == false) {
+            if (!request.isReturned()) {
                 count++;
             }
         }

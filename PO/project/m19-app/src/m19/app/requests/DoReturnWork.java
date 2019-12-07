@@ -7,6 +7,7 @@ import m19.app.exceptions.WorkNotBorrowedByUserException;
 import m19.exceptions.FineToPayException;
 import m19.exceptions.InvalidUserIdException;
 import m19.exceptions.InvalidWorkIdException;
+import m19.exceptions.UserNotSuspendedException;
 import m19.exceptions.WorkNotRequestedByUserException;
 import pt.tecnico.po.ui.Command;
 import pt.tecnico.po.ui.DialogException;
@@ -36,19 +37,24 @@ public class DoReturnWork extends Command<LibraryManager> {
 		_form.parse();
 		try {
 			_receiver.returnWork(userId.value(), workId.value());
-		} catch (InvalidUserIdException e1) {
-			throw new NoSuchUserException(e1.getId());
-		} catch (InvalidWorkIdException e1) {
-			throw new NoSuchWorkException(e1.getId());
-		} catch (WorkNotRequestedByUserException e1) {
-			throw new WorkNotBorrowedByUserException(e1.getWork(), e1.getUser());
-		} catch (FineToPayException e1) {
-			_display.popup(Message.showFine(userId.value(), e1.getFine()));
+		} catch (InvalidUserIdException e) {
+			throw new NoSuchUserException(e.getId());
+		} catch (InvalidWorkIdException e) {
+			throw new NoSuchWorkException(e.getId());
+		} catch (WorkNotRequestedByUserException e) {
+			throw new WorkNotBorrowedByUserException(e.getWork(), e.getUser());
+		} catch (FineToPayException e) {
+			_display.popup(Message.showFine(e.getUserId(), e.getFine()));
 			_form.clear();
 			choice = _form.addStringInput(Message.requestFinePaymentChoice());
 			_form.parse();
 			if (choice.value().equals("s")) {
-				_receiver.payFine(userId.value(), workId.value());
+				try {
+					_receiver.payFine(e.getUserId());
+				} catch (InvalidUserIdException | UserNotSuspendedException ee) {
+					ee.printStackTrace();
+				}
+				
 			}
 			_form.clear();
 			userId = _form.addIntegerInput(Message.requestUserId());

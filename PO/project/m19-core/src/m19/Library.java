@@ -201,16 +201,6 @@ public class Library implements Serializable {
 		}
 	}
 
-	/**
-	 * Pay the fine of the user with the given id.
-	 * @param id User's id
-	 */
-	public void payUserFine(int userId, int workId) {
-		User user = _users.get(userId);
-		user.payFine(workId);
-		user.update(_day);
-	}
-
 
 	// Works functions
 
@@ -284,9 +274,10 @@ public class Library implements Serializable {
 
 	// Requests functions
 
-	public void observe(int userId, int workId) {
-		User user = _users.get(userId);
-		Work work = _works.get(workId);
+	public void observe(int userId, int workId) throws InvalidUserIdException, 
+													   InvalidWorkIdException {
+		User user = fetchUser(userId);
+		Work work = fetchWork(workId);
 		work.addObserver(user);
 	}
 
@@ -319,7 +310,7 @@ public class Library implements Serializable {
 		request.setReturned(_day);
 		user.update(_day);
 		if (user.hasFine()) {
-			throw new FineToPayException(user.getFine());
+			throw new FineToPayException(userId, user.getFine());
 		}
 	}
 

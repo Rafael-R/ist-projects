@@ -26,18 +26,18 @@ public class DoSave extends Command<LibraryManager> {
 	public final void execute() {
 		try {
 			_receiver.save();
-		} catch (MissingFileAssociationException e1) {
+		} catch (IOException e) {
+            e.printStackTrace();
+        } catch (MissingFileAssociationException e) {
 			filename = _form.addStringInput(Message.newSaveAs());
 			_form.parse();
 			try {
 				_receiver.saveAs(filename.value());
-			} catch (MissingFileAssociationException e2) {
-				e2.printStackTrace();
-			} catch (IOException e2) {
-				e2.printStackTrace();
+			} catch (MissingFileAssociationException ee) {
+				ee.printStackTrace();
+			} catch (IOException ee) {
+				ee.printStackTrace();
 			}
-		} catch (IOException e1) {
-            e1.printStackTrace();
-        }
+		}
 	}
 }
