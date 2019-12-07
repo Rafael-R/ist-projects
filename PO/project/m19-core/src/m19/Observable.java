@@ -1,6 +1,6 @@
-package m19.works;
+package m19;
 
-import m19.users.Observer;
+import m19.Observer;
 
 public interface Observable {
 

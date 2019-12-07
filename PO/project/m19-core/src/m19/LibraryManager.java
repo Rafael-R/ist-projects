@@ -11,7 +11,6 @@ import java.io.ObjectOutputStream;
 import java.util.List;
 
 import m19.exceptions.*;
-import m19.users.User;
 
 /**
  * The façade class.
@@ -126,10 +125,6 @@ public class LibraryManager {
 	public String showUserNotifications(int userId) throws InvalidUserIdException {
 		saved = false;
 		return _library.getUserNotifications(userId);
-	}
-
-	public int showUserFine(int userId) throws InvalidUserIdException {
-		return _library.getUserFine(userId);
 	}
 
 	public void payFine(int userId) throws InvalidUserIdException, UserNotSuspendedException {

@@ -1,4 +1,4 @@
-package m19.users;
+package m19;
 
 import java.util.Comparator;
 

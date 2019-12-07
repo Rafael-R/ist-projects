@@ -1,4 +1,4 @@
-package m19.works;
+package m19;
 
 public class Dvd extends Work {
     

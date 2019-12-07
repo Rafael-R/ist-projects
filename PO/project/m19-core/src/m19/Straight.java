@@ -1,9 +1,9 @@
-package m19.users;
+package m19;
 
 import java.util.List;
 
-import m19.works.Work;
-import m19.requests.Request;
+import m19.Work;
+import m19.Request;
 
 public class Straight extends Classification {
 

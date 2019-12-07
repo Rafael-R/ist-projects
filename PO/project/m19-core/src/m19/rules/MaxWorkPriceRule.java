@@ -1,7 +1,7 @@
 package m19.rules;
 
-import m19.works.Work;
-import m19.users.User;
+import m19.Work;
+import m19.User;
 import m19.exceptions.RuleVerificationException;
 
 public class MaxWorkPriceRule implements Rule {
