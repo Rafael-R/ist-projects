@@ -4,8 +4,6 @@ import java.util.List;
 
 public class Straight extends Classification {
 
-    private static final long serialVersionUID = 201912050023L;
-
     private static final int MAX_REQUESTS = 5;
 
     public Straight(User user) {

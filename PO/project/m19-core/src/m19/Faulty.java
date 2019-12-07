@@ -4,8 +4,6 @@ import java.util.List;
 
 public class Faulty extends Classification {
 
-    private static final long serialVersionUID = 201912050023L;
-
     private static final int MAX_REQUESTS = 1;
 
     public Faulty(User user) {

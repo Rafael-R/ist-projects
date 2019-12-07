@@ -2,8 +2,6 @@ package m19;
 
 public class Dvd extends Work {
     
-    private static final long serialVersionUID = 201911092304L;
-    
     private String _director;
     private String _igac;
 
