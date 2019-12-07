@@ -73,20 +73,18 @@ public class Library implements Serializable {
 				registerFromFields(fields);
 			}
 			reader.close();
-		} catch (UnknownDataException e) {
-			throw new BadEntrySpecificationException(e.getData());
-		} catch (InvalidUserDataException e) {
-			e.printStackTrace();
+		} catch (InvalidDataException e) {
+			throw new BadEntrySpecificationException(e.getData(), e);
 		}
 	}
 
 	/**
 	 * Parse the data imported from the file
 	 * @param fields
-	 * @throws UnknownDataException
+	 * @throws InvalidDataException
 	 * @see m19.Library.importFile
 	 */
-	void registerFromFields(String[] fields) throws InvalidUserDataException, UnknownDataException {
+	void registerFromFields(String[] fields) throws InvalidDataException {
 		Pattern patternUser = Pattern.compile("^(USER)");
 		Pattern patternWork = Pattern.compile("^(DVD|BOOK)");
 		if (patternUser.matcher(fields[0]).matches()) {
@@ -94,7 +92,7 @@ public class Library implements Serializable {
 		} else if (patternWork.matcher(fields[0]).matches()) {
 			registerWork(fields);
 		} else {
-			throw new UnknownDataException(fields[0]);
+			throw new InvalidDataException(fields[0]);
 		}
 	}
 
@@ -135,9 +133,9 @@ public class Library implements Serializable {
 	 * @param email New user's email
 	 * @return New user's id
 	 */
-	public int registerUser(String name, String email) throws InvalidUserDataException {
+	public int registerUser(String name, String email) throws InvalidDataException {
 		if (name.isEmpty() | email.isEmpty()) {
-			throw new InvalidUserDataException(name, email);
+			throw new InvalidDataException(name, email);
 		} else {
 			int id = _userId++;
 			User user = new User(id, name, email);

@@ -122,7 +122,7 @@ public class LibraryManager {
 	 * @param email
 	 * @throws InvalidUserDataException
 	 */
-	public int registerUser(String name, String email) throws InvalidUserDataException {
+	public int registerUser(String name, String email) throws InvalidDataException {
 		saved = false;
 		return _library.registerUser(name, email);
 	}
