@@ -46,7 +46,11 @@ public class DoRequestWork extends Command<LibraryManager> {
 				choice = _form.addStringInput(Message.requestReturnNotificationPreference());
 				_form.parse();
 				if (choice.value().equals("s")) {
-					_receiver.observe(e.getUser(), e.getWork());
+					try {
+						_receiver.observe(e.getUser(), e.getWork());
+					} catch (InvalidUserIdException | InvalidWorkIdException ee) {
+						ee.printStackTrace();
+					}
 				}
 				_form.clear();
 				userId = _form.addIntegerInput(Message.requestUserId());
