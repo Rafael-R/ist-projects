@@ -24,7 +24,7 @@ public class Book extends Work {
     }
 
     public String infoString() {
-        return _author + " - " + _isbn;
+        return " - " + _author + " - " + _isbn;
     }
 
 }

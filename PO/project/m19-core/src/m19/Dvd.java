@@ -24,7 +24,7 @@ public class Dvd extends Work {
     }
 
     public String infoString() {
-        return _director + " - " + _igac;
+        return " - " + _director + " - " + _igac;
     }
     
 }
