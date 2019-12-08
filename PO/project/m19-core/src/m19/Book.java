@@ -15,10 +15,8 @@ public class Book extends Work {
     /**
 	 * @param term
 	 */
-    @Override
-    public boolean hasTerm(String term) {
-        return super.hasTerm(term) ||
-               _author.toLowerCase().contains(term.toLowerCase());
+    public boolean infoHasTerm(String term) {
+        return _author.toLowerCase().contains(term.toLowerCase());
     }
     
     public String typeString() {

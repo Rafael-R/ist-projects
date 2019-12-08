@@ -15,10 +15,8 @@ public class Dvd extends Work {
     /**
 	 * @param term
 	 */
-    @Override
-    public boolean hasTerm(String term) {
-        return super.hasTerm(term) || 
-               _director.toLowerCase().contains(term.toLowerCase());
+    public boolean infoHasTerm(String term) {
+        return _director.toLowerCase().contains(term.toLowerCase());
     }
 
     public String typeString() {
