@@ -12,11 +12,11 @@ public abstract class Work implements Serializable, Observable {
     private static final long serialVersionUID = 201911092305L;
     
     private int _id;
-    private int _copies;
-    private int _availableCopies;
     private String _title;
     private int _price;
     private Category _category;
+    private int _copies;
+    private int _availableCopies;
     private ArrayList<Observer> _observers = new ArrayList<Observer>();
 
     public Work(int id, String title, int price, String category, int copies) {

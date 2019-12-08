@@ -6,7 +6,7 @@ public class Dvd extends Work {
     private String _igac;
 
     public Dvd(int id, String title, String director, int price, 
-            String category, String igac, int copies) {
+               String category, String igac, int copies) {
         super(id, title, price, category, copies);
         _director = director;
         _igac = igac;
