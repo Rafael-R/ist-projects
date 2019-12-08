@@ -71,10 +71,6 @@ public abstract class Work implements Serializable, Observable {
         return _availableCopies > 0;
     }
 
-    public boolean hasTerm(String term) {
-        return _title.toLowerCase().contains(term.toLowerCase());
-    }
-
     public void addObserver(Observer observer) {
         _observers.add(observer);
     }
@@ -88,6 +84,16 @@ public abstract class Work implements Serializable, Observable {
         for (Observer observer : _observers) {
             observer.update(notification);
         }
+    }
+
+    public abstract boolean infoHasTerm(String term); 
+
+    public boolean titleHasTerm(String term) {
+        return _title.toLowerCase().contains(term.toLowerCase());
+    }
+
+    public boolean hasTerm(String term) {
+        return infoHasTerm(term) || titleHasTerm(term);
     }
 
     public String categoryString() {
