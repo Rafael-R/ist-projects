@@ -2,6 +2,7 @@ package m19.rules;
 
 import m19.Work;
 import m19.User;
+import m19.Category;
 import m19.exceptions.RuleVerificationException;
 
 public class ReferenceWorksRule implements Rule {
@@ -12,7 +13,7 @@ public class ReferenceWorksRule implements Rule {
 
     @Override
     public void verify(Work work, User user) throws RuleVerificationException {
-        if (work.getCategory().equals("Referência")) {
+        if (work.getCategory() == Category.REFERENCE) {
             throw new RuleVerificationException(user.getId(), work.getId(), INDEX);
         }
     }
