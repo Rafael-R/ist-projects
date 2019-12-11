@@ -26,17 +26,15 @@ public class Faulty extends Classification {
     }
 
     public void update(List<Request> requests) {
-        if (requests.size() >= 3) {
-            int counter = 0;
-            for (int i = requests.size() - 3; i < requests.size(); i++) {
-                Request request = requests.get(i);
-                if (!request.getStatus()) {
-                    counter++;
-                }
+        int counter = 0;
+        for (int i = requests.size() - 3; i < requests.size(); i++) {
+            Request request = requests.get(i);
+            if (request.isReturned() && request.getFine() == 0) {
+                counter++;
             }
-            if (counter == 3) {
-                _user.setClassification(new Normal(_user));
-            }
+        }
+        if (counter == 3) {
+            _user.setClassification(new Normal(_user));
         }
     }
     
