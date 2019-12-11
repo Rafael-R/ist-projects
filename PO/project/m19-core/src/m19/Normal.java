@@ -30,24 +30,24 @@ public class Normal extends Classification {
             int counter = 0, faults = 0;
             for (int i = requests.size() - 3; i < requests.size(); i++) {
                 Request request = requests.get(i);
-                if (request.getStatus()) {
+                if (request.isReturned() && request.getStatus()) {
                     faults++;
-                } else if (!request.getStatus()) {
+                } else if (request.isReturned() && !request.getStatus()) {
                     counter++;
                 }
             }
-            if (counter == 3 && requests.size() >= 5) {
+            if (faults == 3) {
+                _user.setClassification(new Faulty(_user));
+            } else if (requests.size() >= 5) {
                 for (int i = requests.size() - 5; i < requests.size() - 3; i++) {
                     Request request = requests.get(i);
-                    if (!request.getStatus()) {
+                    if (request.isReturned() && request.getFine() == 0) {
                         counter++;
                     }
                 }
                 if (counter == 5) {
                     _user.setClassification(new Straight(_user));
                 }
-            } else if (faults == 3) {
-                _user.setClassification(new Faulty(_user));
             }
         }
     }
