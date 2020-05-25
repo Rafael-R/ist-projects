@@ -15,13 +15,13 @@ Team newTeam(char *name)
     return team;
 }
 
-void printTeam(Team team)
-{
-    printf("%s %d\n", team->name, team->victories);
-}
-
 void freeTeam(Team team)
 {
     free(team->name);
     free(team);
+}
+
+void printTeam(Team team)
+{
+    printf("%s %d\n", team->name, team->victories);
 }

@@ -13,6 +13,6 @@ typedef struct team
 
 Team newTeam(char *name);
 
-void printTeam(Team team);
-
 void freeTeam(Team team);
+
+void printTeam(Team team);

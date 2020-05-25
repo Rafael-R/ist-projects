@@ -18,11 +18,6 @@ Link newNode(Key key, void *data)
     return node;
 }
 
-void *getData(Link head)
-{
-    return head->data;
-}
-
 /* Destroi um dado elemento */
 void freeNode(Link node)
 {
