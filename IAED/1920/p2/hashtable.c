@@ -19,7 +19,7 @@ int hashkey(Key key)
 }
 
 /* Inicializa uma dada hashtable */
-Hash initHash()
+Hash newHash()
 {
     int i;
     Hash hashtable = (Hash)malloc(sizeof(Link) * HASHSIZE);

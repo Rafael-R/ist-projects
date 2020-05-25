@@ -16,6 +16,6 @@ typedef struct match
 
 Match newMatch(char *name, char *team1, char *team2, int score1, int score2);
 
-void printMatch(Match match);
-
 void freeMatch(Match match);
+
+void printMatch(Match match);

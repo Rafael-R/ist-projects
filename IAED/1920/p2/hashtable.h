@@ -11,7 +11,7 @@ typedef Link *Hash;
 
 int hashkey(Key key);
 
-Hash initHash();
+Hash newHash();
 
 void insertHash(Hash hashtable, Key key, Link new);
 

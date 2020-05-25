@@ -8,7 +8,7 @@
 #include "hashtable.h"
 
 Link addMatch(int nl, Hash matches, Hash teams, char *name, char *team1, char *team2, int score1, int score2);
-void listMatches(int nl, Link head);
+void listMatches(int nl, Link firstMatch);
 void searchMatch(int nl, Hash matches, char *name);
 Link removeMatch(int nl, Hash matches, Hash teams, char *name);
 void changeScore(int nl, Hash matches, Hash teams, char *name, int score1, int score2);
@@ -21,7 +21,7 @@ int main()
 {
     char command, name[MAX_INPUT], team1[MAX_INPUT], team2[MAX_INPUT];
     int exit = 0, nl = 0, score1, score2;
-    Hash matches = initHash(), teams = initHash();
+    Hash matches = newHash(), teams = newHash();
     Link temp = NULL, firstMatch = NULL, lastMatch = NULL, firstTeam = NULL, lastTeam = NULL;
 
     while (!exit)
@@ -110,7 +110,7 @@ Link addMatch(int nl, Hash matches, Hash teams, char *name, char *team1, char *t
                 else if (score1 < score2)
                     teamNode = searchHash(teams, team2);
 
-                team = (Team)getData(teamNode);
+                team = (Team)teamNode->data;
                 team->victories++;
             }
         }
@@ -126,11 +126,11 @@ Link addMatch(int nl, Hash matches, Hash teams, char *name, char *team1, char *t
     return new;
 }
 
-void listMatches(int nl, Link head)
+void listMatches(int nl, Link firstMatch)
 {
-    for (; head != NULL; head = head->next_order)
+    for (; firstMatch != NULL; firstMatch = firstMatch->next_order)
     {
-        Match match = (Match)getData(head);
+        Match match = (Match)firstMatch->data;
         printf("%d ", nl);
         printMatch(match);
     }
@@ -141,7 +141,7 @@ void searchMatch(int nl, Hash matches, char *name)
     Link matchNode = searchHash(matches, name);
     if (matchNode != NULL)
     {
-        Match match = (Match)getData(matchNode);
+        Match match = (Match)matchNode->data;
         printf("%d ", nl);
         printMatch(match);
     }
@@ -160,7 +160,7 @@ Link removeMatch(int nl, Hash matches, Hash teams, char *name)
     matchNode = searchHash(matches, name);
     if (matchNode != NULL)
     {
-        match = (Match)getData(matchNode);
+        match = (Match)matchNode->data;
         removeHash(matches, name);
 
         if (match->score1 != match->score2)
@@ -170,7 +170,7 @@ Link removeMatch(int nl, Hash matches, Hash teams, char *name)
             else if (match->score1 < match->score2)
                 teamNode = searchHash(teams, match->team2);
 
-            team = (Team)getData(teamNode);
+            team = (Team)teamNode->data;
             team->victories--;
         }
     }
@@ -190,7 +190,7 @@ void changeScore(int nl, Hash matches, Hash teams, char *name, int score1, int s
     matchNode = searchHash(matches, name);
     if (matchNode != NULL)
     {
-        match = (Match)getData(matchNode);
+        match = (Match)matchNode->data;
 
         if (match->score1 != match->score2)
         {
@@ -199,7 +199,7 @@ void changeScore(int nl, Hash matches, Hash teams, char *name, int score1, int s
             else if (match->score1 < match->score2)
                 teamNode = searchHash(teams, match->team2);
 
-            team = (Team)getData(teamNode);
+            team = (Team)teamNode->data;
             team->victories--;
         }
 
@@ -210,7 +210,7 @@ void changeScore(int nl, Hash matches, Hash teams, char *name, int score1, int s
             else if (score1 < score2)
                 teamNode = searchHash(teams, match->team2);
 
-            team = (Team)getData(teamNode);
+            team = (Team)teamNode->data;
             team->victories++;
         }
 
@@ -244,7 +244,7 @@ void searchTeam(int nl, Hash teams, char *name)
     Link teamNode = searchHash(teams, name);
     if (teamNode != NULL)
     {
-        Team team = (Team)getData(teamNode);
+        Team team = (Team)teamNode->data;
         printf("%d ", nl);
         printTeam(team);
     }
@@ -256,16 +256,13 @@ void searchTeam(int nl, Hash teams, char *name)
 
 void findWinners(int nl, Link firstTeam)
 {
-    Link temp;
     Team team;
     int victories, mostVictories = 0, count = 0, i;
     char **teams = (char **)malloc(sizeof(char *));
 
-    while (firstTeam != NULL)
+    for (; firstTeam != NULL; firstTeam = firstTeam->next_order)
     {
-        temp = firstTeam;
-        firstTeam = firstTeam->next_order;
-        team = (Team)temp->data;
+        team = (Team)firstTeam->data;
         victories = team->victories;
 
         if (victories > mostVictories)

@@ -18,8 +18,6 @@ typedef struct node
 
 Link newNode(Key key, void *data);
 
-void *getData(Link head);
-
 void freeNode(Link node);
 
 void insertLL(Link *head, Link new);
