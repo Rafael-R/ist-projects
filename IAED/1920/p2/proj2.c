@@ -20,15 +20,13 @@ void freeData(Link firstMatch, Link firstTeam);
 int main()
 {
     char command, name[MAX_INPUT], team1[MAX_INPUT], team2[MAX_INPUT];
-    int exit = 0, nl = 0, score1, score2;
+    int nl = 0, score1, score2;
     Hash matches = newHash(), teams = newHash();
     Link temp = NULL, firstMatch = NULL, lastMatch = NULL, firstTeam = NULL, lastTeam = NULL;
 
-    while (!exit)
+    while ((command = getchar()) != 'x')
     {
-        command = getchar();
         getchar(); /* clean space or \n */
-
         nl++;
 
         switch (command)
@@ -53,7 +51,6 @@ int main()
             temp = removeMatch(nl, matches, teams, name);
             if (temp != NULL)
             {
-                freeMatch((Match)temp->data);
                 removeDLL(&firstMatch, &lastMatch, temp);
             }
             break;
@@ -75,9 +72,6 @@ int main()
             break;
         case 'g':
             findWinners(nl, firstTeam);
-            break;
-        case 'x':
-            exit = 1;
             break;
         }
     }
@@ -173,6 +167,8 @@ Link removeMatch(int nl, Hash matches, Hash teams, char *name)
             team = (Team)teamNode->data;
             team->victories--;
         }
+
+        freeMatch((Match)matchNode->data);
     }
     else
     {
