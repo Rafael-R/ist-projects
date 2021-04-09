@@ -26,6 +26,11 @@ public:
         visited = true;
     }
 
+    void setUnvisited()
+    {
+        visited = false;
+    }
+
     bool isVisited()
     {
         return visited;
@@ -36,33 +41,28 @@ class Graph
 {
 private:
     vector<Vertice *> vertices;
+    int* incomingEdges;
 
 public:
     Graph(int numVertices)
     {
+        incomingEdges = new int[numVertices];
         for (int i = 0; i < numVertices; i++)
         {
             vertices.push_back(new Vertice());
+            incomingEdges[i] = 0;
         }
     }
 
     void addEdge(int x, int y)
     {
         vertices[x - 1]->addAdjacencie(y - 1);
+        incomingEdges[y - 1]++;
     }
 
     int calculate()
     {
         int numVertices = vertices.size();
-        int inVerticeCount[numVertices] = {};
-
-        for (int i = 0; i < numVertices; i++)
-        {
-            for (int adjacencie : vertices[i]->getAdjacencies())
-            {
-                inVerticeCount[adjacencie]++;
-            }
-        }
 
         int interventions = 0, greaterSequence = 0, sequence;
         
@@ -71,8 +71,13 @@ public:
             queue<int> q;
             int vertice = i;
 
-            if (inVerticeCount[vertice] == 0)
+            if (incomingEdges[vertice] == 0)
             {
+                for (int j = 0; j < numVertices; j++)
+                {
+                    vertices[j]->setUnvisited();
+                }
+
                 interventions++;
                 sequence = 0;
 
@@ -95,6 +100,8 @@ public:
                         }
                     }
                 }
+
+                printf("%d: %d\n", i + 1, sequence);
                 
                 greaterSequence = (sequence > greaterSequence) ? sequence : greaterSequence;
             }
@@ -110,6 +117,7 @@ public:
             delete vertice;
         }
         vertices.clear();
+        delete[] incomingEdges;
     }
 };
 
