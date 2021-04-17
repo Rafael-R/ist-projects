@@ -98,7 +98,7 @@ public:
             adjacencies = vertices[vertice]->getAdjacencies();
 
             if (adjacencies.size() == 0) {
-                aux(vertice, 1);
+                aux(vertice, 0);
             } else {
                 for (int v : adjacencies) {
                     if (!vertices[v]->isVisited()) {
@@ -113,7 +113,7 @@ public:
 
         int* result = new int[2];
         result[0] = interventions;
-        result[1] = vertices[numVertices]->getDistance() - 1;
+        result[1] = vertices[numVertices]->getDistance();
         
         return result;
     }
