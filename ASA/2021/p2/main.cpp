@@ -15,10 +15,10 @@ private:
 public:
     vector<int> getAdjacencies() { return adjacencies; }
 
-    int getCost(int adjacencie) {
+    int getCost(int vertice) {
         int i = 0;
         for(int v : adjacencies) {
-            if(v == adjacencie) {
+            if(vertice == v) {
                 return costs[i];
             }
             i++;
@@ -108,6 +108,7 @@ public:
 
         while(bfs(rGraph, parent)) {
             int path_flow = INT_MAX;
+            
             for(v = t; v != s; v = parent[v]) {
                 u = parent[v];
                 path_flow = min(path_flow, rGraph[u][v]);
