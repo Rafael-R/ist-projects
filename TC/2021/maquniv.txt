@@ -1,0 +1,175 @@
+
+
+start $__ $__ r** input
+start Q__ QQ_ rr* init
+start *__ *__ r** start
+
+init 0__ 00_ rr* init
+init 1__ 10_ rr* init
+init 2__ 20_ rr* init
+init 3__ 30_ rr* init
+init 4__ 40_ rr* init
+init 5__ 50_ rr* init
+init 6__ 60_ rr* init
+init 7__ 70_ rr* init
+init 8__ 80_ rr* init
+init 9__ 90_ rr* init
+init *__ *__ r** toinput
+
+toinput $__ $__ r** input
+toinput *__ *__ r** toinput
+
+input ___ ___ lll back
+input A__ A_A r*r input
+input 0__ 0_0 r*r input
+input 1__ 1_1 r*r input
+input 2__ 2_2 r*r input
+input 3__ 3_3 r*r input
+input 4__ 4_4 r*r input
+input 5__ 5_5 r*r input
+input 6__ 6_6 r*r input
+input 7__ 7_7 r*r input
+input 8__ 8_8 r*r input
+input 9__ 9_9 r*r input
+
+back $*_ _*_ l*r begstate
+back *** _** l*l back
+
+begstate *_* *_* *r* beg
+begstate *** *** *l* begstate
+
+beg _** _** *** guard
+beg *** *** l** beg
+
+guard _Y* *** *** finalize
+guard _N* *** *** halt-reject
+guard _Q* *** r** searchq
+
+searchq QQ* QQ* rr* searchq
+searchq 00* 00* rr* searchq
+searchq 11* 11* rr* searchq
+searchq 22* 22* rr* searchq
+searchq 33* 33* rr* searchq
+searchq 44* 44* rr* searchq
+searchq 55* 55* rr* searchq
+searchq 66* 66* rr* searchq
+searchq 77* 77* rr* searchq
+searchq 88* 88* rr* searchq
+searchq 99* 99* rr* searchq
+searchq *_* *_* *l* toqsearcha
+searchq *** *** *l* toqnext
+
+toqnext *_* *_* rr* next
+toqnext *** *** rl* toqnext
+
+next ;** ;** r** searchq
+next _** *** *** abort
+next *** *** r** next   
+
+toqsearcha *Q* *Q* *** searcha
+toqsearcha *** *** *l* toqsearcha
+
+searcha A*A A*A r*r searcha
+searcha 0*0 0*0 r*r searcha
+searcha 1*1 1*1 r*r searcha
+searcha 2*2 2*2 r*r searcha
+searcha 3*3 3*3 r*r searcha
+searcha 4*4 4*4 r*r searcha
+searcha 5*5 5*5 r*r searcha
+searcha 6*6 6*6 r*r searcha
+searcha 7*7 7*7 r*r searcha
+searcha 8*8 8*8 r*r searcha
+searcha 9*9 9*9 r*r searcha
+searcha Q** Q** **l toado
+searcha Y** Y** **l toado
+searcha N** N** **l toado
+searcha A*_ A*_ r** a0
+searcha *** *** **l toanext
+
+a0 0** 0** r** a0
+a0 Q** Q** *** do
+a0 Y** Y** *** do
+a0 N** N** *** do
+a0 *** *** *** next
+
+toanext **A **A *** next
+toanext *** *** **l toanext
+
+toado **A **A *** do
+toado *** *** **l toado
+
+do Q** QQ* rr* do
+do Y** YY* rr* do
+do N** NN* rr* do
+do 0** 00* rr* do
+do 1** 11* rr* do
+do 2** 22* rr* do
+do 3** 33* rr* do
+do 4** 44* rr* do
+do 5** 55* rr* do
+do 6** 66* rr* do
+do 7** 77* rr* do
+do 8** 88* rr* do
+do 9** 99* rr* do
+do *** *** *l* toqdoa
+
+toqdoa *_* *_* *r* doa
+toqdoa *** *** *l* toqdoa
+
+doa A** A*A r*r doa
+doa 0** 0*0 r*r doa
+doa 1** 1*1 r*r doa
+doa 2** 2*2 r*r doa
+doa 3** 3*3 r*r doa
+doa 4** 4*4 r*r doa
+doa 5** 5*5 r*r doa
+doa 6** 6*6 r*r doa
+doa 7** 7*7 r*r doa
+doa 8** 8*8 r*r doa
+doa 9** 9*9 r*r doa
+doa R** *** l** beg
+doa S** *** l*l toabeg
+doa L** *** l*l toaabeg
+
+toabeg **A **A l** beg
+toabeg *** *** **l toabeg
+
+toaabeg **A **A **l toabegspecial
+toaabeg *** *** **l toaabeg
+
+toabegspecial A*_ A*A l** beg
+toabegspecial 0*_ 0*0 l*l toabegspecial
+toabegspecial 1*_ 1*0 l*l toabegspecial
+toabegspecial 2*_ 2*0 l*l toabegspecial
+toabegspecial 3*_ 3*0 l*l toabegspecial
+toabegspecial 4*_ 4*0 l*l toabegspecial
+toabegspecial 5*_ 5*0 l*l toabegspecial
+toabegspecial 6*_ 6*0 l*l toabegspecial
+toabegspecial 7*_ 7*0 l*l toabegspecial
+toabegspecial 8*_ 8*0 l*l toabegspecial
+toabegspecial 9*_ 9*0 l*l toabegspecial
+toabegspecial *** *** **l toabeg
+
+finalize **_ *** *** halt-accept
+finalize **A **B **r dost
+
+dost **0 **& **r dost
+dost **_ **_ **l return
+dost **A **A **r dost
+dost *** *** **r dont
+
+dont **_ **_ **l return
+dont **A **A **r dost
+dont *** *** **r dont
+
+return **& **_ **l clean
+return *** *** **l finished
+
+clean **& **_ **l clean
+clean **A **_ **l return
+clean **B **_ *** halt-accept
+
+finished **& **0 **l finished
+finished **B **A *** halt-accept
+finished *** *** **l finished
+ 
