@@ -15,7 +15,7 @@ delete: Apaga um caminho e todos os subcaminhos.\n");
 
 void set(Hash paths, Link* first, Link* last, char *path, char *value) {
     char* parsedPath = parsePath(path);
-    char *sub_path = malloc(sizeof(char));
+    char *sub_path = (char *) malloc(sizeof(char) * strlen(path) + 1);
     char *token;
     Link link = NULL;
     Data data;
@@ -49,9 +49,8 @@ void set(Hash paths, Link* first, Link* last, char *path, char *value) {
 void print(Link first) {
     for (; first != NULL; first = first->next_order) {
         Data data = (Data) first->data;
-        if (strcmp(data->value, "") != 0) {
+        if (strcmp(data->value, "") != 0)
             printf("%s %s\n", data->path, data->value);
-        }
     }
 }
 
@@ -63,21 +62,19 @@ void find(Hash paths, char *path) {
     link = searchHash(paths, parsedPath);
     if (link != NULL) {
         data = (Data) link->data;
-        if (strcmp(data->value, "") != 0) {
+        if (strcmp(data->value, "") != 0)
             printf("%s\n", data->value);
-        } else {
+        else
             printf("no data\n");
-        }
-    } else { 
+    } else 
         printf("not found\n"); 
-    }
 }
 
 void list(Hash paths, Link first, char *path) {
     char* parsedPath;
     char* checker;
     int pathComponents, numComponents, count = 0, i;
-    char** components = (char **)malloc(sizeof(char *));
+    char** components = (char**) malloc(sizeof(char *));
     
     if (path == NULL) {
         for (; first != NULL; first = first->next_order) {
@@ -105,17 +102,17 @@ void list(Hash paths, Link first, char *path) {
                     }
                 }
             }
-        } else {
+        } else
             printf("not found\n");
-        }
     }
 
     if (count > 0) {
         sort(components, count);
-        for (i = 0; i < count; i++) {
+        for (i = 0; i < count; i++)
             printf("%s\n", components[i]);
-        }
     }
+
+    free(components);
 }
 
 void search(Link first, char *value) {
@@ -139,6 +136,7 @@ void delete(Hash paths, Link* first, Link* last, char *path) {
             Data data = (Data) temp->data;
             removeHash(paths, data->path);
             removeDLL(first, last, temp);
+            freeData(data);
         }
     } else {
         parsedPath = parsePath(path);
@@ -149,10 +147,12 @@ void delete(Hash paths, Link* first, Link* last, char *path) {
                 if (checker == data->path) {
                     removeHash(paths, data->path);
                     removeDLL(first, last, temp);
+                    freeData(data);
                 }
             }
-        } else {
+        } else
             printf("not found\n");
-        }
     }
+
+    free(temp);
 }

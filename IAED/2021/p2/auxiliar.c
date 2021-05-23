@@ -1,17 +1,19 @@
 #include "auxiliar.h"
 
+
 char *copyString(char *original) {
-    char *copy = (char *)malloc(sizeof(char) * strlen(original) + 1);
+    char *copy = (char *) malloc(sizeof(char) * strlen(original) + 1);
     strcpy(copy, original);
     return copy;
 }
 
 char* parsePath(char* path) {
-    char *parsedPath = malloc(sizeof(char));
-    char *token;
-
-    token = strtok(path, "/");
+    char *parsedPath = (char*) malloc(sizeof(char));
+    int length = 1;
+    char *token = strtok(path, "/");
     while (token != NULL) {
+        length += 1 + strlen(token);
+        parsedPath = (char*) realloc(parsedPath, length);
         strcat(parsedPath, "/");
         strcat(parsedPath, token);
         token = strtok(NULL, "/");
@@ -30,25 +32,37 @@ int countComponents(char* path) {
 }
 
 char* getComponent(int index, char* path) {
-    char *component = (char *)malloc(sizeof(char) * strlen(path) + 1);
-    char *token;
-
-    token = strtok(path, "/");
+    char *component = (char*) malloc(sizeof(char));
+    int length ;
+    char *token = strtok(path, "/");
     while (index > 0) {
+        length = strlen(token) + 1;
+        component = (char*) realloc(component, length);
         strcpy(component, token);
         token = strtok(NULL, "/");
         index--;
     }
-
     return component;
 }
 
-int myCompare(const void *a, const void *b)
-{
-    return strcmp(*(const char **)a, *(const char **)b);
+void swap(char **a, char **b) {
+	char *temp = *a;
+	*a = *b;
+	*b = temp;
 }
 
-void sort(char **arr, int n)
-{
-    qsort(arr, n, sizeof(const char *), myCompare);
+void sort(char **arr, int length) {
+	int i, piv = 0;
+	if (length <= 1) 
+		return;
+	
+	for (i = 0; i < length; i++) {
+		if (strcmp(arr[i], arr[length -1]) < 0)
+			swap(arr + i, arr + piv++);		
+	}
+
+	swap(arr + piv, arr + length - 1);
+
+	sort(arr, piv++);
+	sort(arr + piv, length - piv);
 }

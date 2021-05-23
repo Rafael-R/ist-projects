@@ -1,0 +1,41 @@
+; manter maquina igual exceto os estados de aceitacao e rejeicao
+start A A r start
+start Q Q r start
+start 0 0 r start
+start 1 1 r start
+start 2 2 r start
+start 3 3 r start
+start 4 4 r start
+start 5 5 r start
+start 6 6 r start
+start 7 7 r start
+start 8 8 r start
+start 9 9 r start
+start ; ; r start
+start R R r start
+start L L r start
+start S S r start
+start Y N r start
+start N Y r start
+start * * l back
+
+; voltar ao inicio da maquina
+back A A l back
+back Q Q l back
+back 0 0 l back
+back 1 1 l back
+back 2 2 l back
+back 3 3 l back
+back 4 4 l back
+back 5 5 l back
+back 6 6 l back
+back 7 7 l back
+back 8 8 l back
+back 9 9 l back
+back ; ; l back
+back R R l back
+back L L l back
+back S S l back
+back Y Y l back
+back N N l back
+back * * r halt-accept

@@ -20,12 +20,13 @@
 
 int main()
 {
-    char input[MAX_INSTRUCTION];
+	char input[MAX_INSTRUCTION];
     char *command, *path, *value;
     Hash paths = newHash();
-    Link first = NULL, last = NULL;
+    Link first = NULL, last = NULL, temp;
 
-	do { fgets(input, MAX_INSTRUCTION, stdin);
+	do {
+        fgets(input, MAX_INSTRUCTION, stdin);
         command = strtok(input, " \n");
 	    if (strcmp(command, "help") == 0) {
             help();
@@ -55,7 +56,17 @@ int main()
             delete(paths, &first, &last, path);
         }
 	} while (strcmp(command, "quit") != 0 || strlen(input) > MAX_INSTRUCTION); /* Quando 'quit' e introduzido o programa sai do ciclo*/
-	return 0;
+	
+    while (first != NULL)
+    {
+        temp = first;
+        first = first->next_order;
+        freeData((Data)temp->data);
+        freeNode(temp);
+    }
+    free(paths);
+    
+    return 0;
 }
 
 /*----------------------------------------------------------------------------*/
