@@ -110,6 +110,4 @@ void removeDLL(Link *first, Link *last, Link del)
         del->next_order->prev_order = del->prev_order;
         del->prev_order->next_order = del->next_order;
     }
-
-    freeNode(del);
 }

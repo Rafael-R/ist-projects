@@ -15,49 +15,49 @@ delete: Apaga um caminho e todos os subcaminhos.\n");
 
 void set(Hash paths, Link* first, Link* last, char *path, char *value) {
     char* parsedPath = parsePath(path);
-    char *sub_path = (char *) malloc(sizeof(char) * strlen(path) + 1);
+    char subPath[MAX_INSTRUCTION] = "";
     char *token;
     Link link = NULL;
     Data data;
 
     token = strtok(parsedPath, "/");
     while (token != NULL) {
-        strcat(sub_path, "/");
-        strcat(sub_path, token);
+        strcat(subPath, "/");
+        strcat(subPath, token);
         token = strtok(NULL, "/");
 
-        link = searchHash(paths, sub_path);
-        if (link == NULL) {
-            if (token != NULL) {
-                data = newData(sub_path, "");
-                link = newNode(sub_path, data);
-                insertHash(paths, sub_path, link);
-            } else {
-                data = newData(sub_path, value);
-                link = newNode(sub_path, data);
-                insertHash(paths, sub_path, link);
+        link = searchHash(paths, subPath);
+        if (link == NULL) { /* Caso não exista o caminho especificado */
+            if (token != NULL) {                /* Caso seja um sub-caminho */
+                data = newData(subPath, "");    /* e criado sem valor associado */
+                link = newNode(subPath, data);
+                insertHash(paths, subPath, link);
+            } else {                            /* Caso seja um caminho */
+                data = newData(subPath, value); /* e associado o valor dado */
+                link = newNode(subPath, data);
+                insertHash(paths, subPath, link);
             }
             insertDLL(first, last, link);
-        } else if (link != NULL && token == NULL) {
+        } else if (link != NULL && token == NULL) { /* Atualiza o valor caso o caminho exista */
             data = (Data) link->data;
             data->value = copyString(value);
         }
     }
-    free(sub_path);
+    free(parsedPath);
 }
 
 void print(Link first) {
     for (; first != NULL; first = first->next_order) {
         Data data = (Data) first->data;
-        if (strcmp(data->value, "") != 0)
+        if (strcmp(data->value, "") != 0)   /* Apenas imprime se tiver valor associado */
             printf("%s %s\n", data->path, data->value);
     }
 }
 
 void find(Hash paths, char *path) {
+    char* parsedPath = parsePath(path);
     Link link = NULL;
     Data data;
-    char* parsedPath = parsePath(path);
 
     link = searchHash(paths, parsedPath);
     if (link != NULL) {
@@ -67,7 +67,9 @@ void find(Hash paths, char *path) {
         else
             printf("no data\n");
     } else 
-        printf("not found\n"); 
+        printf("not found\n");
+
+    free(parsedPath);
 }
 
 void list(Hash paths, Link first, char *path) {
@@ -76,11 +78,11 @@ void list(Hash paths, Link first, char *path) {
     int pathComponents, numComponents, count = 0, i;
     char** components = (char**) malloc(sizeof(char *));
     
-    if (path == NULL) {
+    if (path == NULL) { /* Caso nao seja indicado um caminho */
         for (; first != NULL; first = first->next_order) {
             Data data = (Data) first->data;
             numComponents = countComponents(data->path);
-            if (numComponents == 1) {
+            if (numComponents == 1) {   /* Listamos os caminhos com apenas um componente */
                 count++;
                 components = (char **)realloc(components, sizeof(char *) * count);
                 *(components + count - 1) = getComponent(numComponents, data->path);
@@ -92,8 +94,9 @@ void list(Hash paths, Link first, char *path) {
         if(searchHash(paths, parsedPath) != NULL) {
             for (; first != NULL; first = first->next_order) {
                 Data data = (Data) first->data;
+                /* Verifica se o caminho pertence ao diretorio */
                 checker = strstr(data->path, parsedPath);
-                if (checker == data->path) {
+                if (checker == data->path) {    
                     numComponents = countComponents(data->path);
                     if (numComponents == pathComponents + 1) {
                         count++;
@@ -104,14 +107,18 @@ void list(Hash paths, Link first, char *path) {
             }
         } else
             printf("not found\n");
+
+        free(parsedPath);
+        free(checker);
     }
 
     if (count > 0) {
         sort(components, count);
-        for (i = 0; i < count; i++)
+        for (i = 0; i < count; i++) {
             printf("%s\n", components[i]);
+            free(components[i]);
+        }
     }
-
     free(components);
 }
 
@@ -130,19 +137,23 @@ void delete(Hash paths, Link* first, Link* last, char *path) {
     char* parsedPath;
     char* checker;
     Link temp;
+    Data data;
     
-    if (path == NULL) {
-        for (temp = *first; temp != NULL; temp = temp->next_order) {
-            Data data = (Data) temp->data;
+    if (path == NULL) { /* Caso nao seja indicado um caminho */
+        while (first != NULL) {
+            temp = *first;
+            *first = (*first)->next_order;
+            data = (Data) temp->data;
             removeHash(paths, data->path);
-            removeDLL(first, last, temp);
             freeData(data);
+            freeNode(temp);
         }
     } else {
         parsedPath = parsePath(path);
         if(searchHash(paths, parsedPath) != NULL) {
             for (temp = *first; temp != NULL; temp = temp->next_order) {
-                Data data = (Data) temp->data;
+                data = (Data) temp->data;
+                /* Verifica se o caminho pertence ao diretorio */
                 checker = strstr(data->path, parsedPath);
                 if (checker == data->path) {
                     removeHash(paths, data->path);
@@ -154,5 +165,6 @@ void delete(Hash paths, Link* first, Link* last, char *path) {
             printf("not found\n");
     }
 
-    free(temp);
+    free(parsedPath);
+    free(checker);
 }

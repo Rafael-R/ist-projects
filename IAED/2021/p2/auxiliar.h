@@ -5,9 +5,11 @@
 
 /* Constants defenition */
 #define MAX_INSTRUCTION 65535
+#define MAX_ARGS 3
 
 /* Function declarations */
-char *copyString(char* original);
+void parseInput(char* input, int* argc, char* argv[]);
+char* copyString(char* original);
 char* parsePath(char* path);
 int countComponents(char* path);
 char* getComponent(int index, char* path);
