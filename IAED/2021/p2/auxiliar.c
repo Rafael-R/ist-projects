@@ -75,7 +75,7 @@ void sort(char **arr, int length) {
 		return;
 	
 	for (i = 0; i < length; i++) {
-		if (strcmp(arr[i], arr[length -1]) < 0)
+		if (strcmp(arr[i], arr[length -1]) > 0)
 			swap(arr + i, arr + piv++);		
 	}
 

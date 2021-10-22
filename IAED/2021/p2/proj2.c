@@ -43,7 +43,7 @@ int main()
             set(paths, &first, &last, argv[1], argv[2]);
         }
 	    else if (strcmp(argv[0], "print") == 0) {
-            print(first);
+            print(last);
         }
 	    else if (strcmp(argv[0], "find") == 0) {
             find(paths, argv[1]);

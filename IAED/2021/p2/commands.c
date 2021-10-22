@@ -46,9 +46,9 @@ void set(Hash paths, Link* first, Link* last, char *path, char *value) {
     free(parsedPath);
 }
 
-void print(Link first) {
-    for (; first != NULL; first = first->next_order) {
-        Data data = (Data) first->data;
+void print(Link last) {
+    for (; last != NULL; last = last->prev_order) {
+        Data data = (Data) last->data;
         if (strcmp(data->value, "") != 0)   /* Apenas imprime se tiver valor associado */
             printf("%s %s\n", data->path, data->value);
     }
