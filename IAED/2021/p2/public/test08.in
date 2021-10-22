@@ -6,6 +6,10 @@ set tests/test02.in segundo teste
 set Makefile construção do projeto
 set guidelines.md orientações para a escrita do projeto
 list
+<<<<<<< HEAD
 delete
+=======
+delete tests
+>>>>>>> 9a9111b913d34b199486bc8dddf3c03e55716a5e
 list
 quit
