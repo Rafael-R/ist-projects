@@ -37,6 +37,7 @@ void multiply_matrices(int16_t const factor1[N][N], int16_t const factor2[N][N],
                        int16_t res[N][N]) {
                            
     int16_t tmp[N][N];
+    memset(tmp, 0, sizeof(int16_t) * N * N);
     transpose(factor2, tmp);
     for (size_t i = 0; i < N; ++i) {
         for (size_t j = 0; j < N; ++j) {
