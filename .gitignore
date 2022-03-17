@@ -47,6 +47,10 @@ tecnicofs-rwlock
 SO/*/client
 SO/*/test-*
 
+# ----- ASA -----
+
+ASA/**/tests/generated
+
 # ----- PO -----
 
 PO/ei-*
