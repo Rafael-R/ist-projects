@@ -1,2 +1,2 @@
 # Projects @ IST
-Projects made by Rafael Rodrigues [89532] for college.
+Projects made by Rafael Rodrigues for college.
