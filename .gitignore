@@ -12,6 +12,8 @@
 *.myout
 **/CVS/
 **/bin/
+**/.DS_Store
+**/__pycache__
 **/testes_publicos/
 **/testes-publicos/
 **/testes_enunciado/
