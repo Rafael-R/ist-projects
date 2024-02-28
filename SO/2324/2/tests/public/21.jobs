@@ -1,0 +1,13 @@
+CREATE 21 10 10
+
+RESERVE 21 [(1,1) (10,10)]
+
+RESERVE 21 [(2,2) (4,4)]
+
+RESERVE 21 [(3,3) (5,5)]
+
+# this should fail (positions already reserved)
+RESERVE 21 [(4,4) (6,6)]
+
+SHOW 21
+LIST

@@ -1,0 +1,14 @@
+# Binaries
+*.o
+*.out
+2/src/client/client
+2/src/server/ems
+
+# Tests
+/**/tests/**/*.out
+
+# ZIP
+*.zip
+
+# VSCode
+.vscode

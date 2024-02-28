@@ -1,0 +1,5 @@
+GS
+player
+server/games/*
+server/scores/*
+client/data/*
