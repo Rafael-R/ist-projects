@@ -1,0 +1,78 @@
+; Teste Q10A1NNNA1R;Q10A0YYYA0L;Q11A1NNNA1L;Q12A1Q11A1L;Q11A0YYYA0R;Q12A0NNNA0R$Q13A1YYYA1R;Q14A0NNNA0S;Q15A1NNNA1L;Q16A0YYYA0L
+; Out   Q10A1NNNA1R;Q10A0Q13A0L;Q11A1NNNA1L;Q12A1Q11A1L;Q11A0Q13A0R;Q12A0NNNA0R;Q13A1YYYA1R;Q14A0NNNA0S;Q15A1NNNA1L;Q16A0YYYA0L
+
+; Avancar ate a segunda maquina
+Av ** ** r* Av
+Av $* $* r* Start
+
+; Passa pelo primeiro q da segunda maquina
+Start Q* Q* r* M1in
+
+; Guardar o primeiro estado da segunda maquina
+M1in 0* 00 rr M1in
+M1in 1* 11 rr M1in
+M1in 2* 22 rr M1in
+M1in 3* 33 rr M1in
+M1in 4* 44 rr M1in
+M1in 5* 55 rr M1in
+M1in 6* 66 rr M1in
+M1in 7* 77 rr M1in
+M1in 8* 88 rr M1in
+M1in 9* 99 rr M1in
+M1in A_ A_ ll BackSeg
+
+; Rebobinar a segunda fita
+BackSeg ** ** ll BackSeg
+BackSeg *_ *_ *r Back
+
+; Voltar ao inicio da primeira fita
+Back ** ** l* Back
+Back _* _* r* Cal
+
+; Percorre a primeira maquina
+Cal ** ** r* Cal
+Cal Y* Q* r* Cm1
+Cal $* $* l* Fim
+
+; Troca o estado a aceitacao da primeira maquina
+Cm1 *0 0* rr Cm1
+Cm1 *1 1* rr Cm1
+Cm1 *2 2* rr Cm1
+Cm1 *3 3* rr Cm1
+Cm1 *4 4* rr Cm1
+Cm1 *5 5* rr Cm1
+Cm1 *6 6* rr Cm1
+Cm1 *7 7* rr Cm1
+Cm1 *8 8* rr Cm1
+Cm1 *9 9* rr Cm1
+Cm1 *_ ** *l BackSeg
+
+; Volta ao inicio
+Fim ** ** l* Fim
+Fim _* _* r* Comp
+
+; Criar nova máquina composta
+Comp Q* QQ rr Comp
+Comp A* AA rr Comp
+Comp 0* 00 rr Comp
+Comp 1* 11 rr Comp
+Comp 2* 22 rr Comp
+Comp 3* 33 rr Comp
+Comp 4* 44 rr Comp
+Comp 5* 55 rr Comp
+Comp 6* 66 rr Comp
+Comp 7* 77 rr Comp
+Comp 8* 88 rr Comp
+Comp 9* 99 rr Comp
+Comp Y* YY rr Comp
+Comp N* NN rr Comp
+Comp ;* ;; rr Comp
+Comp R* RR rr Comp
+Comp L* LL rr Comp
+Comp S* SS rr Comp
+Comp $* $; rr Comp
+Comp _* _* ll Fim2
+
+; Voltar ao inicio da nova maquina
+Fim2 ** ** ll Fim2
+Fim2 __ __ rr halt-accept

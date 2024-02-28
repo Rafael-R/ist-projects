@@ -1,0 +1,126 @@
+; Teste Q70A1NNNA1R;Q70A0YYYA0L;Q71A1NNNA1L;Q72A1Q71A1L;Q71A0YYYA0R;Q72A0NNNA0R$Q73A1YYYA1R;Q74A0NNNA0S;Q75A1NNNA1L;Q76A0YYYA0L
+; Out   Q70A1YYYA1R;Q70A0Q73A0L;Q71A1YYYA1L;Q72A1Q71A1L;Q71A0Q73A0R;Q72A0YYYA0R;Q73A1Q70A1R;Q74A0NNNA0S;Q75A1NNNA1L;Q76A0Q70A0L
+
+; Avancar ate ao primeiro estados da primeira maquina
+Start Q** Q** r** G1
+
+; Guardar o primeiro estado da primeira maquina
+G1 0** 00* rr* G1
+G1 1** 11* rr* G1
+G1 2** 22* rr* G1
+G1 3** 33* rr* G1
+G1 4** 44* rr* G1
+G1 5** 55* rr* G1
+G1 6** 66* rr* G1
+G1 7** 77* rr* G1
+G1 8** 88* rr* G1
+G1 9** 99* rr* G1
+G1 A_* A_* ll* BackSeg
+
+; Rebobinar a segunda fita
+BackSeg *** *** *l* BackSeg
+BackSeg *_* *_* *r* Crj
+
+; Alterar o estado de rejeicao e de aceitacao da primeira maquina
+Crj *** *** r** Crj
+Crj Y** X** r** Crj
+Crj N** Y** r** Crj
+Crj $** $** r** Start2
+
+; Avancar ate ao primeiro estado da segunda maquina
+Start2 Q** Q** r** G2
+
+; Guardar o primeiro estado da segunda maquina
+G2 0** 0*0 r*r G2
+G2 1** 1*1 r*r G2
+G2 2** 2*2 r*r G2
+G2 3** 3*3 r*r G2
+G2 4** 4*4 r*r G2
+G2 5** 5*5 r*r G2
+G2 6** 6*6 r*r G2
+G2 7** 7*7 r*r G2
+G2 8** 8*8 r*r G2
+G2 9** 9*9 r*r G2
+G2 A*_ A*_ l*l BackTer
+
+; Rebobinar a terceira fita
+BackTer *** *** **l BackTer
+BackTer **_ **_ **r Mac
+
+; Percorre a segunda maquina
+Mac *** *** r** Mac
+Mac Y** Q** r** Mac2
+Mac _** _** l** Back
+
+; Troca o estado de aceitacao da segunda maquina pelo estado inicial da primeira
+Mac2 *0* 0** rr* Mac2
+Mac2 *1* 1** rr* Mac2
+Mac2 *2* 2** rr* Mac2
+Mac2 *3* 3** rr* Mac2
+Mac2 *4* 4** rr* Mac2
+Mac2 *5* 5** rr* Mac2
+Mac2 *6* 6** rr* Mac2
+Mac2 *7* 7** rr* Mac2
+Mac2 *8* 8** rr* Mac2
+Mac2 *9* 9** rr* Mac2
+Mac2 *_* A** *l* BackSeg2
+
+; Rebobinar segunda fita
+BackSeg2 *** *** *l* BackSeg2
+BackSeg2 *_* *_* *r* Mac
+
+; Voltar ao inicio
+Back *** *** l** Back
+Back _** _** r** Cac
+
+; Percorre a primeira maquina
+Cac *** *** r** Cac
+Cac X** Q** r** Cac2
+Cac $** $** l** Fim
+
+; Troca o estado de aceitacao da primeira maquina pelo estado inicial da segunda
+Cac2 **0 0** r*r Cac2
+Cac2 **1 1** r*r Cac2
+Cac2 **2 2** r*r Cac2
+Cac2 **3 3** r*r Cac2
+Cac2 **4 4** r*r Cac2
+Cac2 **5 5** r*r Cac2
+Cac2 **6 6** r*r Cac2
+Cac2 **7 7** r*r Cac2
+Cac2 **8 8** r*r Cac2
+Cac2 **9 9** r*r Cac2
+Cac2 **_ *** **l BackTer2
+
+; Rebobinar a terceira fita
+BackTer2 *** *** **l BackTer2
+BackTer2 **_ **_ **r Cac
+
+; Volta ao inicio
+Fim *** *** l** Fim
+Fim _** _** r** Comp
+
+; Criar nova máquina composta
+Comp Q** QQ* rr* Comp
+Comp A** AA* rr* Comp
+Comp 0** 00* rr* Comp
+Comp 1** 11* rr* Comp
+Comp 2** 22* rr* Comp
+Comp 3** 33* rr* Comp
+Comp 4** 44* rr* Comp
+Comp 5** 55* rr* Comp
+Comp 6** 66* rr* Comp
+Comp 7** 77* rr* Comp
+Comp 8** 88* rr* Comp
+Comp 9** 99* rr* Comp
+Comp Y** YY* rr* Comp
+Comp N** NN* rr* Comp
+Comp ;** ;;* rr* Comp
+Comp R** RR* rr* Comp
+Comp L** LL* rr* Comp
+Comp S** SS* rr* Comp
+Comp $** $;* rr* Comp
+Comp _** _** ll* Fim2
+
+; Voltar ao inicio da nova maquina
+Fim2 *** *** ll* Fim2
+Fim2 __* __* rr* halt-accept
