@@ -1,0 +1,175 @@
+"Country","Continent","GDP","HCI"
+Afghanistan,Asia,1991,0.40
+Albania,Europe,19566,0.63
+Algeria,Africa,13682,0.53
+Angola,Africa,7077,0.36
+Antigua and Barbuda,Americas,25449,0.60
+Argentina,Americas,26506,0.60
+Armenia,Asia,19745,0.58
+Australia,Oceania,64675,0.77
+Austria,Europe,69069,0.75
+Azerbaijan,Asia,18694,0.58
+Bahrain,Asia,60715,0.65
+Bangladesh,Asia,8673,0.46
+Belarus,Europe,24017,0.70
+Belgium,Europe,65813,0.76
+Benin,Africa,4305,0.40
+Bhutan,Asia,14297,0.48
+Bosnia and Herzegovina,Europe,19634,0.58
+Botswana,Africa,19394,0.41
+Brazil,Americas,20079,0.55
+Brunei,Asia,72610,0.63
+Bulgaria,Europe,33780,0.61
+Burkina Faso,Africa,2683,0.38
+Burundi,Africa,890,0.39
+Cambodia,Asia,6087,0.49
+Cameroon,Africa,4661,0.40
+Canada,Americas,59813,0.80
+Chad,Africa,1807,0.30
+Chile,Americas,29935,0.65
+China,Asia,23309,0.65
+Colombia,Americas,19482,0.61
+Comoros,Africa,3464,0.40
+Costa Rica,Americas,26809,0.63
+Croatia,Europe,42873,0.71
+Cyprus,Asia,53931,0.76
+Czech Republic,Europe,49025,0.75
+DR Congo,Africa,1510,0.37
+Denmark,Europe,74958,0.76
+Dominica,Americas,14348,0.54
+Dominican Republic,Americas,25523,0.50
+Ecuador,Americas,13285,0.59
+Egypt,Africa,17123,0.49
+El Salvador,Americas,11717,0.55
+Estonia,Europe,45236,0.78
+Eswatini,Africa,11859,0.37
+Ethiopia,Africa,3719,0.38
+Micronesia,Oceania,3922,0.51
+Fiji,Oceania,16564,0.51
+Finland,Europe,59869,0.80
+France,Europe,58765,0.76
+Gabon,Africa,19165,0.46
+Gambia,Africa,2837,0.42
+Georgia,Asia,22357,0.57
+Germany,Europe,66038,0.75
+Ghana,Africa,6905,0.45
+Greece,Europe,39864,0.69
+Grenada,Americas,20195,0.57
+Guatemala,Americas,10595,0.46
+Guinea,Africa,3241,0.37
+Guyana,Americas,61099,0.50
+Haiti,Americas,3186,0.45
+Honduras,Americas,7163,0.48
+Hong Kong,Asia,72861,0.81
+Hungary,Europe,43601,0.68
+Iceland,Europe,69833,0.75
+India,Asia,9183,0.49
+Indonesia,Asia,15834,0.54
+Iran,Asia,19942,0.59
+Iraq,Asia,11742,0.41
+Ireland,Europe,137638,0.79
+Israel,Asia,54771,0.73
+Italy,Europe,54259,0.73
+Ivory Coast,Africa,6960,0.38
+Jamaica,Americas,12995,0.53
+Japan,Asia,52120,0.80
+Jordan,Asia,12809,0.55
+Kazakhstan,Asia,32712,0.63
+Kenya,Africa,6577,0.55
+Kiribati,Oceania,2381,0.49
+Kosovo,Europe,15767,0.57
+Kuwait,Asia,51765,0.56
+Kyrgyzstan,Asia,6438,0.60
+Laos,Asia,9787,0.46
+Latvia,Europe,40892,0.71
+Lebanon,Asia,11794,0.52
+Lesotho,Africa,3235,0.40
+Liberia,Africa,1789,0.32
+Lithuania,Europe,49245,0.71
+Luxembourg,Europe,143304,0.69
+Macau,Asia,98157,0.80
+Madagascar,Africa,1907,0.39
+Malawi,Africa,1668,0.41
+Malaysia,Asia,37083,0.61
+Mali,Africa,2639,0.32
+Malta,Europe,63481,0.71
+Marshall Islands,Oceania,5823,0.42
+Mauritania,Africa,7542,0.38
+Mauritius,Africa,29349,0.62
+Mexico,Americas,24976,0.61
+Moldova,Europe,16916,0.58
+Mongolia,Asia,15088,0.61
+Montenegro,Europe,28002,0.63
+Morocco,Africa,10408,0.50
+Mozambique,Africa,1584,0.36
+Myanmar,Asia,5124,0.48
+Namibia,Africa,11603,0.45
+Nauru,Oceania,11169,0.51
+Nepal,Asia,4934,0.50
+Netherlands,Europe,73317,0.79
+New Zealand,Oceania,53809,0.78
+Nicaragua,Americas,7642,0.51
+Niger,Africa,1579,0.29
+Nigeria,Africa,6148,0.36
+North Macedonia,Europe,21391,0.56
+Norway,Europe,82236,0.77
+Oman,Asia,39336,0.61
+Pakistan,Asia,6773,0.41
+Palau,Oceania,15169,0.59
+Palestine,Asia,6642,0.58
+Panama,Americas,42738,0.50
+Papua New Guinea,Oceania,3403,0.43
+Paraguay,Americas,15533,0.53
+Peru,Americas,15894,0.61
+Philippines,Asia,11326,0.52
+Poland,Europe,45538,0.75
+Portugal,Europe,45227,0.77
+Qatar,Asia,114210,0.64
+Congo,Africa,5552,0.42
+Romania,Europe,41029,0.58
+Russia,Europe,35310,0.68
+Rwanda,Africa,3137,0.38
+Saint Kitts and Nevis,Americas,29893,0.59
+Saint Lucia,Americas,18973,0.60
+Saint Vincent and the Grenadines,Americas,17840,0.53
+Samoa,Oceania,6544,0.55
+Saudi Arabia,Asia,68453,0.58
+Senegal,Africa,4325,0.42
+Serbia,Europe,26074,0.68
+Seychelles,Africa,41829,0.63
+Sierra Leone,Africa,2097,0.36
+Singapore,Asia,133108,0.88
+Slovakia,Europe,42228,0.66
+Slovenia,Europe,51407,0.77
+Solomon Islands,Oceania,2411,0.42
+South Africa,Africa,16211,0.43
+South Korea,Asia,56709,0.80
+South Sudan,Africa,476,0.31
+Spain,Europe,50472,0.73
+Sri Lanka,Asia,14267,0.60
+Sudan,Africa,3605,0.38
+Sweden,Europe,66209,0.80
+Switzerland,Europe,89537,0.76
+Tajikistan,Asia,5361,0.50
+Tanzania,Africa,3595,0.39
+Thailand,Asia,22491,0.61
+East Timor,Asia,3747,0.45
+Togo,Africa,2768,0.43
+Tonga,Oceania,7127,0.53
+Trinidad and Tobago,Americas,30719,0.60
+Tunisia,Africa,13249,0.52
+Turkey,Asia,41888,0.65
+Tuvalu,Oceania,5766,0.45
+Uganda,Africa,3222,0.38
+Ukraine,Europe,14304,0.63
+United Arab Emirates,Asia,88962,0.67
+United Kingdom,Europe,56836,0.78
+United States,Americas,80412,0.70
+Uruguay,Americas,28984,0.60
+Uzbekistan,Asia,10316,0.63
+Vanuatu,Oceania,2940,0.45
+Vietnam,Asia,14285,0.69
+Yemen,Asia,2053,0.37
+Zambia,Africa,4068,0.40
+Zimbabwe,Africa,2750,0.47
+
