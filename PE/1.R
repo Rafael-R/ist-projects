@@ -14,6 +14,5 @@ ggplot(dados, aes(x = GDP, y = HCI)) +
   geom_text(data = subset(dados, Country %in% paises), aes(label = Country),
             vjust = -1, hjust = 0.5, size = 3.5) +
   labs(title = "Human Capital Index relative to GDP per capita",
-       subtitle = "In Asian and African countries",
        caption = "Source: World Bank/IMF",
-       shape = "Country")
+       x = "GDP (log scale)", shape = "Country")
