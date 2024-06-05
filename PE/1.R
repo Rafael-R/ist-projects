@@ -7,15 +7,14 @@ paises <- c("United Arab Emirates", "Nepal", "Comoros", "Namibia")
 
 dados <- dados[dados$Continent %in% continentes,]
 
-num_paises <- length(unique(dados$Country))
-simbolos <- c(0:25,33:(num_paises+6))
 
-ggplot(dados, aes(x = GDP, y = HCI, color = Continent)) +
-  geom_point(size = 3, aes(shape = Country)) +
-  scale_shape_manual(values = simbolos) +
+ggplot(dados, aes(x = GDP, y = HCI)) +
+  geom_point(size = 3, aes(color = Continent, shape = Continent)) +
+  scale_shape_manual(values = c(16, 18)) +
   scale_x_log10() +
   geom_text(data = subset(dados, Country %in% paises),
-            aes(label = Country), vjust = -1, hjust = 0.5, size = 4) +
-  labs(title = "HCI vs GPD in Asian and African countries",
+            aes(label = Country), vjust = -1, hjust = 0.5, size = 3.5) +
+  labs(title = "Human Capital Index relative to GDP per capita",
+       subtitle = "In Asian and African countries",
        x = "GDP per capita [2023]",
        y = "Human Capital Index [2020]")
