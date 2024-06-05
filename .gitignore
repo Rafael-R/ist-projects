@@ -9,6 +9,7 @@
 *.ucls
 *.lua
 *.myout
+*.synctex.gz
 **/CVS/
 **/bin/
 **/.DS_Store
