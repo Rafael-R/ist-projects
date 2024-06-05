@@ -13,4 +13,4 @@ ggplot(dados) +
        caption = "Source: kaggle",
        y = "Suicides per 100k habitants",
        x = "Sex") +
-  theme(legend.position = "none")
+  theme_bw() + theme(legend.position = "none")
