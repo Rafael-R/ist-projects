@@ -1,0 +1,7 @@
+CREATE 3 10 10
+RESERVE 3 [(1,1) (10,10)]
+
+# this should fail (event does not exist)
+SHOW 4
+
+LIST

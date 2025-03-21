@@ -1,0 +1,223 @@
+\documentclass[12pt]{article}
+\usepackage[paper=letterpaper,margin=2cm]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{newtxtext, newtxmath}
+\usepackage{enumitem}
+\usepackage{titling}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{listings}
+\usepackage[table]{xcolor}
+
+\graphicspath{ {./images/} }
+
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{1,1,1}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=1
+}
+
+\lstset{style=mystyle}
+
+\setlength{\droptitle}{-6em}
+
+\title{\large{Aprendizagem 2022}\vskip 0.2cm Homework IV -- Group 126}
+\author{}
+\date{}
+\begin{document}
+\maketitle
+
+\center\large{\vskip -2.5cm\textbf{Part I}: Pen and paper}
+
+\begin{enumerate}[leftmargin=\labelsep]
+\item Given the following observations:
+    \begin{align*}
+        \begin{tabular}[t]{ P{2em} P{2em} P{2em} }
+                    & $y_{1}$ & $y_{2}$ \\
+            \hline
+            $x_{1}$ &       1 &       2 \\
+            $x_{2}$ &      -1 &       1 \\
+            $x_{3}$ &       1 &       0 \\
+        \end{tabular}
+    \end{align*}
+    \begin{enumerate}[label=\roman*]
+        \item Initialization
+            \begin{align*}
+                \mu_{1}=\begin{pmatrix} 2 \\ 2 \end{pmatrix}, \;
+                \mu_{2}=\begin{pmatrix} 0 \\ 0 \end{pmatrix}, \;
+                \Sigma_{1}=\begin{pmatrix} 2 & 1 \\ 1 & 2 \end{pmatrix}, \;
+                \Sigma_{2}=\begin{pmatrix} 2 & 0 \\ 0 & 2 \end{pmatrix}, \;
+                \pi_{1}=0.5, \;
+                \pi_{2}=0.5
+            \end{align*}
+        \item Expectation \\[6pt]
+            First we had to calculate the normal destribution for each data point $x_{i}$ for each cluster $c_{k}$ using:
+            \begin{equation}
+                p(x_{i}|c_{k}) = N(x_{i}|\mu_{k},\Sigma_{k}) =
+                \frac{1}{(2\pi)^{d/2}|\Sigma_{k}|^{1/2}}
+                e^{-\frac{1}{2}(x_{i}-\mu_{k})^T\Sigma_{k}^{-1}(x_{i}-\mu_{k})}
+            \end{equation}
+            And got: \;
+            \begin{tabular}{ P{2em} | P{4em} P{4em} }
+                        & $c_{1}$ & $c_{2}$ \\
+                \hline
+                $x_{1}$ &  0.0658 &  0.0228 \\
+                $x_{2}$ &  0.0089 &  0.0483 \\
+                $x_{3}$ &  0.0338 &  0.0620 \\
+            \end{tabular} \\[10pt]
+            Then we calculated the weight for each data point $x_{i}$ for each cluster $c_{k}$ using:
+            \begin{equation}
+                \gamma_{ki} =
+                \frac{N(x_{i}|\mu_{k},\Sigma_{k})\cdot\pi_{k}}
+                    {\sum_{j = 1}^{k}\pi_{j}N(x_{i}|\mu_{j},\Sigma_{j})} =
+                \frac{N(x_{i}|\mu_{k},\Sigma_{k})\cdot\pi_{k}}
+                    {\pi_{1}N(x_{i}|\mu_{1},\Sigma_{1})+\pi_{2}N(x_{i}|\mu_{2},\Sigma_{2})}
+            \end{equation}
+            And got: \;
+            \begin{tabular}{ P{2em} | P{4em} P{4em} }
+                        & $c_{1}$ & $c_{2}$ \\
+                \hline
+                $x_{1}$ &  0.7428 &  0.2572 \\
+                $x_{2}$ &  0.1558 &  0.8442 \\
+                $x_{3}$ &  0.3529 &  0.6471 \\
+            \end{tabular}
+        \newpage
+        \item Maximization \\[6pt]
+            Each observation $x_{i}$ will contribute to update cluster $c_{k}$ with weight $\gamma_{ki}$
+            \begin{equation}
+                N_{k}={\sum_{i=1}^{n}\gamma_{ki}}
+            \end{equation}
+            \begin{align*}
+                N_{1} \simeq 1.2516 && N_{2} \simeq 1.7484
+            \end{align*}
+            \begin{equation}
+                \mu_{k}={\frac{1}{N_{k}}\sum_{i=1}^{n}\gamma_{ki}\cdot x_{i}}
+            \end{equation}
+            \begin{align*}
+                \mu_{1} \simeq \begin{pmatrix} 0.7510 \\ 0.9388 \end{pmatrix} && 
+                \mu_{2} \simeq \begin{pmatrix} 0.0480 \\ 0.7770 \end{pmatrix}
+            \end{align*}
+            \begin{equation}
+                \Sigma_{k} = \frac{1}{N_{k}}\sum_{i=1}^{n}\gamma_{ki} \cdot (x_{i} - \mu_{k}) \cdot (x_{i} - \mu_{k})^T
+            \end{equation}
+            \begin{align*}
+                \Sigma_{1} \simeq
+                \begin{pmatrix} 0.4361 & 0.0776 \\ 0.0776 & 0.9174 \end{pmatrix} &&
+                \Sigma_{2} \simeq
+                \begin{pmatrix} 0.9990 & -0.2153 \\ -0.2153 & 0.4675 \end{pmatrix}
+            \end{align*}
+            \begin{equation}
+                \pi_{k}=p(c_{k})={\frac{N_{k}}{N}}
+            \end{equation}
+            \begin{align*}
+                \pi_{1} \simeq 0.4172 && \pi_{2} \simeq 0.5828
+            \end{align*}
+    \end{enumerate}
+\item 
+    \begin{enumerate}
+        \item To perform an hard assignment we do the expansion step again, using the updated parameters:
+            \begin{align*}
+                \mu_{1} = \begin{pmatrix} 0.7510 \\ 0.9388 \end{pmatrix}, &&
+                \Sigma_{1}=\begin{pmatrix} 0.4361 & 0.0776 \\ 0.0776 & 0.9174 \end{pmatrix}, &&
+                \pi_{1} \simeq 0.4172 \\
+                \mu_{2} = \begin{pmatrix} 0.0480 \\ 0.7770 \end{pmatrix}, &&
+                \Sigma_{2}=\begin{pmatrix} 0.9990 & -0.2153 \\ -0.2153 & 0.4675 \end{pmatrix}, &&
+                \pi_{2} \simeq 0.5828
+            \end{align*}
+            And obtain: \;
+            \begin{tabular}{ P{2em} | P{4em} P{4em} }
+                        & $c_{1}$ & $c_{2}$ \\
+                \hline
+                $x_{1}$ &  \cellcolor{blue!20}0.8733 &  0.1267 \\
+                $x_{2}$ &  0.0341 &  \cellcolor{blue!20}0.9659 \\
+                $x_{3}$ &  0.4836 &  \cellcolor{blue!20}0.5164 \\
+            \end{tabular} \\[6pt]
+            From this results we can assign $x_{1}$ to $c_{1}$ and $x_{2}, x_{3}$ to $c_{2}$.
+        \newpage
+        \item To compute the silhouette of the lerger cluster we have to compute the average of the silhouettes of the larger cluster's observations.
+            \begin{align}
+                s_{cluster} = \frac{s_2 + s_3}{2}
+            \end{align}
+            \begin{align}
+                s_{observation} = 1-\frac{a}{b} \text{,\;\;if } a<b 
+                \text{\;\;\;\;or\;\;\;\;}
+                s_{observation} = \frac{b}{a}-1 \text{,\;\;if } a\geqslant b
+            \end{align}
+            Since there are only two points in our cluster, $a$ is the same for both:
+            \begin{align*}
+                a = \sqrt[]{(y_{1_{2}}-y_{1_{3}})^2+(y_{2_{2}}-y_{2_{3}})^2}
+                = \sqrt[]{(-2)^2+(1)^2} = \sqrt[]{5}
+            \end{align*}
+            As there is only one point in the other cluster:
+            \begin{itemize}
+                \item For $x_{2}$:
+                    \begin{align*}
+                        b = \sqrt[]{(y_{1_{2}}-y_{1_{1}})^2+(y_{2_{2}}-y_{2_{1}})^2}
+                        = \sqrt[]{(-2)^2+(-1)^2} = \sqrt[]{5}
+                    \end{align*}
+                \item For $x_{3}$:
+                    \begin{align*}
+                        b = \sqrt[]{(y_{1_{3}}-y_{1_{1}})^2+(y_{2_{3}}-y_{2_{1}})^2}
+                        = \sqrt[]{(0)^2+(-2)^2} = 2
+                    \end{align*}
+            \end{itemize}
+            Using the silhouette formula$^{(8)}$ for $a\geqslant b$:
+            \begin{align*}
+                s_2 = \frac{\sqrt[]{5}}{\sqrt[]{5}}-1 = 0 &&
+                s_3 = \frac{2}{\sqrt[]{5}}-1 \simeq -0.1056
+            \end{align*}
+            We can now compute the cluster silhouette$^{(7)}$:
+            \begin{align*}
+                s_{cluster} = \frac{0-0.1056}{2} \simeq -0.0528
+            \end{align*}
+    \end{enumerate}
+\end{enumerate}
+
+\newpage
+\center\large{\textbf{Part II}: Programming}
+
+\begin{enumerate}[leftmargin=\labelsep]
+\item
+    \begin{tabular}[t]{ P{3em} | P{5em} | P{5em} }
+        Seed & Silhouette & Purity \\
+        \hline
+        0    & 0.1136 & 0.7672 \\
+        \hline
+        1    & 0.1140 & 0.7632 \\
+        \hline
+        2    & 0.1136 & 0.7672 \\
+    \end{tabular}
+\item As we use different seeds, different initializations cause different results.
+\item \
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[width=\linewidth]{plot.png}
+    \end{figure}
+\item 31 principal components are necessary to explain more than 80\% of variability.
+\end{enumerate}
+
+\center\large{\textbf{APPENDIX}\vskip 0.3cm}
+
+\lstinputlisting[language=Python]{../homework.py}
+
+\end{document}

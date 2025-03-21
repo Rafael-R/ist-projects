@@ -1,0 +1,40 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2cm, includehead]{geometry}
+\usepackage[svgnames]{xcolor}
+\usepackage{listings}
+\usepackage{sourcecodepro}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+
+\graphicspath{ {./images/} }
+
+\lstset{
+  language=R,
+  basicstyle=\footnotesize\ttfamily,
+  stringstyle=\color{DarkGreen},
+  commentstyle=\color{DarkBlue},
+  keywordstyle=\footnotesize\ttfamily,
+  showstringspaces=false,
+  deletekeywords={/},
+  xleftmargin=.35em,
+  xrightmargin=.35em
+}
+
+\renewcommand{\headrulewidth}{0pt}
+
+\begin{document}
+
+\pagestyle{fancy}
+\fancyhead[R]{Rafael Rodrigues 89532}
+
+\section*{Pergunta 3}
+
+\lstinputlisting{3.R}
+
+\vspace{20pt}
+
+\begin{center}
+  \includegraphics[width=\linewidth]{pergunta_3.png}
+\end{center}
+
+\end{document}

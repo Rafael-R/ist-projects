@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} IVM {% endblock %}</h1>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th scope="col">Category</th>
+      <th scope="col">Units</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    {% for event in events %}
+    <tr>
+      <td> {{ event[0] }} </td>
+      <td> {{ event[1] }} </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>{% block title %} Categories {% endblock %}</h1>
+
+<br>
+
+<form action="{{ url_for('create_category') }}" method="post">
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="lbl">Category Name</span>
+        <input name="name" type="text" class="form-control" aria-describedby="basic-addon1">
+        <button type="submit" class="btn btn-primary btn-lg">Create</button>
+    </div>
+</form>
+
+<div class="d-grid gap-2">
+</div>
+
+<br>
+<br>
+
+<h2>Simple Categories</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for category in simple_categories %}
+        <tr>
+            <td>
+                <h5>{{ category[0] }}</h5>
+            </td>
+            <td>
+                <button href={{ url_for('categories') }} class="btn disabled btn-success btn-sm">Add sub-category</button>
+            </td>
+            <td>
+                <button href={{ url_for('categories') }} class="btn disabled btn-success btn-sm">Add sub-category</button>
+            </td>
+            <td>
+                <a href="{{ url_for('remove_category') }}?name={{ category[0] }}&simple=true">
+                    <button class="btn btn-danger btn-sm">Remove</button>
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<br>
+<br>
+
+<h2>Super Categories</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for category in super_categories %}
+        <tr>
+            <td>
+                <h5>{{ category[0] }}</h5>
+            </td>
+            <td>
+                <button href={{ url_for('categories') }} class="btn disabled btn-primary btn-sm">See sub-categories</button>
+            </td>
+            <td>
+                <button href={{ url_for('categories') }} class="btn disabled btn-success btn-sm">Add sub-category</button>
+            </td>
+            <td>
+                <a href="{{ url_for('remove_category') }}?name={{ category[0] }}&simple=false">
+                    <button class="btn btn-danger btn-sm">Remove</button>
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

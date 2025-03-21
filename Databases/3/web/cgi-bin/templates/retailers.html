@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Retailers {% endblock %}</h1>
+
+<form action="{{ url_for('create_retailer') }}" method="post">
+  <div class="input-group mb-3">
+      <span class="input-group-text">TIN</span>
+      <input name="tin" type="text" class="form-control" aria-describedby="basic-addon1">
+      <span class="input-group-text">Name</span>
+      <input name="name" type="text" class="form-control" aria-describedby="basic-addon1">
+      <button type="submit" class="btn btn-primary btn-lg">Create</button>
+  </div>
+</form>
+
+<br>
+<br>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th scope="col">TIN</th>
+      <th scope="col">Name</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    {% for retailer in retailers %}
+    <tr>
+      <td> {{ retailer[0] }} </td>
+      <td> {{ retailer[1] }} </td>
+      <td> <a href="{{ url_for('retailers') }}?tin={{ retailer[0] }}" class="btn disabled btn-danger">Remove</a> </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+{% endblock %}

@@ -1,0 +1,438 @@
+\documentclass[12pt]{article}
+\usepackage[paper=letterpaper,margin=2cm]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{newtxtext, newtxmath}
+\usepackage{enumitem}
+\usepackage{titling}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\graphicspath{ {./images/} }
+
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{1,1,1}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=1
+}
+
+\lstset{style=mystyle}
+
+\setlength{\droptitle}{-6em}
+
+\title{\large{Aprendizagem 2022}\vskip 0.2cm Homework III -- Group 126}
+\author{}
+\date{}
+\begin{document}
+\maketitle
+
+\center\large{\vskip -2.5cm\textbf{Part I}: Pen and paper}
+
+\begin{enumerate}[leftmargin=\labelsep]
+\item To learn the Ridge regression we need to use the following formula:
+    \begin{align*}
+        w=\left( X^{T}X + \lambda \cdot I \right)^{-1} \cdot X^{T} \cdot z
+    \end{align*}
+    We are given:
+    \begin{align*}
+        & X = 
+        \begin{bmatrix}
+            1 & 0.8 & 0.64 & 0.512 \\
+            1 & 1   & 1    & 1     \\
+            1 & 1.2 & 1.44 & 1.728 \\
+            1 & 1.4 & 1.96 & 2.744 \\
+            1 & 1.6 & 2.56 & 4.096 \\
+        \end{bmatrix} \qquad
+        z = 
+        \begin{bmatrix}
+            24 \\
+            20 \\
+            10 \\
+            13 \\
+            12 \\
+        \end{bmatrix} \qquad
+        \lambda \cdot I = 
+        \begin{bmatrix}
+            2 & 0 & 0 & 0 \\
+            0 & 2 & 0 & 0 \\
+            0 & 0 & 2 & 0 \\
+            0 & 0 & 0 & 2 \\
+        \end{bmatrix} &&
+    \end{align*}
+    With this data we can proceed with the calculations:
+    \begin{align*}
+        X^{T} \cdot X = &
+        \begin{bmatrix}
+            1     & 1 & 1     & 1     & 1     \\
+            0.8   & 1 & 1.2   & 1.4   & 1.6   \\
+            0.64  & 1 & 1.44  & 1.96  & 2.56  \\
+            0.512 & 1 & 1.728 & 2.744 & 4.096 \\
+        \end{bmatrix}
+        \cdot
+        \begin{bmatrix}
+            1 & 0.8 & 0.64 & 0.512 \\
+            1 & 1   & 1    & 1     \\
+            1 & 1.2 & 1.44 & 1.728 \\
+            1 & 1.4 & 1.96 & 2.744 \\
+            1 & 1.6 & 2.56 & 4.096 \\
+        \end{bmatrix} \\
+        = &
+        \begin{bmatrix}
+             5    &  6      &  7.6    & 10.08    \\
+             6    &  7.6    & 10.08   & 13.8784  \\
+             7.6  & 10.08   & 13.8784 & 19.68    \\
+            10.08 & 13.8784 & 19.68   & 28.55488 \\
+        \end{bmatrix} &&
+    \end{align*}
+    \begin{align*}
+        X^{T} \cdot X + \lambda \cdot I =&
+        \begin{bmatrix}
+             5    &  6      &  7.6    & 10.08    \\
+             6    &  7.6    & 10.08   & 13.8784  \\
+             7.6  & 10.08   & 13.8784 & 19.68    \\
+            10.08 & 13.8784 & 19.68   & 28.55488 \\
+        \end{bmatrix}
+        +
+        \begin{bmatrix}
+            2 & 0 & 0 & 0 \\
+            0 & 2 & 0 & 0 \\
+            0 & 0 & 2 & 0 \\
+            0 & 0 & 0 & 2 \\
+        \end{bmatrix} \\
+        = &
+        \begin{bmatrix}
+             7    &  6      &  7.6    & 10.08    \\
+             6    &  9.6    & 10.08   & 13.8784  \\
+             7.6  & 10.08   & 15.8784 & 19.68    \\
+            10.08 & 13.8784 & 19.68   & 30.55488 \\
+        \end{bmatrix} &&
+    \end{align*}
+    \begin{align*}
+        \left ( X^{T} \cdot X + \lambda \cdot I \right )^{-1} =
+        \begin{bmatrix}
+             0.34168753 & -0.1214259  & -0.07490231 & -0.00932537 \\
+            -0.1214259  &  0.3892078  & -0.09667718 & -0.07445624 \\
+            -0.07490231 & -0.09667718 &  0.37257788 & -0.17135047 \\
+            -0.00932537 & -0.07445624 & -0.17135047 &  0.17998796 \\
+        \end{bmatrix} &&
+    \end{align*}
+    \begin{align*}
+        X^{T} \cdot z = &
+        \begin{bmatrix}
+            1     & 1 & 1     & 1     & 1     \\
+            0.8   & 1 & 1.2   & 1.4   & 1.6   \\
+            0.64  & 1 & 1.44  & 1.96  & 2.56  \\
+            0.512 & 1 & 1.728 & 2.744 & 4.096 \\
+        \end{bmatrix}
+        \cdot
+        \begin{bmatrix}
+            24 \\
+            20 \\
+            10 \\
+            13 \\
+            12 \\
+        \end{bmatrix}
+        =
+        \begin{bmatrix}
+            79      \\
+            88.6    \\
+            105.96  \\
+            134.392 \\
+        \end{bmatrix} &&
+    \end{align*}
+    \begin{align*}
+        w = &
+        \begin{bmatrix}
+             0.34168753 & -0.1214259  & -0.07490231 & -0.00932537 \\
+            -0.1214259  &  0.3892078  & -0.09667718 & -0.07445624 \\
+            -0.07490231 & -0.09667718 &  0.37257788 & -0.17135047 \\
+            -0.00932537 & -0.07445624 & -0.17135047 &  0.17998796 \\
+        \end{bmatrix}
+        \cdot
+        \begin{bmatrix}
+            79      \\
+            88.6    \\
+            105.96  \\
+            134.392 \\
+        \end{bmatrix} \\
+        \simeq &
+        \begin{bmatrix}
+             7.05 \\ 
+             4.64 \\
+             1.97 \\
+            -1.30 \\
+        \end{bmatrix} &&
+    \end{align*}
+\item Given $w=\begin{bmatrix} 7.05 & 4.64 & 1.97 & -1.30 \end{bmatrix}^T$ we get the regression:
+    \begin{align*}
+        \hat{z}(x) = 7.05 + 4.64x + 1.97x^2 - 1.3x^3
+    \end{align*}
+    Using this function we can calculate the predicted values.
+    \begin{center}
+        \begin{tabular}{ | P{4em} | P{4em} | P{4em} | P{4em} | P{4em} | }
+            \hline
+            x & z & $\hat{z}$ & $\left(z_{i}-\hat{z}_{i}\right)$ & $\left(z_{i}-\hat{z}_{i}\right)^2$ \\
+            \hline
+            0.8 & 24 & 11.36 & 12.64 & 159.7696 \\
+            \hline
+            1   & 20 & 12.36 &  7.64 &  58.3696 \\
+            \hline
+            1.2 & 10 & 13.21 & -3.21 &  10.3041 \\
+            \hline
+            1.4 & 13 & 13.84 & -0.84 &   0.7056 \\
+            \hline 
+            1.6 & 12 & 14.19 & -2.19 &   4.7961 \\
+            \hline 
+        \end{tabular}
+    \end{center}
+    Then we can calculate the training RMSE for the learnt model:
+    \begin{align*}
+        RMSE = \sqrt[]{\frac{\sum\limits_{i=1}^{n}\left(z_{i}-\hat{z}_{i}\right)^2}{n}}
+        = \sqrt[]{\frac{233.945}{5}} \simeq 6.84
+    \end{align*}
+\newpage
+\item We are given the following data:
+    \begin{align*}
+        \begin{tabular}{ P{3em} P{3em} P{3em} }
+            x   & z  \\
+            \hline
+            0.8 & 24 \\
+            1   & 20 \\
+            1.2 & 10 \\
+        \end{tabular} \qquad
+        w^{[1]} = \begin{bmatrix} 1 \\ 1 \end{bmatrix} \quad
+        b^{[1]} = \begin{bmatrix} 1 \\ 1 \end{bmatrix} \quad
+        w^{[2]} = \begin{bmatrix} 1 &  1 \end{bmatrix} \quad
+        b^{[2]} = \begin{bmatrix} 1 \end{bmatrix} \quad
+    \end{align*}
+    We can now do forward propagation:\\
+    \begin{itemize}
+        \item For $x_{1}$:
+            \begin{align*}
+                z_{1}^{[1]} = \begin{bmatrix} 1 \\ 1 \end{bmatrix}
+                \cdot \begin{bmatrix} 0.8 \end{bmatrix}
+                + \begin{bmatrix} 1 \\ 1 \end{bmatrix}
+                = \begin{bmatrix} 1.8 \\ 1.8 \end{bmatrix}, \quad
+                x_{1}^{[1]} = \begin{bmatrix} 1.197 \\ 1.197 \end{bmatrix}
+            \end{align*}
+            \begin{align*}
+                z_{1}^{[2]} = \begin{bmatrix} 1 & 1 \end{bmatrix}
+                \cdot \begin{bmatrix} 1.197 \\ 1.197 \end{bmatrix}
+                + \begin{bmatrix} 1 \end{bmatrix} 
+                = \begin{bmatrix} 3.394 \end{bmatrix},  \quad
+                x_{1}^{[2]} = \begin{bmatrix} 1.404 \end{bmatrix}
+            \end{align*}
+        \item For $x_{2}$:
+            \begin{align*}
+                z_{2}^{[1]} = \begin{bmatrix} 1 \\ 1 \end{bmatrix}
+                \cdot \begin{bmatrix} 1 \end{bmatrix}
+                + \begin{bmatrix} 1 \\ 1 \end{bmatrix}
+                = \begin{bmatrix} 2.0 \\ 2.0 \end{bmatrix}, \quad
+                x_{2}^{[1]} = \begin{bmatrix} 1.221 \\ 1.221 \end{bmatrix}
+            \end{align*}
+            \begin{align*}
+                z_{2}^{[2]} = \begin{bmatrix} 1 & 1 \end{bmatrix}
+                \cdot \begin{bmatrix} 1.221 \\ 1.221 \end{bmatrix}
+                + \begin{bmatrix} 1 \end{bmatrix}
+                =  \begin{bmatrix} 3.442 \end{bmatrix},  \quad
+                x_{2}^{[2]} = \begin{bmatrix} 1.411 \end{bmatrix}
+            \end{align*}
+        \item For $x_{3}$:
+            \begin{align*}
+                z_{3}^{[1]} = \begin{bmatrix} 1 \\ 1 \end{bmatrix}
+                \cdot \begin{bmatrix} 1.2 \end{bmatrix}
+                + \begin{bmatrix} 1 \\ 1 \end{bmatrix}
+                = \begin{bmatrix} 2.2 \\ 2.2 \end{bmatrix}, \quad
+                x_{3}^{[1]} = \begin{bmatrix} 1.246 \\ 1.246 \end{bmatrix}
+            \end{align*}
+            \begin{align*}
+                z_{3}^{[2]} = \begin{bmatrix} 1 & 1 \end{bmatrix}
+                \cdot \begin{bmatrix} 1.246 \\ 1.246 \end{bmatrix}
+                + \begin{bmatrix} 1 \end{bmatrix}
+                = \begin{bmatrix} 3.492 \end{bmatrix},  \quad
+                x_{3}^{[2]} = \begin{bmatrix} 1.418 \end{bmatrix}
+            \end{align*}
+    \end{itemize}
+    \newpage
+    Now we need to derivate all functions in our network:
+    \begin{itemize}
+        \item $\frac{\partial E}{\partial x^{[2]}} = x^{[2]}-t$
+        \item $\frac{\partial x^{[i]}}{\partial z^{[i]}} = e^{0.1z^{[i]}} \cdot 0.1$
+        \item $\frac{\partial z^{[i]}}{\partial w^{[i]}} = x^{[i-1]}$
+        \item $\frac{\partial z^{[i]}}{\partial x^{[i-1]}} = w^{[i]}$
+        \item $\frac{\partial z^{[i]}}{\partial b^{[i]}} = 1$
+    \end{itemize}
+    We can now calculate the deltas for the layers: \\
+    \begin{itemize}
+        \item Last layer: \quad
+            $\delta^{[2]} = \frac{\partial E}{\partial x^{[2]}}
+            \circ \frac{\partial x^{[2]}}{\partial z^{[2]}}
+            = (x^{[2]}-t) \circ (e^{0.1z^{[2]}}\cdot0.1)$
+            \begin{align*}
+                \delta^{[2]}_{1} = 
+                \left(1.404 - 24\right) \circ \left(0.140\right) = -3.163
+            \end{align*}
+            \begin{align*}
+                \delta^{[2]}_{2} = 
+                \left(1.411 - 20\right) \circ \left(0.141\right) = -2.621
+            \end{align*}
+            \begin{align*}
+                \delta^{[2]}_{3} = 
+                \left(1.418 - 10\right) \circ \left(0.142\right) = -1.219
+            \end{align*}
+        \item Hidden layer: \quad
+            $\delta^{[1]} = \left(\frac{\partial z^{[2]}}{\partial x^{[1]}}\right)^T
+            \cdot \delta^{[2]}
+            \circ \frac{\partial x^{[i]}}{\partial z^{[i]}}
+            = w^{[2]^T} \cdot \delta^{[2]} \circ (e^{0.1z^{[1]}}\cdot0.1)$
+            \begin{align*}
+                \delta^{[1]}_{1}
+                = \begin{bmatrix} -3.163 \\ -3.163 \end{bmatrix}
+                \circ \begin{bmatrix} 0.120 \\ 0.120 \end{bmatrix}
+                = \begin{bmatrix} -0.380 \\ -0.380 \end{bmatrix}
+            \end{align*}
+            \begin{align*}
+                \delta^{[1]}_{2}
+                = \begin{bmatrix} -2.621 \\ -2.621 \end{bmatrix}
+                \circ \begin{bmatrix} 0.122 \\ 0.122 \end{bmatrix}
+                = \begin{bmatrix} -0.320 \\ -0.320 \end{bmatrix}
+            \end{align*}
+            \begin{align*}
+                \delta^{[1]}_{3}
+                = \begin{bmatrix} -1.219 \\ -1.219 \end{bmatrix}
+                \circ \begin{bmatrix} 0.125 \\ 0.125 \end{bmatrix}
+                = \begin{bmatrix} -0.152 \\ -0.152 \end{bmatrix}
+            \end{align*}
+    \end{itemize}
+    \newpage
+    We can now calculate the updated weights and biases:
+    \begin{itemize}
+        \item Last layer:
+        \begin{align*}
+            \frac{\partial E}{\partial w^{[2]}}
+            = & \; \delta^{[2]}_{2} \frac{\partial z^{[2]}_{2}}{\partial w^{[2]}}
+            + \delta^{[2]}_{2} \frac{\partial z^{[2]}_{2}}{\partial w^{[2]}}
+            + \delta^{[2]}_{3} \frac{\partial z^{[2]}_{3}}{\partial w^{[2]}} \\[6pt]
+            = & \; \delta^{[2]}_{1} \left(x^{[1]}_{1}\right)^T
+            + \delta^{[2]}_{2} \left(x^{[1]}_{2}\right)^T
+            + \delta^{[2]}_{3} \left(x^{[1]}_{3}\right)^T \\[6pt]
+            = & \begin{bmatrix} -3.163 \end{bmatrix} \cdot \begin{bmatrix} 1.197 & 1.197 \end{bmatrix}
+            + \begin{bmatrix} -2.621 \end{bmatrix} \cdot \begin{bmatrix} 1.221 & 1.221 \end{bmatrix} +\\
+            & \begin{bmatrix} -1.219 \end{bmatrix} \cdot \begin{bmatrix} 1.246 & 1.246 \end{bmatrix} \\[6pt]
+            = & \begin{bmatrix} -8.505 & -8.505 \end{bmatrix}
+        \end{align*}
+        \begin{align*}
+            w'^{[2]} = & \; w^{[2]}-\eta\cdot\frac{\partial E}{\partial w^{[2]}} \\[6pt]
+            = & \begin{bmatrix} 1 & 1 \end{bmatrix} 
+            - 0.1 \cdot \begin{bmatrix} -8.505 & -8.505 \end{bmatrix} \\[6pt]
+            = & \begin{bmatrix} 0.1851 & 0.1851 \end{bmatrix}
+        \end{align*}
+        \begin{align*}
+            \frac{\partial E}{\partial b^{[2]}}
+            = & \; \delta_{1}^{[2]} \frac{\partial z_{1}^{[2]}}{\partial b^{[2]}}
+            + \delta_{2}^{[2]} \frac{\partial z_{2}^{[2]}}{\partial b^{[2]}}
+            + \delta_{3}^{[2]} \frac{\partial z_{3}^{[2]}}{\partial b^{[2]}} \\[6pt]
+            = & \; \delta_{1}^{[2]} + \delta_{2}^{[2]} + \delta_{3}^{[2]} \\[6pt]
+            = & \begin{bmatrix} -3.163 \end{bmatrix}
+            + \begin{bmatrix} -2.621 \end{bmatrix}
+            + \begin{bmatrix} -1.219 \end{bmatrix} \\[6pt]
+            = & \begin{bmatrix} -7.003 \end{bmatrix}
+        \end{align*}
+        \begin{align*}
+            b'^{[2]} = & \; b^{[2]}-\eta\cdot\frac{\partial E}{\partial b^{[2]}} \\[6pt]
+            = & \begin{bmatrix} 1 \end{bmatrix} 
+            - 0.1 \cdot \begin{bmatrix} -7.003 \end{bmatrix} \\[6pt]
+            = & \begin{bmatrix} 1.7 \end{bmatrix}
+        \end{align*}
+        \newpage
+        \item Hidden layer:
+        \begin{align*}
+            \frac{\partial E}{\partial w^{[1]}}
+            = & \; \delta^{[1]}_{1} \frac{\partial z^{[1]}_{1}}{\partial w^{[1]}}
+            + \delta^{[1]}_{2} \frac{\partial z^{[1]}_{2}}{\partial w^{[1]}}
+            + \delta^{[1]}_{3} \frac{\partial z^{[1]}_{3}}{\partial w^{[1]}} \\[6pt]
+            = & \; \delta^{[1]}_{1} \left(x^{[0]}_{1}\right)^T
+            + \delta^{[1]}_{2} \left(x^{[0]}_{2}\right)^T
+            + \delta^{[1]}_{3} \left(x^{[0]}_{3}\right)^T \\[6pt]
+            = & \begin{bmatrix} -0.380 \\ -0.380 \end{bmatrix} \cdot [0.8]
+            + \begin{bmatrix} -0.320 \\ -0.320 \end{bmatrix} \cdot [1]
+            + \begin{bmatrix} -0.152 \\ -0.152 \end{bmatrix} \cdot [1.2] \\[6pt]
+            = & \begin{bmatrix} -0.806 \\ -0.806 \end{bmatrix}
+        \end{align*}
+        \begin{align*}
+            w'^{[1]} = & \; w^{[1]}-\eta\cdot\frac{\partial E}{\partial w^{[1]}} \\[6pt]
+            = & \begin{bmatrix} 1 \\ 1 \end{bmatrix} 
+            - 0.1 \cdot \begin{bmatrix} -0.806 \\ -0.806 \end{bmatrix} \\[6pt]
+            = & \begin{bmatrix} 1.081 \\ 1.081 \end{bmatrix}
+        \end{align*}
+        \begin{align*}
+            \frac{\partial E}{\partial b^{[1]}}
+            = & \; \delta_{1}^{[1]} \frac{\partial z_{1}^{[1]}}{\partial b^{[1]}}
+            + \delta_{2}^{[1]} \frac{\partial z_{2}^{[1]}}{\partial b^{[1]}}
+            + \delta_{3}^{[1]} \frac{\partial z_{3}^{[1]}}{\partial b^{[1]}} \\[6pt]
+            = & \; \delta_{1}^{[1]} + \delta_{2}^{[1]} + \delta_{3}^{[1]} \\[6pt]
+            = & \begin{bmatrix} -0.380 \\ -0.380 \end{bmatrix}
+            + \begin{bmatrix} -0.320 \\ -0.320 \end{bmatrix}
+            + \begin{bmatrix} -0.152 \\ -0.152 \end{bmatrix} \\[6pt]
+            = & \begin{bmatrix} -0.852 \\ -0.852 \end{bmatrix}
+        \end{align*}
+        \begin{align*}
+            b'^{[1]} = & \; b^{[1]}-\eta\cdot\frac{\partial E}{\partial b^{[1]}} \\[6pt]
+            = & \begin{bmatrix} 1 \\ 1 \end{bmatrix} 
+            - 0.1 \cdot \begin{bmatrix} -0.852 \\ -0.852 \end{bmatrix} \\[6pt]
+            = & \begin{bmatrix} 1.085 \\ 1.085 \end{bmatrix}
+        \end{align*}
+    \end{itemize}
+\end{enumerate}
+
+\newpage
+\center\large{\textbf{Part II}: Programming}
+
+\begin{enumerate}[leftmargin=\labelsep,resume]
+\item 
+    \begin{tabular}[t]{ m{2.7em} m{10em} }
+        LR:        & 0.162829976437694  \\
+        MLP$_{1}$: & 0.0680414073796843 \\
+        MLP$_{2}$: & 0.0978071820387748 \\
+    \end{tabular}
+\item Plots:
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[width=\linewidth]{plot.png}
+    \end{figure}
+\item 
+    \begin{tabular}[t]{ m{2.7em} m{10em} }
+        MLP$_{1}$: & 452 \\
+        MLP$_{2}$: &  77 \\
+    \end{tabular}
+\item 
+    The only difference between the two MLPs is that MLP$_{1}$ considers early stopping, this causes the model to stop training as soon as the validation error reaches a minimum, avoiding overfitting the training data, ence the better performance. Still, given the fact that the loss function doesn't necessarily decrease at each iteration, it makes the monitoring of the convergence on the loss function challenging, thus increasing the number of iterations.
+\end{enumerate}
+
+\newpage
+\center\large{\textbf{APPENDIX}\vskip 0.3cm}
+
+\lstinputlisting[language=Python]{../homework.py}
+
+\end{document}

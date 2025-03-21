@@ -1,0 +1,19 @@
+;;; representações de máquinas que manipulam números em unário
+
+;;; calcula dobro
+Q0A1Q0A2R;Q0A0Q1A0L;Q1A1Q1A1L;Q1A2Q2A1R;Q1A0YYA0R;Q2A1Q2A1R;Q2A0Q1A1L
+
+;;; calcula sucessor
+Q0A1Q0A1L;Q0A0YYA1S
+
+;;; calcula predecessor
+Q0A1YYA0R
+
+;;; calcula metade (de número par)
+Q0A0Q1A0L;Q1A1Q1A1L;Q1A0YYA0R;Q0A1Q2A2R;Q2A1Q2A1R;Q2A0Q3A0L;Q3A1Q4A0L;Q4A1Q4A1L;Q4A2Q0A1R
+
+;;; máquina booleana, decide se número é par
+Q0A1Q0A1R;Q0A0Q1A0L;Q1A1Q2A1L;Q2A1Q1A1L;Q1A0YYA0R;Q2A0NNA0R
+
+;;; máquina booleana, decide se número é um
+Q0A1Q1A1R;Q0A0NNA0S;Q1A1NNA1L;Q1A0YYA0L

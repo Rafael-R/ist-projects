@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} IVM {% endblock %}</h1>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th scope="col">Serial Number</th>
+      <th scope="col">Manufactor</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    {% for ivm in ivms %}
+    <tr>
+      <td> {{ ivm[0] }} </td>
+      <td> {{ ivm[1] }} </td>
+      <td> <a href="{{ url_for('ivm_replenishment') }}?sn={{ ivm[0] }}&man={{ ivm[1] }}"" class="btn btn-secondary">Show Replenishment</a> </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+{% endblock %}

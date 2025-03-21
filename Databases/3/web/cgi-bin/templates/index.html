@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Home {% endblock %}</h1>
+    {% for retailer in Retailers %}
+        <div class='retailer'>
+            <h3>TIN: {{ retailer[0] }} - {{ retailer[1] }}</h3>
+        </div>
+    {% endfor %}
+{% endblock %}

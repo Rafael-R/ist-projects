@@ -1,0 +1,125 @@
+//
+// Protocol buffers definition
+//
+syntax = "proto3";
+package pt.tecnico.bicloin.hub.grpc;
+
+
+message InitRecRequest {
+
+}
+
+message InitRecResponse {
+
+}
+
+message BalanceRequest {
+  string username = 1;
+}
+
+message BalanceResponse {
+  int32 balance = 1;
+}
+
+message TopUpRequest {
+  string username = 1;
+  int32 amount = 2;
+  string phone_number = 3;
+}
+
+message TopUpResponse {
+  int32 balance = 1;
+}
+
+message StationData {
+  string name = 1;
+  double lat = 2;
+  double long = 3;
+  int32 docks = 4;
+  int32 prize = 5;
+  int32 bikes = 6;
+  optional int32 lifts = 7;
+  optional int32 returns = 8;
+  optional int32 distance = 9;
+}
+
+message InfoStationRequest {
+  string station = 1;
+}
+
+message InfoStationResponse {
+  StationData station = 1;
+}
+
+message LocateStationRequest {
+  double lat = 1;
+  double long = 2;
+  int32 num_stations = 3;
+}
+
+message LocateStationResponse {
+  repeated StationData station = 1;
+}
+
+message BikeUpRequest {
+  string username = 1;
+  double lat = 2;
+  double long = 3;
+  string station = 4;
+}
+
+message BikeUpResponse {
+  enum Response {
+    OK = 0;
+    OUT_OF_BOUNDS = 1;
+    INSUFFICIENT_BICLOINS = 2;
+    HAS_BIKE = 3;
+    NO_BIKES = 4;
+  }
+  Response response = 1;
+}
+
+message BikeDownRequest {
+  string username = 1;
+  double lat = 2;
+  double long = 3;
+  string station = 4;
+}
+
+message BikeDownResponse {
+  enum Response {
+    OK = 0;
+    OUT_OF_BOUNDS = 1;
+    NO_BIKE = 2;
+    NO_DOCKS = 3;
+  }
+  Response response = 1;
+}
+
+message PingRequest {
+  string input_text = 1;
+}
+
+message PingResponse {
+	string output_text = 1;
+}
+
+message StatusRequest {
+  // No arguments
+}
+
+message StatusResponse {
+  repeated string status = 1;
+}
+  
+service HubService {
+  rpc init_rec(InitRecRequest) returns (InitRecResponse);
+  rpc balance(BalanceRequest) returns (BalanceResponse);
+  rpc top_up(TopUpRequest) returns (TopUpResponse);
+  rpc info_station(InfoStationRequest) returns (InfoStationResponse);
+  rpc locate_station(LocateStationRequest) returns (LocateStationResponse);
+  rpc bike_up(BikeUpRequest) returns (BikeUpResponse);
+  rpc bike_down(BikeDownRequest) returns (BikeDownResponse);
+  rpc ping(PingRequest) returns (PingResponse);
+  rpc sys_status(StatusRequest) returns (StatusResponse);
+}
