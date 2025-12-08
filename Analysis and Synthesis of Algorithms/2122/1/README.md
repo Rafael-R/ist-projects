@@ -6,11 +6,11 @@ O projecto é composto pelos dois problemas que se descrevem em baixo.
 
 ### Problema 1
 
-Dada uma sequência $\vec{x} = \langle x_0, x_1, \ldots, x_k\rangle$ de inteiros, pretende calcular-se o tamanho da maior subsequência estritamente crescente de $\vec{x}$, bem como o número de subsequências estritamente crescentes de tamanho máximo. Por exemplo, a sequência $\vec{x} = \langle 1, 2, 6, 3, 7\rangle$ tem duas subsequências estritamente crescentes de tamanho máximo igual a 4: $\vec{s}_1 = \langle 1, 2, 6, 7\rangle$ e $\vec{s}_2 = \langle 1, 2, 3, 7\rangle$.
+Dada uma sequência $ \vec{x} = \langle x_0, x_1, \ldots, x_k \rangle$ de inteiros, pretende calcular-se o tamanho da maior subsequência estritamente crescente de $ \vec{x}$, bem como o número de subsequências estritamente crescentes de tamanho máximo. Por exemplo, a sequência $ \vec{x} = \langle 1, 2, 6, 3, 7\rangle$ tem duas subsequências estritamente crescentes de tamanho máximo igual a 4: $ \vec{s}_1 = \langle 1, 2, 6, 7\rangle$ e $ \vec{s}_2 = \langle 1, 2, 3, 7\rangle$.
 
 ### Problema 2
 
-Dadas duas sequências $\vec{x} = \langle x_0, x_1, \ldots, x_k\rangle$ e $\vec{y} = \langle y_0, y_1, \ldots, y_l\rangle$ de inteiros, pretende calcular-se apenas o tamanho da maior subsequência __comum__ estritamente crescente entre $\vec{x}$ e $\vec{y}$. Por exemplo, as sequências $\vec{x} = \langle 1, 2, 6, 3, 7\rangle$ e $\vec{y} = \langle1, 2, 4, 7, 3\rangle$ têm duas subsequências comuns estritamente crescentes de tamanho máximo igual a 3: $\vec{s}_1 = \langle1, 2, 3\rangle$ e $\vec{s}_2 = \langle1, 2, 7\rangle$.
+Dadas duas sequências $ \vec{x} = \langle x_0, x_1, \ldots, x_k\rangle$ e $ \vec{y} = \langle y_0, y_1, \ldots, y_l\rangle$ de inteiros, pretende calcular-se apenas o tamanho da maior subsequência __comum__ estritamente crescente entre $\vec{x}$ e $\vec{y}$. Por exemplo, as sequências $\vec{x} = \langle 1, 2, 6, 3, 7\rangle$ e $\vec{y} = \langle1, 2, 4, 7, 3\rangle$ têm duas subsequências comuns estritamente crescentes de tamanho máximo igual a 3: $\vec{s}_1 = \langle1, 2, 3\rangle$ e $\vec{s}_2 = \langle1, 2, 7\rangle$.
 
 ## Input
 
@@ -30,20 +30,20 @@ Para o Problema 2, o programa apenas deverá escrever no output um inteiro $t$ c
 
 ### Input 1
 
-```
+```txt
 1
 1 2 6 3 7
 ```
 
 ### Output 1
 
-```
+```txt
 4 2
 ```
 
 ### Input 2
 
-```
+```txt
 2
 1 2 6 3 7
 1 2 4 7 3
@@ -51,7 +51,7 @@ Para o Problema 2, o programa apenas deverá escrever no output um inteiro $t$ c
 
 ### Output 2
 
-```
+```txt
 3
 ```
 

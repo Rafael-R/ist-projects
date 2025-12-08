@@ -6,7 +6,7 @@ Em computação distribuída, o problema de atribuição de um conjunto de proce
 junto de processadores é um problema complexo, mesmo quando considerados apenas dois
 processadores, devido a overheads computacionais, como por exemplo: custos de execução de
 cada processo em cada processador (este pode ter diferentes capacidades - velocidade, cache, etc); e custos de comunicação entre os vários processos.
-Considere que pretende correr um programa $P$ = {$p_1, . . . , p_n$}, constituído por um conjunto de n processos. Considere ainda que é conhecido o custo $X_i$ de correr cada processo $p_i$ no processador $X$, e o custo $Y_i$ de correr cada processo $p_i$ no processador $Y$.
+Considere que pretende correr um programa $P = \lbrace p_1, \ldots, p_n \rbrace$, constituído por um conjunto de n processos. Considere ainda que é conhecido o custo $X_i$ de correr cada processo $p_i$ no processador $X$, e o custo $Y_i$ de correr cada processo $p_i$ no processador $Y$.
 
 Considere adicionalmente o custo de comunicação $c_{ij}$ entre dois processos $p_i$ e $p_j$, sempre que $p_i \ne p_j$. Assuma que não há custo de comunicação $(c_{ij} = 0)$ entre processos que corram num mesmo processador.
 
